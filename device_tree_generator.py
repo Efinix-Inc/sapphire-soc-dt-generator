@@ -4,6 +4,7 @@ import argparse
 import json
 import os
 import pprint
+import shutil
 
 DRIVER_FILE = os.path.join(os.path.relpath(os.path.dirname(__file__)), "drivers.json")
 
@@ -1174,10 +1175,14 @@ def main():
     dt_parse = argparse.ArgumentParser(description='Device Tree Generator')
     dt_parse.add_argument('soc', type=str, help='path to soc.h')
     dt_parse.add_argument('board', type=str, help='development kit name such as t120, ti60')
+    dt_parse.add_argument('-d', '--dir', type=str, help='Output generated output directory. By default is dts')
     dt_parse.add_argument('-o', '--outfile', type=str, help='Override output filename. By default is sapphire.dtsi')
     dt_parse.add_argument('-j', '--json', action='store_true', help='Save output file as json format')
     dt_parse.add_argument('-z', '--zephyr', action='store_true', help='Generate device tree for Zephyr OS')
     args = dt_parse.parse_args()
+
+    if args.dir:
+        path_dts = args.dir
 
     is_zephyr = args.zephyr
 
@@ -1186,14 +1191,12 @@ def main():
         output_filename = os.path.join(path_dts, output_filename)
         dts_filename = 'ti60_boards.dts'
         board_os = 'zephyr'
-        efinix_dir = os.path.join(os.path.relpath(os.path.dirname(__file__)), '..')
     else:
         output_filename = 'sapphire.dtsi'
         output_filename = os.path.join(path_dts, output_filename)
         output_json = 'sapphire.json'
         dts_filename = 'linux.dts'
         board_os = 'linux'
-        efinix_dir = os.path.join(os.path.relpath(os.path.dirname(__file__)), '..')
 
     soc_path = args.soc
     cfg = read_file(soc_path)
@@ -1210,7 +1213,11 @@ def main():
         print("Error: %s development kit is not supported\n" % args.board)
         return -1
 
-    dts_filename = os.path.join(efinix_dir, board, board_os, dts_filename)
+    if (os.path.exists(path_dts)):
+            shutil.rmtree(path_dts)
+
+    os.makedirs(path_dts)
+    dts_filename = os.path.join(path_dts, dts_filename)
 
     if args.outfile:
         output_filename = args.outfile
