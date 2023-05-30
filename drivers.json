@@ -51,7 +51,11 @@
 		"compatible": ["fixed-clock"]
 	},
 	"plic": {
-		"compatible": ["xsifive,plic-1.0.0", "sifive,fu540-c000-plic"],
+		"compatible": [
+			"sifive,plic-1.0.0",
+			"xsifive,plic-1.0.0",
+			"sifive,fu540-c000-plic"
+		],
 		"private_data": [
 			"#interrupt-cells = <1>;",
 			"interrupt-controller;",
