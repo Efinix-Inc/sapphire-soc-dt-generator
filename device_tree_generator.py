@@ -21,6 +21,7 @@ CONTROLLER = ["PLIC", "CLINT", "RAM"]
 PLIC = "PLIC"
 CLINT = "CLINT"
 SUPERVISOR = "SUPERVISOR "
+PERIPHERALS = ["UART", "I2C", "SPI", "GPIO"]
 
 def read_file(filename):
     with open(filename, 'r') as f:
@@ -337,6 +338,26 @@ def get_cpu_metadata(cfg, idx=0, is_zephyr=False):
 
     return node
 
+
+"""
+get_peripherals: get a list of supported peripheral from soc.h
+
+@cfg (str): raw data of soc.h
+
+return: list of supported peripheral
+"""
+def get_peripherals(cfg):
+    peripherals = []
+
+    for line in cfg:
+        periph = ''.join([x for x in PERIPHERALS if x in line])
+        if periph:
+            peripherals.append(periph)
+
+    # remove duplicate from list
+    peripherals = list(dict.fromkeys(peripherals))
+
+    return peripherals
 
 def dt_address_cells(num):
     return "#address-cells = <{}>;".format(num)
@@ -1222,9 +1243,9 @@ def main():
 
     #zephyr does not support i2c and spi yet
     if is_zephyr:
-        peripheral_list = ["UART", "GPIO", "CLINT"]
-    else:
-        peripheral_list = ["UART", "SPI", "GPIO", "I2C"]
+        PERIPHERALS = ["UART", "GPIO", "CLINT"]
+
+    peripheral_list = get_peripherals(cfg)
     for peripheral in peripheral_list:
         periph_node = dt_create_node(cfg, peripheral, is_zephyr)
         if periph_node:
