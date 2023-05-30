@@ -3,6 +3,7 @@
 import argparse
 import json
 import os
+import pprint
 
 DRIVER_FILE = os.path.join(os.path.relpath(os.path.dirname(__file__)), "drivers.json")
 
@@ -18,6 +19,7 @@ ICACHE = "ICACHE"
 DCACHE = "DCACHE"
 CONTROLLER = ["PLIC", "CLINT", "RAM"]
 PLIC = "PLIC"
+CLINT = "CLINT"
 SUPERVISOR = "SUPERVISOR "
 
 def read_file(filename):
@@ -93,6 +95,15 @@ def get_property_value(cfg, peripheral, name):
             value = get_value(prop)
     return value
 
+def get_property_value_match(cfg, peripheral, name):
+    value = ''
+    props = get_peripheral_properties(cfg, peripheral)
+
+    for prop in props:
+        prop_name = prop.split()[1]
+        if name == prop_name:
+            value = get_value(prop)
+    return value
 
 """
 get_size: get the peripheral allocated memory size
@@ -146,6 +157,11 @@ def get_peripheral_base_address(cfg, peripheral):
     base = get_base_address(cfg)
 
     addr = hex(int(addr, 0) - int(base, 0))
+
+    return addr
+
+def get_peripheral_address(cfg, peripheral):
+    addr = get_address(cfg, peripheral)
 
     return addr
 
@@ -261,6 +277,13 @@ def get_cpu_isa(cfg, core):
 
     return isa
 
+def del_node_key(node, keys_to_delete):
+
+    for key in keys_to_delete:
+        if key in node:
+            del node[key]
+    return node
+
 
 """
 get_cpu_metadata: get metadata of a cpu
@@ -270,7 +293,7 @@ get_cpu_metadata: get metadata of a cpu
 
 return: dict of a cpu metadata
 """
-def get_cpu_metadata(cfg, idx=0):
+def get_cpu_metadata(cfg, idx=0, is_zephyr=False):
     node = {}
 
     core = "core{}".format(idx)
@@ -301,11 +324,16 @@ def get_cpu_metadata(cfg, idx=0):
             "dcache_block_size": "d-cache-block-size = <32>;",
         })
 
-    system_core = "SYSTEM_CORES_{}".format(idx)
-
-    value = get_property_value(cfg, system_core, MMU)
-    if value:
-        node.update({"mmu_type": 'mmu_type = "riscv,sv32";'})
+    if is_zephyr:
+        # add clock-frequency
+        node.update({"clock-frequency": dt_get_clock_frequency(cfg)})
+        del_key = ["tlb"]
+        node = del_node_key(node, del_key)
+    else:
+        system_core = "SYSTEM_CORES_{}".format(idx)
+        value = get_property_value(cfg, system_core, MMU)
+        if value:
+            node.update({"mmu_type": 'mmu_type = "riscv,sv32";'})
 
     return node
 
@@ -336,12 +364,14 @@ dt_interrupt: return a string of device tree syntax of interrupt
 
 return: string of device tree interrupt syntax
 """
-def dt_interrupt(cfg, peripheral):
+def dt_interrupt(cfg, peripheral, is_zephyr=False):
     out = ''
 
     irq = get_interrupt_id(cfg, peripheral)
-    if irq:
+    if irq and not is_zephyr:
         out = "interrupts = <{}>;".format(irq)
+    else:
+        out = "interrupts = <{0} {1}>;".format(irq, 1)
 
     return out
 
@@ -354,14 +384,33 @@ dt_reg: string of device tree syntax of reg
 
 return: string of device tree reg syntax
 """
-def dt_reg(cfg, peripheral):
+def dt_reg(cfg, peripheral, is_zephyr=False):
     out = ''
 
     addr = get_peripheral_base_address(cfg, peripheral)
     size = get_size(cfg, peripheral)
 
+    if is_zephyr:
+        addr = get_peripheral_address(cfg, peripheral)
+
     if addr and size:
         out = "reg = <{0} {1}>;".format(addr, size)
+
+    return out
+"""
+dt_reg_z_plic: string of device tree syntax of reg for zephyr plic
+@cfg (list): raw data of soc.h
+"""
+def dt_reg_z_plic(cfg):
+    out = ''
+
+    addr = get_peripheral_address(cfg, "PLIC")
+
+    prio = hex(int(addr,0))
+    irq_en = hex(int(addr,0) + 0x2000)
+    reg = hex(int(addr,0) + 0x200000)
+
+    out = "reg = <{0} {1}\n\t{2} {3}\n\t{4} {5}>;".format(prio, '0x00001000', irq_en, '0x00002000', reg, '0x00010000')
 
     return out
 
@@ -373,7 +422,7 @@ dt_compatible: get compatible driver for the peripheral
 
 return: string of device tree compatible syntax
 """
-def dt_compatible(peripheral, controller=False):
+def dt_compatible(peripheral, controller=False, is_zephyr=False):
     out = ''
     drv = ''
     peripheral = peripheral.lower()
@@ -382,8 +431,14 @@ def dt_compatible(peripheral, controller=False):
 
     if controller:
         drivers = drivers['controller']
+        if is_zephyr:
+            drivers = load_config_file()
+            drivers = drivers['zephyr_dtsi']['controller']
     else:
         drivers = drivers['drivers']
+        if is_zephyr:
+            drivers = load_config_file()
+            drivers = drivers['zephyr_dtsi']['drivers']
 
     if peripheral in drivers:
         compatible = drivers[peripheral]['compatible']
@@ -509,9 +564,14 @@ def __dt_create_node_str(node, parent_node):
         #out += "\t{}\n".format(node['size_cell'])
         size_cell = dt_size_cells(node['size_cell'])
         out += "\t{}\n".format(size_cell)
+    if 'ranges_key' in node:
+        out += "\t{}\n".format(node['ranges_key'])
 
     if 'reg' in node:
         out += "\t{}\n".format(node['reg'])
+
+    if 'reg-names' in node:
+        out += "\t{}\n".format(node['reg-names'])
 
     if 'compatible' in node:
         out += "\t{}\n".format(node['compatible'])
@@ -555,6 +615,8 @@ def __dt_create_node_str(node, parent_node):
 
     if 'tlb' in node:
         out += "\t{}\n".format(node['tlb'])
+    if 'clock-frequency' in node:
+        out += "\t{}\n".format(node['clock-frequency'])
 
     if 'private_data' in node:
         # private_data (list)
@@ -594,26 +656,37 @@ def __dt_create_node(nodes):
     return out
 
 
-def get_private_data(peripheral, controller=False):
+def get_private_data(peripheral, controller=False, is_zephyr=False):
     priv_data = ''
     peripheral = peripheral.lower()
     drv_data = load_config_file()
 
     if controller:
         drv = 'controller'
+        if is_zephyr:
+            drv = ['zephyr_dtsi', 'controller']
     else:
         drv = 'drivers'
+        if is_zephyr:
+            drv = ['zephyr_dtsi', 'drivers']
 
-    if peripheral in drv_data[drv]:
-        if 'private_data' in drv_data[drv][peripheral]:
-            priv_data = drv_data[drv][peripheral]['private_data']
+    if isinstance(drv, list): # if drv is a list, then we are dealing with a nested dictionary
+        if peripheral in drv_data[drv[0]][drv[1]]:
+            if 'private_data' in drv_data[drv[0]][drv[1]][peripheral]:
+                priv_data = drv_data[drv[0]][drv[1]][peripheral]['private_data']
+    else:
+        if peripheral in drv_data[drv]:
+            if 'private_data' in drv_data[drv][peripheral]:
+                priv_data = drv_data[drv][peripheral]['private_data']
+
 
     return priv_data
 
 
-def dt_get_private_data(peripheral, controller=False):
+
+def dt_get_private_data(peripheral, controller=False, is_zephyr=False):
     priv_data = {}
-    priv_data['private_data'] = get_private_data(peripheral, controller)
+    priv_data['private_data'] = get_private_data(peripheral, controller, is_zephyr)
 
     return priv_data
 
@@ -626,7 +699,7 @@ dt_create_node: create a device tree node for a peripheral
 
 return: dict of device tree peripheral nodes
 """
-def dt_create_node(cfg, peripheral):
+def dt_create_node(cfg, peripheral, is_zephyr=False):
     node = {}
     nodes = {}
 
@@ -640,11 +713,18 @@ def dt_create_node(cfg, peripheral):
             status = get_status(okay=True)
         else:
             node_idx = "{0}_{1}".format(peripheral, i)
-            label = "{0}{1}".format(peripheral.lower(), chr(65+i))
+            if not is_zephyr:
+                node_label_id = chr(65+i)
+            else:
+                node_label_id = i
+            label = "{0}{1}".format(peripheral.lower(), node_label_id)
             status = get_status(okay=False)
 
-        reg = dt_reg(cfg, node_idx)
+        reg = dt_reg(cfg, node_idx, is_zephyr)
         addr = get_peripheral_base_address(cfg, node_idx)
+
+        if is_zephyr:
+            addr = get_address(cfg, node_idx)
 
         node = {
             "name": peripheral.lower(),
@@ -654,17 +734,26 @@ def dt_create_node(cfg, peripheral):
             "status": status
         }
 
-        compatible = dt_compatible(peripheral)
+        compatible = dt_compatible(peripheral, is_zephyr=is_zephyr)
         if compatible:
             node.update({"compatible": compatible})
 
-        irq = dt_interrupt(cfg, node_idx)
+        irq = dt_interrupt(cfg, node_idx, is_zephyr=is_zephyr)
         if irq:
             node.update({"interrupt": irq})
 
-        priv_data = dt_get_private_data(peripheral)
+        priv_data = dt_get_private_data(peripheral, is_zephyr=is_zephyr)
         if priv_data:
             node.update(priv_data)
+
+        if  is_zephyr:
+            if peripheral == PLIC:
+                node.update({"reg": dt_reg_z_plic(cfg)})
+                node.update({"reg-names": "reg-names = \"{0}\", \"{1}\", \"{2}\";".format('prio', 'irq_en', 'reg')})
+                node.pop('interrupt')
+            if peripheral == CLINT:
+                node.pop('interrupt')
+
 
         nodes.update({node_idx: node})
 
@@ -691,7 +780,7 @@ dt_create_parent_node: create parent node such as clock, apb, axi
 return: parent device tree node
 
 """
-def dt_create_parent_node(cfg, name, address_cell, size_cell):
+def dt_create_parent_node(cfg, name, address_cell, size_cell, is_zephyr=False):
     node = {
         "name": name,
         "addr_cell": address_cell,
@@ -701,13 +790,18 @@ def dt_create_parent_node(cfg, name, address_cell, size_cell):
     if not 'cpu' in name:
         compatible = dt_compatible('bus')
         node['compatible'] = compatible
+        if name == 'soc':
+            node['compatible'] = dt_compatible('soc', controller=True, is_zephyr=is_zephyr)
+
+            if is_zephyr:
+                node.update({'ranges_key': 'ranges;'})
 
     node = {name: node}
 
     return node
 
 
-def dt_create_plic_node(cfg):
+def dt_create_plic_node(cfg, is_zephyr=False):
     plic_metadata = []
     ext = ''
     node = {}
@@ -715,16 +809,29 @@ def dt_create_plic_node(cfg):
 
     drivers = load_config_file()
     cpu_count = get_cpu_count(cfg)
-    node = dt_create_node(cfg, PLIC)
+    node = dt_create_node(cfg, PLIC, is_zephyr)
 
     for i in range(0, cpu_count):
+        if is_zephyr:
+            ext += "\n\t\t&hlic{0} 11".format(i)
+            continue
         ext += "\n\t\t&L{0} 11 &L{1} 9".format(i, i)
 
     ext = "interrupts-extended = <{}>;".format(ext)
-    priv_data = get_private_data('plic')
+    priv_data = get_private_data('plic', is_zephyr=is_zephyr)
     priv_data.append(ext)
     plic_metadata = {"private_data": priv_data}
     node = dt_insert_data(node, plic_metadata, PLIC)
+
+    return node
+
+def dt_create_clint_node(cfg, is_zephyr=False):
+    node = {}
+    priv_data = {}
+
+    node = dt_create_node(cfg, CLINT, is_zephyr)
+    priv_data = get_private_data('clint', is_zephyr=is_zephyr)
+    node = dt_insert_data(node, priv_data, CLINT)
 
     return node
 
@@ -751,12 +858,12 @@ def dt_create_clock_node(cfg):
     return parent_node
 
 
-def dt_create_interrupt_controller_node():
+def dt_create_interrupt_controller_node(is_zephyr=False):
     name = "interrupt-controller"
     node = {}
 
-    compatible = dt_compatible('plic', controller=True)
-    priv_data = get_private_data('plic', controller=True)
+    compatible = dt_compatible('plic', controller=True, is_zephyr=is_zephyr)
+    priv_data = get_private_data('plic', controller=True, is_zephyr=is_zephyr)
     priv_data.append(compatible)
 
     node = {
@@ -769,7 +876,7 @@ def dt_create_interrupt_controller_node():
     return node
 
 
-def dt_create_cpu_node(cfg):
+def dt_create_cpu_node(cfg, is_zephyr=False):
     name = "cpus"
     cpu_nodes = {}
     cpu_count = get_cpu_count(cfg)
@@ -779,12 +886,14 @@ def dt_create_cpu_node(cfg):
 
     for cpu in range(0, cpu_count):
         # interrupt controller
-        intc = dt_create_interrupt_controller_node()
+        intc = dt_create_interrupt_controller_node(is_zephyr=is_zephyr)
         intc_label = "L{0}".format(cpu)
+        if is_zephyr:
+            intc_label = "hlic{0}".format(cpu)
         intc['interrupt-controller']['label'] = intc_label
 
         core = "core{}".format(cpu)
-        cpu_node = get_cpu_metadata(cfg, cpu)
+        cpu_node = get_cpu_metadata(cfg, cpu, is_zephyr)
         cpu_node = dt_insert_child_node({core: cpu_node}, intc)
         cpu_nodes.update(cpu_node)
 
@@ -815,6 +924,27 @@ def dt_create_memory_node(cfg):
     mem_node = {name: mem_node}
     return mem_node
 
+#create ram memory node
+def dt_create_ram_node(cfg):
+    name = "ram0: memory"
+    ram_keyword = "RAM_A"
+    match = 'SYSTEM_RAM_A_SIZE'
+
+    size = get_property_value_match(cfg, ram_keyword, match)
+    addr = get_property_value(cfg, ram_keyword, 'CTRL ')
+
+    size = int(size) // 1024
+
+    ram_node = {
+        "name": name,
+        "device_type": 'device_type = "memory";',
+        "addr": addr.lstrip('0x'),
+        "reg": "reg = <{0} DT_SIZE_K({1})>;".format(addr, size),
+    }
+
+
+    ram_node = {name: ram_node}
+    return ram_node
 
 def dt_version():
     conf = load_config_file()
@@ -828,7 +958,7 @@ def dt_model():
     return model
 
 
-def dt_create_root_node():
+def dt_create_root_node(is_zephyr=False):
     root_node = {
             "root": {
                 "name": "/",
@@ -838,6 +968,8 @@ def dt_create_root_node():
                 "size_cell": 1
                 }
             }
+    if is_zephyr:
+        del root_node["root"]["version"]
 
     return root_node
 
@@ -872,6 +1004,11 @@ def dt_create_bus_node(cfg, bus_name, bus_label):
     bus_node[bus_label].update({'addr': addr})
 
     return bus_node
+
+def dt_create_soc_node(cfg):
+    soc_node = dt_create_parent_node(cfg, "soc", 1, 1, is_zephyr=True)
+
+    return soc_node
 
 
 def indent(lines, level=1):
@@ -938,7 +1075,7 @@ create_dts_file: create dts file
 
 return: string of nodes
 """
-def create_dts_file(cfg, bus_node):
+def create_dts_file(cfg, bus_node, is_zephyr=False):
     dts_root_node = dt_create_root_node()
     node = {}
     nodes = {}
@@ -952,11 +1089,13 @@ def create_dts_file(cfg, bus_node):
     dts_root_node['root'].update(inc_file)
     dts_root_node['root'].update(conf['dts']['root'])
 
-    # memory
-    mem_node = dt_create_memory_node(cfg)
+    mem_node = None
+    if not is_zephyr:
+        # memory
+        mem_node = dt_create_memory_node(cfg)
+
     if mem_node:
         dts_root_node = dt_insert_child_node(dts_root_node, mem_node)
-
     dts = dt_parser_nodes(dts_root_node, dts_root_node)
 
     for k in bus_node:
@@ -980,25 +1119,49 @@ def create_dts_file(cfg, bus_node):
 
     return dts
 
+def create_includes(conf, is_zephyr=False):
+    inc_file = {}
+
+    if is_zephyr:
+        inc_file = {
+            "#include": [
+                conf['zephyr_dtsi']['includes'][0],
+                conf['zephyr_dtsi']['includes'][1]
+            ]
+        }
+    return inc_file
+
 
 def main():
+
     out = ''
     board = ''
     path_dts = 'dts'
     path_dts = os.path.join(os.path.relpath(os.path.dirname(__file__)), path_dts)
-    output_filename = 'sapphire.dtsi'
-    output_filename = os.path.join(path_dts, output_filename)
-    output_json = 'sapphire.json'
-
-    dts_filename = 'linux.dts'
-    efinix_dir = os.path.join(os.path.relpath(os.path.dirname(__file__)), '..')
 
     dt_parse = argparse.ArgumentParser(description='Device Tree Generator')
     dt_parse.add_argument('soc', type=str, help='path to soc.h')
     dt_parse.add_argument('board', type=str, help='development kit name such as t120, ti60')
     dt_parse.add_argument('-o', '--outfile', type=str, help='Override output filename. By default is sapphire.dtsi')
     dt_parse.add_argument('-j', '--json', action='store_true', help='Save output file as json format')
+    dt_parse.add_argument('-z', '--zephyr', action='store_true', help='Generate device tree for Zephyr OS')
     args = dt_parse.parse_args()
+
+    is_zephyr = args.zephyr
+
+    if is_zephyr:
+        output_filename = 'sapphire_soc.dtsi'
+        output_filename = os.path.join(path_dts, output_filename)
+        dts_filename = 'ti60_boards.dts'
+        board_os = 'zephyr'
+        efinix_dir = os.path.join(os.path.relpath(os.path.dirname(__file__)), '..')
+    else:
+        output_filename = 'sapphire.dtsi'
+        output_filename = os.path.join(path_dts, output_filename)
+        output_json = 'sapphire.json'
+        dts_filename = 'linux.dts'
+        board_os = 'linux'
+        efinix_dir = os.path.join(os.path.relpath(os.path.dirname(__file__)), '..')
 
     soc_path = args.soc
     cfg = read_file(soc_path)
@@ -1015,47 +1178,65 @@ def main():
         print("Error: %s development kit is not supported\n" % args.board)
         return -1
 
-    dts_filename = os.path.join(efinix_dir, board, 'linux', dts_filename)
+    dts_filename = os.path.join(efinix_dir, board, board_os, dts_filename)
 
     if args.outfile:
         output_filename = args.outfile
 
     # root
-    root_node = dt_create_root_node()
+    root_node = dt_create_root_node(is_zephyr)
+    root_node['root'].update(create_includes(conf, is_zephyr))
+
+    if is_zephyr:
+        root_node['root'].update(conf['zephyr_dtsi']['root'])
+        ram_node = dt_create_ram_node(cfg)
+        if ram_node:
+            root_node = dt_insert_child_node(root_node, ram_node)
 
     # bus
     bus_name = 'PERIPHERAL_BMB'
     bus_label = 'apbA'
     apb_node = dt_create_bus_node(cfg, bus_name, bus_label)
 
+    if is_zephyr:
+        soc_node = dt_create_soc_node(cfg)
+        peripheral_parent  = soc_node
+    else:
+        peripheral_parent = apb_node
+
     # cpu
-    cpu_node = dt_create_cpu_node(cfg)
+    cpu_node = dt_create_cpu_node(cfg, is_zephyr)
     if cpu_node:
         root_node = dt_insert_child_node(root_node, cpu_node)
 
     # clock
     clk_node = dt_create_clock_node(cfg)
-    if clk_node:
+
+    if clk_node and not is_zephyr:
         root_node = dt_insert_child_node(root_node, clk_node)
 
     # plic
-    plic_node = dt_create_plic_node(cfg)
+    plic_node = dt_create_plic_node(cfg, is_zephyr=is_zephyr)
     if plic_node:
-        apb_node = dt_insert_child_node(apb_node, plic_node)
+        peripheral_parent = dt_insert_child_node(peripheral_parent, plic_node)
 
-    for peripheral in ["UART", "SPI", "GPIO", "I2C"]:
-        periph_node = dt_create_node(cfg, peripheral)
+    #zephyr does not support i2c and spi yet
+    if is_zephyr:
+        peripheral_list = ["UART", "GPIO", "CLINT"]
+    else:
+        peripheral_list = ["UART", "SPI", "GPIO", "I2C"]
+    for peripheral in peripheral_list:
+        periph_node = dt_create_node(cfg, peripheral, is_zephyr)
         if periph_node:
-            apb_node = dt_insert_child_node(apb_node, periph_node)
+            peripheral_parent = dt_insert_child_node(peripheral_parent, periph_node)
 
-    root_node = dt_insert_child_node(root_node, apb_node)
-
+    root_node = dt_insert_child_node(root_node, peripheral_parent)
     out = dt_parser_nodes(root_node, root_node)
     save_file(output_filename, out)
     print("Info: device tree stored in %s" % output_filename)
 
     # create dts file
-    dts_out = create_dts_file(cfg, apb_node)
+    dts_out = create_dts_file(cfg, apb_node, is_zephyr)
     save_file(dts_filename, dts_out)
     print("Info: save dts of board %s in %s" % (board, dts_filename))
 

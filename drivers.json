@@ -51,7 +51,7 @@
 		"compatible": ["fixed-clock"]
 	},
 	"plic": {
-		"compatible": ["sifive,plic-1.0.0", "sifive,fu540-c000-plic"],
+		"compatible": ["xsifive,plic-1.0.0", "sifive,fu540-c000-plic"],
 		"private_data": [
 			"#interrupt-cells = <1>;",
 			"interrupt-controller;",
@@ -68,6 +68,57 @@
 		]
 	}
     },
+    "zephyr_dtsi": {
+	"includes": ["mem.h", "zephyr/dt-bindings/gpio/gpio.h"],
+	"root": {
+		"chosen": {
+			"name": "chosen",
+			"private_data": ["zephyr,sram = &ram0;"]
+		}
+	},
+	"controller":{
+		"plic": {
+			"compatible": ["riscv,cpu-intc"],
+			"private_data": [
+				"#address-cells = <0>;",
+				"#interrupt-cells = <1>;",
+				"interrupt-controller;"
+			]
+		},
+		"soc": {
+			"compatible": ["efinix,sapphire"]
+		}
+	},
+	"drivers":{
+		"plic": {
+			"compatible": ["sifive,plic-1.0.0"],
+			"private_data": [
+				"#address-cells = <0>;",
+				"#interrupt-cells = <2>;",
+				"interrupt-controller;",
+				"riscv,max-priority = <3>;",
+				"riscv,ndev = <32>;"
+			]
+		},
+		"clint": {
+			"compatible": ["sifive,clint0"],
+			"private_data": [
+				"interrupts-extended = <&hlic0 3 &hlic0 7>;"
+			]
+		},
+		"gpio": {
+			"compatible": ["efinix,sapphire-gpio"],
+			"private_data": [
+				"ngpios = <4>;",
+				"gpio-controller;",
+				"#gpio-cells = <2>;",
+				"#address-cells = <1>;",
+				"#size-cells = <1>;"
+			]
+		}
+	}
+
+	},
     "dts": {
 	"include": ["sapphire.dtsi"],
 	"#include": ["dt-bindings/gpio/gpio.h"],
