@@ -771,9 +771,10 @@ def dt_create_node(cfg, peripheral, is_zephyr=False):
         if irq:
             node.update({"interrupt": irq})
 
-        clk_freq = dt_get_clock_frequency(cfg)
-        if clk_freq:
-            node.update({"clock_freq": clk_freq})
+        if not is_zephyr: 
+            clk_freq = dt_get_clock_frequency(cfg)
+            if clk_freq:
+                node.update({"clock_freq": clk_freq})
 
         priv_data = dt_get_private_data(peripheral, is_zephyr=is_zephyr)
         if priv_data:
@@ -1114,13 +1115,21 @@ def create_dts_file(cfg, bus_node, is_zephyr=False):
     nodes = {}
 
     conf = load_config_file()
-    inc_file = {
-        "include": conf['dts']['include'],
-        "#include": conf['dts']['#include']
-    }
+
+    if is_zephyr:
+        inc_file = {
+            "#include": conf['zephyr_dts']['#include']
+        }
+        dts_root = conf['zephyr_dts']['root']
+    else:
+        inc_file = {
+            "include": conf['dts']['include'],
+            "#include": conf['dts']['#include']
+        }
+        dts_root = conf['dts']['root']
 
     dts_root_node['root'].update(inc_file)
-    dts_root_node['root'].update(conf['dts']['root'])
+    dts_root_node['root'].update(dts_root)
 
     mem_node = None
     if not is_zephyr:
@@ -1261,6 +1270,7 @@ def main():
 
     #zephyr does not support i2c and spi yet
     if is_zephyr:
+        global PERIPHERALS 
         PERIPHERALS = ["UART", "GPIO", "CLINT"]
 
     peripheral_list = get_peripherals(cfg)
@@ -1275,7 +1285,7 @@ def main():
     print("Info: device tree stored in %s" % output_filename)
 
     # create dts file
-    dts_out = create_dts_file(cfg, apb_node, is_zephyr)
+    dts_out = create_dts_file(cfg, peripheral_parent, is_zephyr)
     save_file(dts_filename, dts_out)
     print("Info: save dts of board %s in %s" % (board, dts_filename))
 
