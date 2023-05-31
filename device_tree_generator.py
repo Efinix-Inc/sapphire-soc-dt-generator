@@ -1195,18 +1195,6 @@ def main():
 
     is_zephyr = args.zephyr
 
-    if is_zephyr:
-        output_filename = 'sapphire_soc.dtsi'
-        output_filename = os.path.join(path_dts, output_filename)
-        dts_filename = 'ti60_boards.dts'
-        board_os = 'zephyr'
-    else:
-        output_filename = 'sapphire.dtsi'
-        output_filename = os.path.join(path_dts, output_filename)
-        output_json = 'sapphire.json'
-        dts_filename = 'linux.dts'
-        board_os = 'linux'
-
     soc_path = args.soc
     cfg = read_file(soc_path)
 
@@ -1221,6 +1209,16 @@ def main():
     if not board:
         print("Error: %s development kit is not supported\n" % args.board)
         return -1
+
+    if is_zephyr:
+        output_filename = 'sapphire_soc.dtsi'
+        output_filename = os.path.join(path_dts, output_filename)
+        dts_filename = '{0}.dts'.format(board)
+    else:
+        output_filename = 'sapphire.dtsi'
+        output_filename = os.path.join(path_dts, output_filename)
+        output_json = 'sapphire.json'
+        dts_filename = 'linux.dts'
 
     if (os.path.exists(path_dts)):
             shutil.rmtree(path_dts)
