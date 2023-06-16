@@ -1109,7 +1109,7 @@ create_dts_file: create dts file
 
 return: string of nodes
 """
-def create_dts_file(cfg, bus_node, is_zephyr=False):
+def create_dts_file(cfg, bus_node, is_zephyr=False, soc_name=None):
     dts_root_node = dt_create_root_node()
     node = {}
     nodes = {}
@@ -1120,6 +1120,7 @@ def create_dts_file(cfg, bus_node, is_zephyr=False):
         inc_file = {
             "#include": conf['zephyr_dts']['#include']
         }
+        inc_file["#include"][0] += soc_name
         dts_root = conf['zephyr_dts']['root']
     else:
         inc_file = {
@@ -1188,6 +1189,9 @@ def main():
     dt_parse.add_argument('-o', '--outfile', type=str, help='Override output filename. By default is sapphire.dtsi')
     dt_parse.add_argument('-j', '--json', action='store_true', help='Save output file as json format')
     dt_parse.add_argument('-z', '--zephyr', action='store_true', help='Generate device tree for Zephyr OS')
+    dt_parse.add_argument('-s', '--socname', type=str, help='Custom soc name for Zephyr SoC dtsi')
+    #add zephyr's board name
+    dt_parse.add_argument('-zb', '--zephyrboard', type=str, help='Zephyr board name')
     args = dt_parse.parse_args()
 
     if args.dir:
@@ -1211,9 +1215,9 @@ def main():
         return -1
 
     if is_zephyr:
-        output_filename = 'sapphire_soc.dtsi'
-        output_filename = os.path.join(path_dts, output_filename)
-        dts_filename = '{0}.dts'.format(board)
+        output_filename_standalone = "sapphire_soc_{soc_name}.dtsi".format(soc_name=args.socname)
+        output_filename = os.path.join(path_dts, output_filename_standalone)
+        dts_filename = '{}.dts'.format(args.zephyrboard)
     else:
         output_filename = 'sapphire.dtsi'
         output_filename = os.path.join(path_dts, output_filename)
@@ -1226,7 +1230,7 @@ def main():
     os.makedirs(path_dts)
     dts_filename = os.path.join(path_dts, dts_filename)
 
-    if args.outfile:
+    if args.outfile and not is_zephyr:
         output_filename = args.outfile
 
     # root
@@ -1280,10 +1284,10 @@ def main():
     root_node = dt_insert_child_node(root_node, peripheral_parent)
     out = dt_parser_nodes(root_node, root_node)
     save_file(output_filename, out)
-    print("Info: device tree stored in %s" % output_filename)
+    print("Info: SoC device tree source stored in %s" % output_filename)
 
     # create dts file
-    dts_out = create_dts_file(cfg, peripheral_parent, is_zephyr)
+    dts_out = create_dts_file(cfg, peripheral_parent, is_zephyr, output_filename_standalone)
     save_file(dts_filename, dts_out)
     print("Info: save dts of board %s in %s" % (board, dts_filename))
 
