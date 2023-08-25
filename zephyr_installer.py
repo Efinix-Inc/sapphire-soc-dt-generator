@@ -5,14 +5,14 @@ import glob
 import os
 
 look_up_riscv_efx_tool_zephyr = {
-    "SYSTEM_RISCV_ISA_RV32I" : "RISCV_ISA_RV32I",
-    "SYSTEM_RISCV_ISA_EXT_M" : "RISCV_ISA_EXT_M",
-    "SYSTEM_RISCV_ISA_EXT_A" : "RISCV_ISA_EXT_A",
-    "SYSTEM_RISCV_ISA_EXT_C" : "RISCV_ISA_EXT_C",
-    "SYSTEM_RISCV_ISA_EXT_ZICSR" : "RISCV_ISA_EXT_ZICSR",
-    "SYSTEM_RISCV_ISA_EXT_ZIFENCEI": "RISCV_ISA_EXT_ZIFENCEI",
-    "SYSTEM_RISCV_ISA_EXT_F" : "RISCV_ISA_EXT_F",
-    "SYSTEM_RISCV_ISA_EXT_D" : "RISCV_ISA_EXT_D"
+    "SYSTEM_RISCV_ISA_RV32I 1" : "RISCV_ISA_RV32I",
+    "SYSTEM_RISCV_ISA_EXT_M 1" : "RISCV_ISA_EXT_M",
+    "SYSTEM_RISCV_ISA_EXT_A 1" : "RISCV_ISA_EXT_A",
+    "SYSTEM_RISCV_ISA_EXT_C 1" : "RISCV_ISA_EXT_C",
+    "SYSTEM_RISCV_ISA_EXT_ZICSR 1" : "RISCV_ISA_EXT_ZICSR",
+    "SYSTEM_RISCV_ISA_EXT_ZIFENCEI 1": "RISCV_ISA_EXT_ZIFENCEI",
+    "SYSTEM_RISCV_ISA_EXT_F 1" : "RISCV_ISA_EXT_F",
+    "SYSTEM_RISCV_ISA_EXT_D 1" : "RISCV_ISA_EXT_D"
 }
 
 efx_soc_series = "SOC_SERIES_EFINIX_SAPPHIRE"
@@ -24,6 +24,7 @@ parser.add_argument("board_name", help="Name of the Board in Zephyr.")
 parser.add_argument('efx_dev_board', type=str, help='development kit name such as ti60, t120')
 parser.add_argument("zephyr_path", help="Path to the Zephyr project.")
 parser.add_argument("soc_h_path", help="Path to the soc.h file.")
+parser.add_argument("--replace", help="Replace if board existed", default="0" )
 args = parser.parse_args()
 
 soc_h_path = args.soc_h_path
@@ -49,7 +50,12 @@ gpio_defined = False
 with open(soc_h_path, 'r') as f:
     for line in f:
         if line.startswith("#define "):
-            define = line.split()[1]
+            part = line.split()
+            if len(part) >= 3:
+                define = part[1] +" "+part[2]
+            else:
+                define = part[1]
+            #define = line.split()[1]
             soc_defines.add(define)
             if "SYSTEM_UART_" in define:
                 uart_defined = True
@@ -57,7 +63,7 @@ with open(soc_h_path, 'r') as f:
                 gpio_defined = True
 
 # Open the Kconfig.soc file for writing
-kconfig_soc_path = os.path.join(zephyr_path, "soc/riscv/riscv-privileged/efinix-sapphire/Kconfig.soc")
+kconfig_soc_path = os.path.join(zephyr_path, "soc/riscv/riscv-privilege/efinix-sapphire/Kconfig.soc")
 with open(kconfig_soc_path, 'r') as f:
     kconfig_soc_lines = f.readlines()
 
@@ -75,7 +81,7 @@ new_config += "\tselect INCLUDE_RESET_VECTOR\n"
 for key, val in look_up_riscv_efx_tool_zephyr.items():
     if key in soc_defines:
         new_config += f"\tselect {val}\n"
-if "SYSTEM_RISCV_ISA_EXT_A" in soc_defines:
+if "SYSTEM_RISCV_ISA_EXT_A 1" in soc_defines:
     new_config += "\tselect ATOMIC_OPERATIONS_BUILTIN\n"
 
 # Remove the 'endchoice' from the last config

@@ -14,8 +14,14 @@ PERIPHERAL = "CTRL "
 IO_SIZE = "CTRL_SIZE"
 FREQUENCY = "CLINT_HZ"
 BASE_ADDR_PROP = "SYSTEM_BMB_PERIPHERAL_BMB "
-FPU = "FPU"
-MMU = "MMU"
+# FPU = "FPU"
+#MMU = "MMU"
+MMU         = "EXT_M"
+ATOMIC      = "EXT_A"
+COMPRESS    = "EXT_C"
+FPU         = "EXT_F"
+DOUBLE      = "EXT_D"
+
 ICACHE = "ICACHE"
 DCACHE = "DCACHE"
 CONTROLLER = ["PLIC", "CLINT", "RAM"]
@@ -269,19 +275,39 @@ def get_cache_block(cfg, core):
 
     return block
 
+
 def get_cpu_isa(cfg, core):
-    isa = "rv32im"
-    system_core = "SYSTEM_CORES_{}".format(core)
+    isa = "rv32i" #base extension
+    system_core = "SYSTEM_RISCV_ISA_"
 
     value = get_property_value(cfg, system_core, MMU)
     if value == "1":
         # append 'a' for atomic RISCV instruction extension
+        isa = "{}m".format(isa)
+
+    #value = get_property_value(cfg, system_core, MMU)
+    value = get_property_value(cfg, system_core, ATOMIC)
+    if value == "1":
+        # append 'a' for atomic RISCV instruction extension
         isa = "{}a".format(isa)
+
+    #value = get_property_value(cfg, system_core, MMU)
+    value = get_property_value(cfg, system_core, COMPRESS)
+    if value == "1":
+        # append 'a' for atomic RISCV instruction extension
+        isa = "{}c".format(isa)
+
 
     value = get_property_value(cfg, system_core, FPU)
     if value == "1":
-        # append 'fd' for floating point & double percision RISCV instruction extension
-        isa = "{}fd".format(isa)
+        # append 'fd' for floating point percision RISCV instruction extension
+        isa = "{}f".format(isa)
+
+    value = get_property_value(cfg, system_core, DOUBLE)
+    if value == "1":
+        # append 'fd' for  double percision RISCV instruction extension
+        isa = "{}d".format(isa)
+
 
     return isa
 
@@ -306,6 +332,7 @@ def get_cpu_metadata(cfg, idx=0, is_zephyr=False):
 
     core = "core{}".format(idx)
     isa = get_cpu_isa(cfg, idx)
+    print("isa = ",isa) #for testing 
     icache_way = get_cache_way(cfg, idx, ICACHE)
     icache_size = get_cache_size(cfg, idx, ICACHE)
     dcache_way = get_cache_way(cfg, idx, DCACHE)
@@ -1193,7 +1220,6 @@ def main():
     #add zephyr's board name
     dt_parse.add_argument('-zb', '--zephyrboard', type=str, help='Zephyr board name')
     args = dt_parse.parse_args()
-
     if args.dir:
         path_dts = args.dir
 
