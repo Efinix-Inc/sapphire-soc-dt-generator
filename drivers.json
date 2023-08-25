@@ -108,6 +108,13 @@
 				"interrupts-extended = <&hlic0 3 &hlic0 7>;"
 			]
 		},
+		"uart": {
+			"compatible": ["efinix,sapphire-uart0"],
+			"private_data": [
+				"reg-names = \"base\";",
+				"current-speed = <115200>;"
+			]
+		},
 		"gpio": {
 			"compatible": ["efinix,sapphire-gpio"],
 			"private_data": [
