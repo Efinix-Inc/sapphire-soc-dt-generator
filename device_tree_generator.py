@@ -29,7 +29,7 @@ PLIC = "PLIC"
 CLINT = "CLINT"
 SUPERVISOR = "SUPERVISOR "
 PERIPHERALS = ["UART", "I2C", "SPI", "GPIO"]
-
+memory_selection = 'int'
 def read_file(filename):
     with open(filename, 'r') as f:
         cfg = f.readlines()
@@ -1007,6 +1007,27 @@ def dt_create_ram_node(cfg):
     ram_node = {name: ram_node}
     return ram_node
 
+#create external ram memory node
+def dt_create_ext_ram_node(cfg):
+    name = "external_ram: memory"
+    ram_keyword = "DDR"
+    match = 'SYSTEM_DDR_BMB_SIZE'
+
+    size = get_property_value_match(cfg, ram_keyword, match)
+    addr = get_property_value(cfg, ram_keyword, 'BMB ')
+
+    size = int(size, 16) // 1024
+
+    ram_node = {
+        "name": name,
+        "device_type": 'device_type = "memory";',
+        "addr": addr.lstrip('0x'),
+        "reg": "reg = <{0} DT_SIZE_K({1})>;".format(addr, size),
+    }
+    ram_node = {name: ram_node}
+    return ram_node
+
+
 def dt_version():
     conf = load_config_file()
     version  = '{}\n\n'.format(conf['dt_version'])
@@ -1148,7 +1169,10 @@ def create_dts_file(cfg, bus_node, is_zephyr=False, soc_name=None):
             "#include": conf['zephyr_dts']['#include']
         }
         inc_file["#include"][0] += soc_name
-        dts_root = conf['zephyr_dts']['root']
+        if (memory_selection == 'ext'): # external memory selected
+            dts_root = conf['zephyr_dts']['root_ext']
+        else: 
+            dts_root = conf['zephyr_dts']['root']     
     else:
         inc_file = {
             "include": conf['dts']['include'],
@@ -1163,6 +1187,8 @@ def create_dts_file(cfg, bus_node, is_zephyr=False, soc_name=None):
     if not is_zephyr:
         # memory
         mem_node = dt_create_memory_node(cfg)
+    # mem_node = dt_create_memory_node(cfg)
+
 
     if mem_node:
         dts_root_node = dt_insert_child_node(dts_root_node, mem_node)
@@ -1208,7 +1234,6 @@ def main():
     board = ''
     path_dts = 'dts'
     path_dts = os.path.join(os.path.relpath(os.path.dirname(__file__)), path_dts)
-
     dt_parse = argparse.ArgumentParser(description='Device Tree Generator')
     dt_parse.add_argument('soc', type=str, help='path to soc.h')
     dt_parse.add_argument('board', type=str, help='development kit name such as t120, ti60')
@@ -1217,6 +1242,7 @@ def main():
     dt_parse.add_argument('-j', '--json', action='store_true', help='Save output file as json format')
     dt_parse.add_argument('-z', '--zephyr', action='store_true', help='Generate device tree for Zephyr OS')
     dt_parse.add_argument('-s', '--socname', type=str, help='Custom soc name for Zephyr SoC dtsi')
+    dt_parse.add_argument('-m', '--memory', type=str, help='Select either `int` for internal memory, `ext` for external memory. If no external memory enabled on the SoC, internal memory will be used. ')
     #add zephyr's board name
     dt_parse.add_argument('-zb', '--zephyrboard', type=str, help='Zephyr board name')
     args = dt_parse.parse_args()
@@ -1224,7 +1250,8 @@ def main():
         path_dts = args.dir
 
     is_zephyr = args.zephyr
-
+    global memory_selection
+    memory_selection = args.memory
     soc_path = args.soc
     cfg = read_file(soc_path)
 
@@ -1239,6 +1266,11 @@ def main():
     if not board:
         print("Error: %s development kit is not supported\n" % args.board)
         return -1
+
+    if (args.memory != 'int' and args.memory != 'ext'): 
+        print("Error: Invalid input memory, %s . Supported: int, ext\n" % args.memory)
+        return -1
+    
 
     if is_zephyr:
         output_filename_standalone = "sapphire_soc_{soc_name}.dtsi".format(soc_name=args.socname)
@@ -1264,10 +1296,20 @@ def main():
     root_node['root'].update(create_includes(conf, is_zephyr))
 
     if is_zephyr:
-        root_node['root'].update(conf['zephyr_dtsi']['root'])
+        if args.memory == 'int':
+            root_node['root'].update(conf['zephyr_dtsi']['root'])
+        else: 
+            root_node['root'].update(conf['zephyr_dtsi']['root_ext'])
         ram_node = dt_create_ram_node(cfg)
         if ram_node:
             root_node = dt_insert_child_node(root_node, ram_node)
+        
+        ext_ram_node = dt_create_ext_ram_node(cfg)
+        if ext_ram_node:
+            root_node = dt_insert_child_node(root_node, ext_ram_node)
+
+
+    
 
     # bus
     bus_name = 'PERIPHERAL_BMB'

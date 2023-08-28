@@ -25,8 +25,10 @@ parser.add_argument('efx_dev_board', type=str, help='development kit name such a
 parser.add_argument("zephyr_path", help="Path to the Zephyr project.")
 parser.add_argument("soc_h_path", help="Path to the soc.h file.")
 parser.add_argument("--replace", help="Replace if board existed", default="0" )
+parser.add_argument('-m',"--memory", help="Select the memory used to run Zephyr app. Selection: int, ext", default="int" )
 args = parser.parse_args()
 
+selected_memory = args.memory
 soc_h_path = args.soc_h_path
 soc_name = args.soc_name
 zephyr_path = args.zephyr_path
@@ -41,6 +43,10 @@ if not os.path.isdir(zephyr_path):
 
 if not os.path.isfile(soc_h_path):
     print(f"Error: The provided soc.h path does not exist: {soc_h_path}")
+    exit(1)
+
+if (selected_memory != 'int' and selected_memory != 'ext'):
+    print(f"Error: The provided memory selection not support: {selected_memory}. Supported: int, ext")
     exit(1)
 
 # Get the SOC defines from the soc.h file
@@ -61,6 +67,12 @@ with open(soc_h_path, 'r') as f:
                 uart_defined = True
             if "SYSTEM_GPIO" in define:
                 gpio_defined = True
+            if "SYSTEM_DDR_BMB" in define: 
+                external_ram_defined = True
+
+# if the external ram not defined, force the selected memory to internal memory config
+if (external_ram_defined == False): 
+    selected_memory = 'int' 
 
 # Open the Kconfig.soc file for writing
 kconfig_soc_path = os.path.join(zephyr_path, "soc/riscv/riscv-privilege/efinix-sapphire/Kconfig.soc")
@@ -139,7 +151,7 @@ with open(kconfig_defconfig_path, 'w') as f:
     f.write("endif\n")
 
 dt_gen_script_path = os.path.join(current_dir, "device_tree_generator.py")
-subprocess.run(["python3", dt_gen_script_path, "-z", soc_h_path, args.efx_dev_board, "-s", soc_name, "-zb", board_name])
+subprocess.run(["python3", dt_gen_script_path, "-z", soc_h_path, args.efx_dev_board, "-s", soc_name, "-zb", board_name, "-m", selected_memory])
 
 gen_dts_path = os.path.join(current_dir, "dts")
 #handle soc dts file
