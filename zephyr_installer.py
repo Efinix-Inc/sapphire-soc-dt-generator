@@ -16,7 +16,7 @@ look_up_riscv_efx_tool_zephyr = {
 }
 
 efx_soc_series = "SOC_SERIES_EFINIX_SAPPHIRE"
-
+DEFAULT_FREQUENCY=100000000 #Default frequency should be 100MHz
 
 parser = argparse.ArgumentParser()
 parser.add_argument("soc_name", help="Name of the SOC.")
@@ -53,6 +53,8 @@ if (selected_memory != 'int' and selected_memory != 'ext'):
 soc_defines = set()
 uart_defined = False
 gpio_defined = False
+external_ram_defined = False
+clint_freq = DEFAULT_FREQUENCY
 with open(soc_h_path, 'r') as f:
     for line in f:
         if line.startswith("#define "):
@@ -69,6 +71,8 @@ with open(soc_h_path, 'r') as f:
                 gpio_defined = True
             if "SYSTEM_DDR_BMB" in define: 
                 external_ram_defined = True
+            if "SYSTEM_CLINT_HZ" in define: 
+                clint_freq = part[2] #get the CLINT frequency
 
 # if the external ram not defined, force the selected memory to internal memory config
 if (external_ram_defined == False): 
@@ -132,6 +136,7 @@ with open(defconfig_path, 'w') as f:
         f.write("CONFIG_UART_CONSOLE=y\n")
     if gpio_defined:
         f.write("CONFIG_GPIO=y\n")
+    f.write("CONFIG_SYS_CLOCK_HW_CYCLES_PER_SEC="+clint_freq+"\n")
     print("Info: {}_defconfig file created. Path: {}".format(board_name,defconfig_path))
 
 # Create Kconfig.board
