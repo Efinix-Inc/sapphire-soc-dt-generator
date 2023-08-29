@@ -964,69 +964,52 @@ def dt_create_cpu_node(cfg, is_zephyr=False):
     return parent
 
 
-def dt_create_memory_node(cfg):
-    name = "memory"
-    memory_keyword = "DDR_BMB"
-    conf = load_config_file()
-    # addr use linux start addr
-    addr = conf['memory_mapped']['uImage']
+# Create memory node 
+# isOnChipRam = Only affects on zephyr setting
+# is_zephyr = Select either if the targeted os is zephyr
+def dt_create_memory_node(cfg, isOnChipRam, is_zephyr=False):
+    if (is_zephyr == True and isOnChipRam == True): 
+        name = "ram0: memory"
+        ram_keyword = "RAM_A"
+        match = 'SYSTEM_RAM_A_SIZE'
 
-    size = get_property_value(cfg, memory_keyword, 'SIZE ')
-    size = hex(int(size,0) - int(addr, 0))
-    reg = "reg = <{0} {1}>;".format(addr, size)
+        size = get_property_value_match(cfg, ram_keyword, match)
+        addr = get_property_value(cfg, ram_keyword, 'CTRL ')
+        size = int(size) // 1024
+        reg = "reg = <{0} DT_SIZE_K({1})>;".format(addr, size)
+
+    elif (is_zephyr == True and isOnChipRam == False):
+        name = "external_ram: memory"
+        ram_keyword = "DDR"
+        match = 'SYSTEM_DDR_BMB_SIZE'
+
+        size = get_property_value_match(cfg, ram_keyword, match)
+        addr = get_property_value(cfg, ram_keyword, 'BMB ')
+        size = int(size, 16) // 1024
+        reg = "reg = <{0} DT_SIZE_K({1})>;".format(addr, size)
+
+    else: 
+        name = "memory"
+        memory_keyword = "DDR_BMB"
+        conf = load_config_file()
+        # addr use linux start addr
+        addr = conf['memory_mapped']['uImage']        
+        size = get_property_value(cfg, memory_keyword, 'SIZE ')
+        size = hex(int(size,0) - int(addr, 0))
+        reg = "reg = <{0} {1}>;".format(addr, size)
+
+    addr = addr.lstrip('0x'); 
+
     mem_node = {
         "name": name,
         "device_type": 'device_type = "memory";',
-        "addr": addr.lstrip('0x'),
+        "addr": addr, 
         "size": size,
         "reg": reg
     }
 
     mem_node = {name: mem_node}
     return mem_node
-
-#create ram memory node
-def dt_create_ram_node(cfg):
-    name = "ram0: memory"
-    ram_keyword = "RAM_A"
-    match = 'SYSTEM_RAM_A_SIZE'
-
-    size = get_property_value_match(cfg, ram_keyword, match)
-    addr = get_property_value(cfg, ram_keyword, 'CTRL ')
-
-    size = int(size) // 1024
-
-    ram_node = {
-        "name": name,
-        "device_type": 'device_type = "memory";',
-        "addr": addr.lstrip('0x'),
-        "reg": "reg = <{0} DT_SIZE_K({1})>;".format(addr, size),
-    }
-
-
-    ram_node = {name: ram_node}
-    return ram_node
-
-#create external ram memory node
-def dt_create_ext_ram_node(cfg):
-    name = "external_ram: memory"
-    ram_keyword = "DDR"
-    match = 'SYSTEM_DDR_BMB_SIZE'
-
-    size = get_property_value_match(cfg, ram_keyword, match)
-    addr = get_property_value(cfg, ram_keyword, 'BMB ')
-
-    size = int(size, 16) // 1024
-
-    ram_node = {
-        "name": name,
-        "device_type": 'device_type = "memory";',
-        "addr": addr.lstrip('0x'),
-        "reg": "reg = <{0} DT_SIZE_K({1})>;".format(addr, size),
-    }
-    ram_node = {name: ram_node}
-    return ram_node
-
 
 def dt_version():
     conf = load_config_file()
@@ -1186,8 +1169,7 @@ def create_dts_file(cfg, bus_node, is_zephyr=False, soc_name=None):
     mem_node = None
     if not is_zephyr:
         # memory
-        mem_node = dt_create_memory_node(cfg)
-    # mem_node = dt_create_memory_node(cfg)
+        mem_node=  dt_create_memory_node(cfg, False, False)
 
 
     if mem_node:
@@ -1248,6 +1230,7 @@ def main():
     os_zephyr_parser.add_argument('zephyrboard', type=str, help='Zephyr board name')
     os_zephyr_parser.add_argument('-m', '--memory', type=str, help='Select either `int` for internal memory, `ext` for external memory. If no external memory enabled on the SoC, internal memory will be used. ')
     args = dt_parse.parse_args()
+
     if args.dir:
         path_dts = args.dir
 
@@ -1257,7 +1240,10 @@ def main():
         is_zephyr = False
 
     global memory_selection
-    memory_selection = args.memory
+    if is_zephyr : 
+        memory_selection = args.memory
+    else :  
+        memory_selection = "ext"
     soc_path = args.soc
     cfg = read_file(soc_path)
 
@@ -1273,7 +1259,7 @@ def main():
         print("Error: %s development kit is not supported\n" % args.board)
         return -1
 
-    if (args.memory != 'int' and args.memory != 'ext'): 
+    if (memory_selection != 'int' and memory_selection != 'ext'): 
         print("Error: Invalid input memory, %s . Supported: int, ext\n" % args.memory)
         return -1
     
@@ -1283,6 +1269,7 @@ def main():
         output_filename = os.path.join(path_dts, output_filename_standalone)
         dts_filename = '{}.dts'.format(args.zephyrboard)
     else:
+        output_filename_standalone = "" 
         output_filename = 'sapphire.dtsi'
         output_filename = os.path.join(path_dts, output_filename)
         output_json = 'sapphire.json'
@@ -1306,11 +1293,10 @@ def main():
             root_node['root'].update(conf['zephyr_dtsi']['root'])
         else: 
             root_node['root'].update(conf['zephyr_dtsi']['root_ext'])
-        ram_node = dt_create_ram_node(cfg)
+        ram_node = dt_create_memory_node(cfg, True, True) #onChipRAM, Zephyr
         if ram_node:
             root_node = dt_insert_child_node(root_node, ram_node)
-        
-        ext_ram_node = dt_create_ext_ram_node(cfg)
+        ext_ram_node = dt_create_memory_node(cfg, False, True) # External RAM, Zephyr
         if ext_ram_node:
             root_node = dt_insert_child_node(root_node, ext_ram_node)
 
