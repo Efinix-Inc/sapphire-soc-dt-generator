@@ -1235,21 +1235,27 @@ def main():
     path_dts = 'dts'
     path_dts = os.path.join(os.path.relpath(os.path.dirname(__file__)), path_dts)
     dt_parse = argparse.ArgumentParser(description='Device Tree Generator')
+    
     dt_parse.add_argument('soc', type=str, help='path to soc.h')
     dt_parse.add_argument('board', type=str, help='development kit name such as t120, ti60')
     dt_parse.add_argument('-d', '--dir', type=str, help='Output generated output directory. By default is dts')
     dt_parse.add_argument('-o', '--outfile', type=str, help='Override output filename. By default is sapphire.dtsi')
     dt_parse.add_argument('-j', '--json', action='store_true', help='Save output file as json format')
-    dt_parse.add_argument('-z', '--zephyr', action='store_true', help='Generate device tree for Zephyr OS')
-    dt_parse.add_argument('-s', '--socname', type=str, help='Custom soc name for Zephyr SoC dtsi')
-    dt_parse.add_argument('-m', '--memory', type=str, help='Select either `int` for internal memory, `ext` for external memory. If no external memory enabled on the SoC, internal memory will be used. ')
-    #add zephyr's board name
-    dt_parse.add_argument('-zb', '--zephyrboard', type=str, help='Zephyr board name')
+    subparsers = dt_parse.add_subparsers(title='os', dest='os')
+    os_linux_parser = subparsers.add_parser('linux', help='Target OS, Linux')
+    os_zephyr_parser = subparsers.add_parser('zephyr', help='Target OS, Zephyr')
+    os_zephyr_parser.add_argument('socname', type=str, help='Custom soc name for Zephyr SoC dtsi')
+    os_zephyr_parser.add_argument('zephyrboard', type=str, help='Zephyr board name')
+    os_zephyr_parser.add_argument('-m', '--memory', type=str, help='Select either `int` for internal memory, `ext` for external memory. If no external memory enabled on the SoC, internal memory will be used. ')
     args = dt_parse.parse_args()
     if args.dir:
         path_dts = args.dir
 
-    is_zephyr = args.zephyr
+    if args.os == "zephyr": 
+        is_zephyr = True
+    else: 
+        is_zephyr = False
+
     global memory_selection
     memory_selection = args.memory
     soc_path = args.soc

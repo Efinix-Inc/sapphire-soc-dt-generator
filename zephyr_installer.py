@@ -156,7 +156,7 @@ with open(kconfig_defconfig_path, 'w') as f:
     f.write("endif\n")
 
 dt_gen_script_path = os.path.join(current_dir, "device_tree_generator.py")
-subprocess.run(["python3", dt_gen_script_path, "-z", soc_h_path, args.efx_dev_board, "-s", soc_name, "-zb", board_name, "-m", selected_memory])
+subprocess.run(["python3", dt_gen_script_path, soc_h_path, args.efx_dev_board, "zephyr", soc_name, board_name, "-m", selected_memory])
 
 gen_dts_path = os.path.join(current_dir, "dts")
 #handle soc dts file
