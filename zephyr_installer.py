@@ -24,7 +24,6 @@ parser.add_argument("board_name", help="Name of the Board in Zephyr.")
 parser.add_argument('efx_dev_board', type=str, help='development kit name such as ti60, t120')
 parser.add_argument("zephyr_path", help="Path to the Zephyr project.")
 parser.add_argument("soc_h_path", help="Path to the soc.h file.")
-parser.add_argument("--replace", help="Replace if board existed", default="0" )
 parser.add_argument('-m',"--memory", help="Select the memory used to run Zephyr app. Selection: int, ext", default="int" )
 args = parser.parse_args()
 
