@@ -24,10 +24,14 @@ parser.add_argument("board_name", help="Name of the Board in Zephyr.")
 parser.add_argument('efx_dev_board', type=str, help='development kit name such as ti60, t120')
 parser.add_argument("zephyr_path", help="Path to the Zephyr project.")
 parser.add_argument("soc_h_path", help="Path to the soc.h file.")
-parser.add_argument('-m',"--memory", help="Select the memory used to run Zephyr app. Selection: int, ext", default="int" )
+parser.add_argument('-em',"--extmemory", action="store_true", help="Select the external memory to run Zephyr app. Revert to internal memory if external memory is not enabled. ")
 args = parser.parse_args()
 
-selected_memory = args.memory
+if args.extmemory: 
+    selected_memory = "ext"
+else: 
+    selected_memory = "int"
+
 soc_h_path = args.soc_h_path
 soc_name = args.soc_name
 zephyr_path = args.zephyr_path
@@ -155,7 +159,12 @@ with open(kconfig_defconfig_path, 'w') as f:
     f.write("endif\n")
 
 dt_gen_script_path = os.path.join(current_dir, "device_tree_generator.py")
-subprocess.run(["python3", dt_gen_script_path, soc_h_path, args.efx_dev_board, "zephyr", soc_name, board_name, "-m", selected_memory])
+if selected_memory == "int": 
+    subprocess.run(["python3", dt_gen_script_path, soc_h_path, args.efx_dev_board, "zephyr", soc_name, board_name])
+else: 
+    subprocess.run(["python3", dt_gen_script_path, soc_h_path, args.efx_dev_board, "zephyr", soc_name, board_name, "-em"])
+
+
 
 gen_dts_path = os.path.join(current_dir, "dts")
 #handle soc dts file

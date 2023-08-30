@@ -1228,7 +1228,7 @@ def main():
     os_zephyr_parser = subparsers.add_parser('zephyr', help='Target OS, Zephyr')
     os_zephyr_parser.add_argument('socname', type=str, help='Custom soc name for Zephyr SoC dtsi')
     os_zephyr_parser.add_argument('zephyrboard', type=str, help='Zephyr board name')
-    os_zephyr_parser.add_argument('-m', '--memory', type=str, help='Select either `int` for internal memory, `ext` for external memory. If no external memory enabled on the SoC, internal memory will be used. ')
+    os_zephyr_parser.add_argument('-em', '--extmemory', action="store_true", help='Use external memory. If no external memory enabled on the SoC, internal memory will be used instead.')
     args = dt_parse.parse_args()
 
     if args.dir:
@@ -1240,10 +1240,15 @@ def main():
         is_zephyr = False
 
     global memory_selection
+
     if is_zephyr : 
-        memory_selection = args.memory
+        if args.extmemory: 
+            memory_selection = "ext"
+        else: 
+            memory_selection = "int"
     else :  
         memory_selection = "ext"
+    print(memory_selection)
     soc_path = args.soc
     cfg = read_file(soc_path)
 
@@ -1260,7 +1265,7 @@ def main():
         return -1
 
     if (memory_selection != 'int' and memory_selection != 'ext'): 
-        print("Error: Invalid input memory, %s . Supported: int, ext\n" % args.memory)
+        print("Error: Invalid input memory, %s . Supported: int, ext\n" % memory_selection)
         return -1
     
 
