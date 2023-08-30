@@ -74,13 +74,7 @@
 	"root": {
 		"chosen": {
 			"name": "chosen",
-			"private_data": ["zephyr,sram = &ram0;"]
-		}
-	},
-	"root_ext": {
-		"chosen": {
-			"name": "chosen",
-			"private_data": ["zephyr,sram = &external_ram;"]
+			"private_data": [""]
 		}
 	},
 	"controller":{

@@ -1289,10 +1289,7 @@ def main():
     root_node['root'].update(create_includes(conf, is_zephyr))
 
     if is_zephyr:
-        if args.memory == 'int':
-            root_node['root'].update(conf['zephyr_dtsi']['root'])
-        else: 
-            root_node['root'].update(conf['zephyr_dtsi']['root_ext'])
+        root_node['root'].update(conf['zephyr_dtsi']['root'])
         ram_node = dt_create_memory_node(cfg, True, True) #onChipRAM, Zephyr
         if ram_node:
             root_node = dt_insert_child_node(root_node, ram_node)
