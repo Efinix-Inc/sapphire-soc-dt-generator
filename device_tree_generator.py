@@ -14,8 +14,14 @@ PERIPHERAL = "CTRL "
 IO_SIZE = "CTRL_SIZE"
 FREQUENCY = "CLINT_HZ"
 BASE_ADDR_PROP = "SYSTEM_BMB_PERIPHERAL_BMB "
-FPU = "FPU"
-MMU = "MMU"
+# FPU = "FPU"
+#MMU = "MMU"
+MMU         = "EXT_M"
+ATOMIC      = "EXT_A"
+COMPRESS    = "EXT_C"
+FPU         = "EXT_F"
+DOUBLE      = "EXT_D"
+
 ICACHE = "ICACHE"
 DCACHE = "DCACHE"
 CONTROLLER = ["PLIC", "CLINT", "RAM"]
@@ -23,7 +29,7 @@ PLIC = "PLIC"
 CLINT = "CLINT"
 SUPERVISOR = "SUPERVISOR "
 PERIPHERALS = ["UART", "I2C", "SPI", "GPIO"]
-
+memory_selection = 'int'
 def read_file(filename):
     with open(filename, 'r') as f:
         cfg = f.readlines()
@@ -269,19 +275,39 @@ def get_cache_block(cfg, core):
 
     return block
 
+
 def get_cpu_isa(cfg, core):
-    isa = "rv32im"
-    system_core = "SYSTEM_CORES_{}".format(core)
+    isa = "rv32i" #base extension
+    system_core = "SYSTEM_RISCV_ISA_"
 
     value = get_property_value(cfg, system_core, MMU)
     if value == "1":
         # append 'a' for atomic RISCV instruction extension
+        isa = "{}m".format(isa)
+
+    #value = get_property_value(cfg, system_core, MMU)
+    value = get_property_value(cfg, system_core, ATOMIC)
+    if value == "1":
+        # append 'a' for atomic RISCV instruction extension
         isa = "{}a".format(isa)
+
+    #value = get_property_value(cfg, system_core, MMU)
+    value = get_property_value(cfg, system_core, COMPRESS)
+    if value == "1":
+        # append 'a' for atomic RISCV instruction extension
+        isa = "{}c".format(isa)
+
 
     value = get_property_value(cfg, system_core, FPU)
     if value == "1":
-        # append 'fd' for floating point & double percision RISCV instruction extension
-        isa = "{}fd".format(isa)
+        # append 'fd' for floating point percision RISCV instruction extension
+        isa = "{}f".format(isa)
+
+    value = get_property_value(cfg, system_core, DOUBLE)
+    if value == "1":
+        # append 'fd' for  double percision RISCV instruction extension
+        isa = "{}d".format(isa)
+
 
     return isa
 
@@ -306,6 +332,7 @@ def get_cpu_metadata(cfg, idx=0, is_zephyr=False):
 
     core = "core{}".format(idx)
     isa = get_cpu_isa(cfg, idx)
+    print("isa = ",isa) #for testing 
     icache_way = get_cache_way(cfg, idx, ICACHE)
     icache_size = get_cache_size(cfg, idx, ICACHE)
     dcache_way = get_cache_way(cfg, idx, DCACHE)
@@ -937,48 +964,52 @@ def dt_create_cpu_node(cfg, is_zephyr=False):
     return parent
 
 
-def dt_create_memory_node(cfg):
-    name = "memory"
-    memory_keyword = "DDR_BMB"
-    conf = load_config_file()
-    # addr use linux start addr
-    addr = conf['memory_mapped']['uImage']
+# Create memory node 
+# isOnChipRam = Only affects on zephyr setting
+# is_zephyr = Select either if the targeted os is zephyr
+def dt_create_memory_node(cfg, isOnChipRam, is_zephyr=False):
+    if (is_zephyr == True and isOnChipRam == True): 
+        name = "ram0: memory"
+        ram_keyword = "RAM_A"
+        match = 'SYSTEM_RAM_A_SIZE'
 
-    size = get_property_value(cfg, memory_keyword, 'SIZE ')
-    size = hex(int(size,0) - int(addr, 0))
-    reg = "reg = <{0} {1}>;".format(addr, size)
+        size = get_property_value_match(cfg, ram_keyword, match)
+        addr = get_property_value(cfg, ram_keyword, 'CTRL ')
+        size = int(size) // 1024
+        reg = "reg = <{0} DT_SIZE_K({1})>;".format(addr, size)
+
+    elif (is_zephyr == True and isOnChipRam == False):
+        name = "external_ram: memory"
+        ram_keyword = "DDR"
+        match = 'SYSTEM_DDR_BMB_SIZE'
+
+        size = get_property_value_match(cfg, ram_keyword, match)
+        addr = get_property_value(cfg, ram_keyword, 'BMB ')
+        size = int(size, 16) // 1024
+        reg = "reg = <{0} DT_SIZE_K({1})>;".format(addr, size)
+
+    else: 
+        name = "memory"
+        memory_keyword = "DDR_BMB"
+        conf = load_config_file()
+        # addr use linux start addr
+        addr = conf['memory_mapped']['uImage']        
+        size = get_property_value(cfg, memory_keyword, 'SIZE ')
+        size = hex(int(size,0) - int(addr, 0))
+        reg = "reg = <{0} {1}>;".format(addr, size)
+
+    addr = addr.lstrip('0x'); 
+
     mem_node = {
         "name": name,
         "device_type": 'device_type = "memory";',
-        "addr": addr.lstrip('0x'),
+        "addr": addr, 
         "size": size,
         "reg": reg
     }
 
     mem_node = {name: mem_node}
     return mem_node
-
-#create ram memory node
-def dt_create_ram_node(cfg):
-    name = "ram0: memory"
-    ram_keyword = "RAM_A"
-    match = 'SYSTEM_RAM_A_SIZE'
-
-    size = get_property_value_match(cfg, ram_keyword, match)
-    addr = get_property_value(cfg, ram_keyword, 'CTRL ')
-
-    size = int(size) // 1024
-
-    ram_node = {
-        "name": name,
-        "device_type": 'device_type = "memory";',
-        "addr": addr.lstrip('0x'),
-        "reg": "reg = <{0} DT_SIZE_K({1})>;".format(addr, size),
-    }
-
-
-    ram_node = {name: ram_node}
-    return ram_node
 
 def dt_version():
     conf = load_config_file()
@@ -1121,7 +1152,10 @@ def create_dts_file(cfg, bus_node, is_zephyr=False, soc_name=None):
             "#include": conf['zephyr_dts']['#include']
         }
         inc_file["#include"][0] += soc_name
-        dts_root = conf['zephyr_dts']['root']
+        if (memory_selection == 'ext'): # external memory selected
+            dts_root = conf['zephyr_dts']['root_ext']
+        else: 
+            dts_root = conf['zephyr_dts']['root']     
     else:
         inc_file = {
             "include": conf['dts']['include'],
@@ -1135,7 +1169,8 @@ def create_dts_file(cfg, bus_node, is_zephyr=False, soc_name=None):
     mem_node = None
     if not is_zephyr:
         # memory
-        mem_node = dt_create_memory_node(cfg)
+        mem_node=  dt_create_memory_node(cfg, False, False)
+
 
     if mem_node:
         dts_root_node = dt_insert_child_node(dts_root_node, mem_node)
@@ -1181,24 +1216,39 @@ def main():
     board = ''
     path_dts = 'dts'
     path_dts = os.path.join(os.path.relpath(os.path.dirname(__file__)), path_dts)
-
     dt_parse = argparse.ArgumentParser(description='Device Tree Generator')
+    
     dt_parse.add_argument('soc', type=str, help='path to soc.h')
     dt_parse.add_argument('board', type=str, help='development kit name such as t120, ti60')
     dt_parse.add_argument('-d', '--dir', type=str, help='Output generated output directory. By default is dts')
     dt_parse.add_argument('-o', '--outfile', type=str, help='Override output filename. By default is sapphire.dtsi')
     dt_parse.add_argument('-j', '--json', action='store_true', help='Save output file as json format')
-    dt_parse.add_argument('-z', '--zephyr', action='store_true', help='Generate device tree for Zephyr OS')
-    dt_parse.add_argument('-s', '--socname', type=str, help='Custom soc name for Zephyr SoC dtsi')
-    #add zephyr's board name
-    dt_parse.add_argument('-zb', '--zephyrboard', type=str, help='Zephyr board name')
+    subparsers = dt_parse.add_subparsers(title='os', dest='os')
+    os_linux_parser = subparsers.add_parser('linux', help='Target OS, Linux')
+    os_zephyr_parser = subparsers.add_parser('zephyr', help='Target OS, Zephyr')
+    os_zephyr_parser.add_argument('socname', type=str, help='Custom soc name for Zephyr SoC dtsi')
+    os_zephyr_parser.add_argument('zephyrboard', type=str, help='Zephyr board name')
+    os_zephyr_parser.add_argument('-em', '--extmemory', action="store_true", help='Use external memory. If no external memory enabled on the SoC, internal memory will be used instead.')
     args = dt_parse.parse_args()
 
     if args.dir:
         path_dts = args.dir
 
-    is_zephyr = args.zephyr
+    if args.os == "zephyr": 
+        is_zephyr = True
+    else: 
+        is_zephyr = False
 
+    global memory_selection
+
+    if is_zephyr : 
+        if args.extmemory: 
+            memory_selection = "ext"
+        else: 
+            memory_selection = "int"
+    else :  
+        memory_selection = "ext"
+    print(memory_selection)
     soc_path = args.soc
     cfg = read_file(soc_path)
 
@@ -1214,11 +1264,17 @@ def main():
         print("Error: %s development kit is not supported\n" % args.board)
         return -1
 
+    if (memory_selection != 'int' and memory_selection != 'ext'): 
+        print("Error: Invalid input memory, %s . Supported: int, ext\n" % memory_selection)
+        return -1
+    
+
     if is_zephyr:
         output_filename_standalone = "sapphire_soc_{soc_name}.dtsi".format(soc_name=args.socname)
         output_filename = os.path.join(path_dts, output_filename_standalone)
         dts_filename = '{}.dts'.format(args.zephyrboard)
     else:
+        output_filename_standalone = "" 
         output_filename = 'sapphire.dtsi'
         output_filename = os.path.join(path_dts, output_filename)
         output_json = 'sapphire.json'
@@ -1239,9 +1295,15 @@ def main():
 
     if is_zephyr:
         root_node['root'].update(conf['zephyr_dtsi']['root'])
-        ram_node = dt_create_ram_node(cfg)
+        ram_node = dt_create_memory_node(cfg, True, True) #onChipRAM, Zephyr
         if ram_node:
             root_node = dt_insert_child_node(root_node, ram_node)
+        ext_ram_node = dt_create_memory_node(cfg, False, True) # External RAM, Zephyr
+        if ext_ram_node:
+            root_node = dt_insert_child_node(root_node, ext_ram_node)
+
+
+    
 
     # bus
     bus_name = 'PERIPHERAL_BMB'

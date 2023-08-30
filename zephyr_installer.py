@@ -5,18 +5,18 @@ import glob
 import os
 
 look_up_riscv_efx_tool_zephyr = {
-    "SYSTEM_RISCV_ISA_RV32I" : "RISCV_ISA_RV32I",
-    "SYSTEM_RISCV_ISA_EXT_M" : "RISCV_ISA_EXT_M",
-    "SYSTEM_RISCV_ISA_EXT_A" : "RISCV_ISA_EXT_A",
-    "SYSTEM_RISCV_ISA_EXT_C" : "RISCV_ISA_EXT_C",
-    "SYSTEM_RISCV_ISA_EXT_ZICSR" : "RISCV_ISA_EXT_ZICSR",
-    "SYSTEM_RISCV_ISA_EXT_ZIFENCEI": "RISCV_ISA_EXT_ZIFENCEI",
-    "SYSTEM_RISCV_ISA_EXT_F" : "RISCV_ISA_EXT_F",
-    "SYSTEM_RISCV_ISA_EXT_D" : "RISCV_ISA_EXT_D"
+    "SYSTEM_RISCV_ISA_RV32I 1" : "RISCV_ISA_RV32I",
+    "SYSTEM_RISCV_ISA_EXT_M 1" : "RISCV_ISA_EXT_M",
+    "SYSTEM_RISCV_ISA_EXT_A 1" : "RISCV_ISA_EXT_A",
+    "SYSTEM_RISCV_ISA_EXT_C 1" : "RISCV_ISA_EXT_C",
+    "SYSTEM_RISCV_ISA_EXT_ZICSR 1" : "RISCV_ISA_EXT_ZICSR",
+    "SYSTEM_RISCV_ISA_EXT_ZIFENCEI 1": "RISCV_ISA_EXT_ZIFENCEI",
+    "SYSTEM_RISCV_ISA_EXT_F 1" : "RISCV_ISA_EXT_F",
+    "SYSTEM_RISCV_ISA_EXT_D 1" : "RISCV_ISA_EXT_D"
 }
 
 efx_soc_series = "SOC_SERIES_EFINIX_SAPPHIRE"
-
+DEFAULT_FREQUENCY=100000000 #Default frequency should be 100MHz
 
 parser = argparse.ArgumentParser()
 parser.add_argument("soc_name", help="Name of the SOC.")
@@ -24,7 +24,13 @@ parser.add_argument("board_name", help="Name of the Board in Zephyr.")
 parser.add_argument('efx_dev_board', type=str, help='development kit name such as ti60, t120')
 parser.add_argument("zephyr_path", help="Path to the Zephyr project.")
 parser.add_argument("soc_h_path", help="Path to the soc.h file.")
+parser.add_argument('-em',"--extmemory", action="store_true", help="Select the external memory to run Zephyr app. Revert to internal memory if external memory is not enabled. ")
 args = parser.parse_args()
+
+if args.extmemory: 
+    selected_memory = "ext"
+else: 
+    selected_memory = "int"
 
 soc_h_path = args.soc_h_path
 soc_name = args.soc_name
@@ -42,22 +48,41 @@ if not os.path.isfile(soc_h_path):
     print(f"Error: The provided soc.h path does not exist: {soc_h_path}")
     exit(1)
 
+if (selected_memory != 'int' and selected_memory != 'ext'):
+    print(f"Error: The provided memory selection not support: {selected_memory}. Supported: int, ext")
+    exit(1)
+
 # Get the SOC defines from the soc.h file
 soc_defines = set()
 uart_defined = False
 gpio_defined = False
+external_ram_defined = False
+clint_freq = DEFAULT_FREQUENCY
 with open(soc_h_path, 'r') as f:
     for line in f:
         if line.startswith("#define "):
-            define = line.split()[1]
+            part = line.split()
+            if len(part) >= 3:
+                define = part[1] +" "+part[2]
+            else:
+                define = part[1]
+            #define = line.split()[1]
             soc_defines.add(define)
             if "SYSTEM_UART_" in define:
                 uart_defined = True
             if "SYSTEM_GPIO" in define:
                 gpio_defined = True
+            if "SYSTEM_DDR_BMB" in define: 
+                external_ram_defined = True
+            if "SYSTEM_CLINT_HZ" in define: 
+                clint_freq = part[2] #get the CLINT frequency
+
+# if the external ram not defined, force the selected memory to internal memory config
+if (external_ram_defined == False): 
+    selected_memory = 'int' 
 
 # Open the Kconfig.soc file for writing
-kconfig_soc_path = os.path.join(zephyr_path, "soc/riscv/riscv-privileged/efinix-sapphire/Kconfig.soc")
+kconfig_soc_path = os.path.join(zephyr_path, "soc/riscv/riscv-privilege/efinix-sapphire/Kconfig.soc")
 with open(kconfig_soc_path, 'r') as f:
     kconfig_soc_lines = f.readlines()
 
@@ -75,7 +100,7 @@ new_config += "\tselect INCLUDE_RESET_VECTOR\n"
 for key, val in look_up_riscv_efx_tool_zephyr.items():
     if key in soc_defines:
         new_config += f"\tselect {val}\n"
-if "SYSTEM_RISCV_ISA_EXT_A" in soc_defines:
+if "SYSTEM_RISCV_ISA_EXT_A 1" in soc_defines:
     new_config += "\tselect ATOMIC_OPERATIONS_BUILTIN\n"
 
 # Remove the 'endchoice' from the last config
@@ -114,6 +139,7 @@ with open(defconfig_path, 'w') as f:
         f.write("CONFIG_UART_CONSOLE=y\n")
     if gpio_defined:
         f.write("CONFIG_GPIO=y\n")
+    f.write("CONFIG_SYS_CLOCK_HW_CYCLES_PER_SEC="+clint_freq+"\n")
     print("Info: {}_defconfig file created. Path: {}".format(board_name,defconfig_path))
 
 # Create Kconfig.board
@@ -133,7 +159,12 @@ with open(kconfig_defconfig_path, 'w') as f:
     f.write("endif\n")
 
 dt_gen_script_path = os.path.join(current_dir, "device_tree_generator.py")
-subprocess.run(["python3", dt_gen_script_path, "-z", soc_h_path, args.efx_dev_board, "-s", soc_name, "-zb", board_name])
+if selected_memory == "int": 
+    subprocess.run(["python3", dt_gen_script_path, soc_h_path, args.efx_dev_board, "zephyr", soc_name, board_name])
+else: 
+    subprocess.run(["python3", dt_gen_script_path, soc_h_path, args.efx_dev_board, "zephyr", soc_name, board_name, "-em"])
+
+
 
 gen_dts_path = os.path.join(current_dir, "dts")
 #handle soc dts file
