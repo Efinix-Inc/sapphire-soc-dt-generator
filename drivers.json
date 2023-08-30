@@ -122,7 +122,7 @@
 
     },
 	"zephyr_dts": {
-		"#include": ["efinix/sapphire_soc.dtsi"],
+		"#include": ["efinix/"],
 		"root": {
 			"chosen": {
 				"name": "chosen",
