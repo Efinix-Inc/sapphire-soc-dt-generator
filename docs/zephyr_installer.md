@@ -16,17 +16,18 @@ The script requires the following mandatory arguments:
 - `efx_dev_board`: Development kit name (e.g. ti60).
 - `zephyr_path`: Path to the Zephyr project.
 - `soc_h_path`: Path to the soc.h file.
+- `-em | --extmemory` : [Optional] Select external RAM memory (DDR). Internal memory will be used if no external memory detected in soc.h even with external memory selected.  
 
 Here is an example of how to run the script:
 
 ```
-python3 zephyr_installer.py {soc_name} {board_name} {efx_dev_board} {zephyr_path} {soc_h_path}
+python3 zephyr_installer.py {soc_name} {board_name} {efx_dev_board} {zephyr_path} {soc_h_path} {-em}
 ```
 
 Replace the {...} placeholders with your actual values.
 
-For example, if your SoC name is "my_soc", board name is "my_board", development kit name is "ti60", the Zephyr path is "/path/to/zephyr_project" and soc.h path is "/path/to/soc.h", you would run:
+For example, if your SoC name is "my_soc", board name is "my_board", development kit name is "ti60", the Zephyr path is "/path/to/zephyr_project", soc.h path is "/path/to/soc.h" and external memory, you would run:
 
 ```
-python3 zephyr_installer.py my_soc my_board ti60 /path/to/zephyr_project /path/to/soc.h
+python3 zephyr_installer.py my_soc my_board ti60 /path/to/zephyr_project /path/to/soc.h -em
 ```
