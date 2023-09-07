@@ -94,24 +94,28 @@ get_property_value: get the value of peripheral properties from soc.h
 
 return: string of the property value
 """
-def get_property_value(cfg, peripheral, name):
+def __get_property_value(cfg, peripheral, name, match=False):
     value = ''
     props = get_peripheral_properties(cfg, peripheral)
 
     for prop in props:
-        if name in prop:
-            value = get_value(prop)
+        if match:
+            prop_name = prop.split()[1]
+            if name == prop_name:
+                value = get_value(prop)
+
+        else:
+            if name in prop:
+                value = get_value(prop)
+
     return value
+
+def get_property_value(cfg, peripheral, name):
+    return  __get_property_value(cfg, peripheral, name, match=False)
 
 def get_property_value_match(cfg, peripheral, name):
-    value = ''
-    props = get_peripheral_properties(cfg, peripheral)
+    return __get_property_value(cfg, peripheral, name, match=True)
 
-    for prop in props:
-        prop_name = prop.split()[1]
-        if name == prop_name:
-            value = get_value(prop)
-    return value
 
 """
 get_size: get the peripheral allocated memory size
@@ -967,7 +971,6 @@ def dt_create_cpu_node(cfg, is_zephyr=False):
     parent = dt_insert_child_node(parent, cpu_nodes)
 
     return parent
-
 
 # Create memory node 
 # isOnChipRam = Only affects on zephyr setting
