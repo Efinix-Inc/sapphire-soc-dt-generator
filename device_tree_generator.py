@@ -972,8 +972,11 @@ def dt_create_cpu_node(cfg, is_zephyr=False):
 # isOnChipRam = Only affects on zephyr setting
 # is_zephyr = Select either if the targeted os is zephyr
 def dt_create_memory_node(cfg, isOnChipRam, is_zephyr=False):
-    if (is_zephyr == True and isOnChipRam == True): 
-        name = "ram0: memory"
+    label = ''
+
+    if (is_zephyr == True and isOnChipRam == True):
+        label = "ram0"
+        name = "memory"
         ram_keyword = "RAM_A"
         match = 'SYSTEM_RAM_A_SIZE'
 
@@ -983,7 +986,8 @@ def dt_create_memory_node(cfg, isOnChipRam, is_zephyr=False):
         reg = "reg = <{0} DT_SIZE_K({1})>;".format(addr, size)
 
     elif (is_zephyr == True and isOnChipRam == False):
-        name = "external_ram: memory"
+        label = "external_ram"
+        name = "memory"
         ram_keyword = "DDR"
         match = 'SYSTEM_DDR_BMB_SIZE'
 
@@ -1005,6 +1009,7 @@ def dt_create_memory_node(cfg, isOnChipRam, is_zephyr=False):
     addr = addr.lstrip('0x'); 
 
     mem_node = {
+        "label": label,
         "name": name,
         "device_type": 'device_type = "memory";',
         "addr": addr, 
