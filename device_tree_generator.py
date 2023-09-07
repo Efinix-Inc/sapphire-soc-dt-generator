@@ -1277,7 +1277,8 @@ def main():
     if (memory_selection != 'int' and memory_selection != 'ext'): 
         print("Error: Invalid input memory, %s . Supported: int, ext\n" % memory_selection)
         return -1
-    
+
+    output_json = 'sapphire.json'
 
     if is_zephyr:
         output_filename_standalone = "sapphire_soc_{soc_name}.dtsi".format(soc_name=args.socname)
@@ -1287,7 +1288,6 @@ def main():
         output_filename_standalone = "" 
         output_filename = 'sapphire.dtsi'
         output_filename = os.path.join(path_dts, output_filename)
-        output_json = 'sapphire.json'
         dts_filename = 'linux.dts'
 
     if (os.path.exists(path_dts)):
