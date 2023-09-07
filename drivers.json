@@ -72,10 +72,6 @@
     "zephyr_dtsi": {
 	"includes": ["mem.h", "zephyr/dt-bindings/gpio/gpio.h"],
 	"root": {
-		"chosen": {
-			"name": "chosen",
-			"private_data": [""]
-		}
 	},
 	"controller":{
 		"plic": {
