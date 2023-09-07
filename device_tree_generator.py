@@ -586,14 +586,18 @@ def __dt_create_node_str(node, parent_node):
     out += '\n'
 
     if 'label' in node:
+        label = ''
+        if not node['label'] == '':
+            label = "{0}:".format(node['label'])
+
         if 'name' and 'addr' in node:
-            out += "{0}: {1}@{2} {{\n".format(node['label'], node['name'], node['addr'])
+            out += "{0} {1}@{2} {{\n".format(label, node['name'], node['addr'])
 
         elif 'name' and not 'addr' in node:
-            out += "{0}: {1} {{\n".format(node['label'], node['name'])
+            out += "{0} {1} {{\n".format(label, node['name'])
 
         else:
-            out += "{0} {{\n".format(node['label'])
+            out += "{0} {{\n".format(label)
 
     else:
         if 'name' and 'addr' in node:
