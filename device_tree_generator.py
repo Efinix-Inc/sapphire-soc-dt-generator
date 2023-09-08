@@ -94,24 +94,28 @@ get_property_value: get the value of peripheral properties from soc.h
 
 return: string of the property value
 """
-def get_property_value(cfg, peripheral, name):
+def __get_property_value(cfg, peripheral, name, match=False):
     value = ''
     props = get_peripheral_properties(cfg, peripheral)
 
     for prop in props:
-        if name in prop:
-            value = get_value(prop)
+        if match:
+            prop_name = prop.split()[1]
+            if name == prop_name:
+                value = get_value(prop)
+
+        else:
+            if name in prop:
+                value = get_value(prop)
+
     return value
+
+def get_property_value(cfg, peripheral, name):
+    return  __get_property_value(cfg, peripheral, name, match=False)
 
 def get_property_value_match(cfg, peripheral, name):
-    value = ''
-    props = get_peripheral_properties(cfg, peripheral)
+    return __get_property_value(cfg, peripheral, name, match=True)
 
-    for prop in props:
-        prop_name = prop.split()[1]
-        if name == prop_name:
-            value = get_value(prop)
-    return value
 
 """
 get_size: get the peripheral allocated memory size
@@ -282,30 +286,28 @@ def get_cpu_isa(cfg, core):
 
     value = get_property_value(cfg, system_core, MMU)
     if value == "1":
-        # append 'a' for atomic RISCV instruction extension
+        # append 'm' for math RISCV instruction extension
         isa = "{}m".format(isa)
 
-    #value = get_property_value(cfg, system_core, MMU)
     value = get_property_value(cfg, system_core, ATOMIC)
     if value == "1":
         # append 'a' for atomic RISCV instruction extension
         isa = "{}a".format(isa)
 
-    #value = get_property_value(cfg, system_core, MMU)
     value = get_property_value(cfg, system_core, COMPRESS)
     if value == "1":
-        # append 'a' for atomic RISCV instruction extension
+        # append 'c' for compressed RISCV instruction extension
         isa = "{}c".format(isa)
 
 
     value = get_property_value(cfg, system_core, FPU)
     if value == "1":
-        # append 'fd' for floating point percision RISCV instruction extension
+        # append 'f' for floating point percision RISCV instruction extension
         isa = "{}f".format(isa)
 
     value = get_property_value(cfg, system_core, DOUBLE)
     if value == "1":
-        # append 'fd' for  double percision RISCV instruction extension
+        # append 'f' for  double percision RISCV instruction extension
         isa = "{}d".format(isa)
 
 
@@ -332,7 +334,6 @@ def get_cpu_metadata(cfg, idx=0, is_zephyr=False):
 
     core = "core{}".format(idx)
     isa = get_cpu_isa(cfg, idx)
-    print("isa = ",isa) #for testing 
     icache_way = get_cache_way(cfg, idx, ICACHE)
     icache_size = get_cache_size(cfg, idx, ICACHE)
     dcache_way = get_cache_way(cfg, idx, DCACHE)
@@ -586,14 +587,18 @@ def __dt_create_node_str(node, parent_node):
     out += '\n'
 
     if 'label' in node:
+        label = ''
+        if not node['label'] == '':
+            label = "{0}:".format(node['label'])
+
         if 'name' and 'addr' in node:
-            out += "{0}: {1}@{2} {{\n".format(node['label'], node['name'], node['addr'])
+            out += "{0} {1}@{2} {{\n".format(label, node['name'], node['addr'])
 
         elif 'name' and not 'addr' in node:
-            out += "{0}: {1} {{\n".format(node['label'], node['name'])
+            out += "{0} {1} {{\n".format(label, node['name'])
 
         else:
-            out += "{0} {{\n".format(node['label'])
+            out += "{0} {{\n".format(label)
 
     else:
         if 'name' and 'addr' in node:
@@ -801,7 +806,8 @@ def dt_create_node(cfg, peripheral, is_zephyr=False):
         if not is_zephyr: 
             clk_freq = dt_get_clock_frequency(cfg)
             if clk_freq:
-                node.update({"clock_freq": clk_freq})
+                if not 'I2C' in peripheral:
+                    node.update({"clock_freq": clk_freq})
 
         priv_data = dt_get_private_data(peripheral, is_zephyr=is_zephyr)
         if priv_data:
@@ -963,53 +969,59 @@ def dt_create_cpu_node(cfg, is_zephyr=False):
 
     return parent
 
+"""
+dt_create_memory_node: create memory node
+@cfg (list): raw data of soc.h
+@is_on_chip_ram (bool): enable on chip ram for zephyr setting
+@is_zephyr (bool): select if targeted os is zephyr
 
-# Create memory node 
-# isOnChipRam = Only affects on zephyr setting
-# is_zephyr = Select either if the targeted os is zephyr
-def dt_create_memory_node(cfg, isOnChipRam, is_zephyr=False):
-    if (is_zephyr == True and isOnChipRam == True): 
-        name = "ram0: memory"
-        ram_keyword = "RAM_A"
-        match = 'SYSTEM_RAM_A_SIZE'
+return: a dictionary of memory node
+"""
+def dt_create_memory_node(cfg, is_on_chip_ram=True, is_zephyr=False):
+    label = ''
+    addr = ''
+    size = ''
+    name = 'memory'
+    keyword = 'SYSTEM_DDR_BMB'
 
-        size = get_property_value_match(cfg, ram_keyword, match)
-        addr = get_property_value(cfg, ram_keyword, 'CTRL ')
-        size = int(size) // 1024
-        reg = "reg = <{0} DT_SIZE_K({1})>;".format(addr, size)
+    size = get_property_value(cfg, keyword, 'SIZE ')
 
-    elif (is_zephyr == True and isOnChipRam == False):
-        name = "external_ram: memory"
-        ram_keyword = "DDR"
-        match = 'SYSTEM_DDR_BMB_SIZE'
+    if is_zephyr:
+        if is_on_chip_ram:
+            label = 'ram0'
+            name = 'memory0'
+            keyword = 'RAM_A'
+            addr = get_property_value(cfg, keyword, 'CTRL ')
+            size = get_property_value(cfg, keyword, 'SIZE ')
 
-        size = get_property_value_match(cfg, ram_keyword, match)
-        addr = get_property_value(cfg, ram_keyword, 'BMB ')
+        else:
+            label = 'external_ram'
+            name = 'memory1'
+            addr = get_property_value_match(cfg, keyword, keyword)
+
         size = int(size, 16) // 1024
         reg = "reg = <{0} DT_SIZE_K({1})>;".format(addr, size)
 
-    else: 
-        name = "memory"
-        memory_keyword = "DDR_BMB"
+    else:
         conf = load_config_file()
         # addr use linux start addr
-        addr = conf['memory_mapped']['uImage']        
-        size = get_property_value(cfg, memory_keyword, 'SIZE ')
+        addr = conf['memory_mapped']['uImage']
         size = hex(int(size,0) - int(addr, 0))
         reg = "reg = <{0} {1}>;".format(addr, size)
 
-    addr = addr.lstrip('0x'); 
-
     mem_node = {
+        "label": label,
         "name": name,
         "device_type": 'device_type = "memory";',
-        "addr": addr, 
+        "addr": addr.lstrip('0x'),
         "size": size,
         "reg": reg
     }
 
     mem_node = {name: mem_node}
+
     return mem_node
+
 
 def dt_version():
     conf = load_config_file()
@@ -1248,7 +1260,7 @@ def main():
             memory_selection = "int"
     else :  
         memory_selection = "ext"
-    print(memory_selection)
+
     soc_path = args.soc
     cfg = read_file(soc_path)
 
@@ -1267,7 +1279,8 @@ def main():
     if (memory_selection != 'int' and memory_selection != 'ext'): 
         print("Error: Invalid input memory, %s . Supported: int, ext\n" % memory_selection)
         return -1
-    
+
+    output_json = 'sapphire.json'
 
     if is_zephyr:
         output_filename_standalone = "sapphire_soc_{soc_name}.dtsi".format(soc_name=args.socname)
@@ -1277,7 +1290,6 @@ def main():
         output_filename_standalone = "" 
         output_filename = 'sapphire.dtsi'
         output_filename = os.path.join(path_dts, output_filename)
-        output_json = 'sapphire.json'
         dts_filename = 'linux.dts'
 
     if (os.path.exists(path_dts)):
