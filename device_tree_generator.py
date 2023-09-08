@@ -972,57 +972,59 @@ def dt_create_cpu_node(cfg, is_zephyr=False):
 
     return parent
 
-# Create memory node 
-# isOnChipRam = Only affects on zephyr setting
-# is_zephyr = Select either if the targeted os is zephyr
-def dt_create_memory_node(cfg, isOnChipRam, is_zephyr=False):
+"""
+dt_create_memory_node: create memory node
+@cfg (list): raw data of soc.h
+@is_on_chip_ram (bool): enable on chip ram for zephyr setting
+@is_zephyr (bool): select if targeted os is zephyr
+
+return: a dictionary of memory node
+"""
+def dt_create_memory_node(cfg, is_on_chip_ram=True, is_zephyr=False):
     label = ''
+    addr = ''
+    size = ''
+    name = 'memory'
+    keyword = 'SYSTEM_DDR_BMB'
 
-    if (is_zephyr == True and isOnChipRam == True):
-        label = "ram0"
-        name = "memory"
-        ram_keyword = "RAM_A"
-        match = 'SYSTEM_RAM_A_SIZE'
+    size = get_property_value(cfg, keyword, 'SIZE ')
 
-        size = get_property_value_match(cfg, ram_keyword, match)
-        addr = get_property_value(cfg, ram_keyword, 'CTRL ')
-        size = int(size) // 1024
-        reg = "reg = <{0} DT_SIZE_K({1})>;".format(addr, size)
+    if is_zephyr:
+        if is_on_chip_ram:
+            label = 'ram0'
+            name = 'memory0'
+            keyword = 'RAM_A'
+            addr = get_property_value(cfg, keyword, 'CTRL ')
+            size = get_property_value(cfg, keyword, 'SIZE ')
 
-    elif (is_zephyr == True and isOnChipRam == False):
-        label = "external_ram"
-        name = "memory"
-        ram_keyword = "DDR"
-        match = 'SYSTEM_DDR_BMB_SIZE'
+        else:
+            label = 'external_ram'
+            name = 'memory1'
+            addr = get_property_value_match(cfg, keyword, keyword)
 
-        size = get_property_value_match(cfg, ram_keyword, match)
-        addr = get_property_value(cfg, ram_keyword, 'BMB ')
         size = int(size, 16) // 1024
         reg = "reg = <{0} DT_SIZE_K({1})>;".format(addr, size)
 
-    else: 
-        name = "memory"
-        memory_keyword = "DDR_BMB"
+    else:
         conf = load_config_file()
         # addr use linux start addr
-        addr = conf['memory_mapped']['uImage']        
-        size = get_property_value(cfg, memory_keyword, 'SIZE ')
+        addr = conf['memory_mapped']['uImage']
         size = hex(int(size,0) - int(addr, 0))
         reg = "reg = <{0} {1}>;".format(addr, size)
-
-    addr = addr.lstrip('0x'); 
 
     mem_node = {
         "label": label,
         "name": name,
         "device_type": 'device_type = "memory";',
-        "addr": addr, 
+        "addr": addr.lstrip('0x'),
         "size": size,
         "reg": reg
     }
 
     mem_node = {name: mem_node}
+
     return mem_node
+
 
 def dt_version():
     conf = load_config_file()
