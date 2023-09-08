@@ -286,30 +286,28 @@ def get_cpu_isa(cfg, core):
 
     value = get_property_value(cfg, system_core, MMU)
     if value == "1":
-        # append 'a' for atomic RISCV instruction extension
+        # append 'm' for math RISCV instruction extension
         isa = "{}m".format(isa)
 
-    #value = get_property_value(cfg, system_core, MMU)
     value = get_property_value(cfg, system_core, ATOMIC)
     if value == "1":
         # append 'a' for atomic RISCV instruction extension
         isa = "{}a".format(isa)
 
-    #value = get_property_value(cfg, system_core, MMU)
     value = get_property_value(cfg, system_core, COMPRESS)
     if value == "1":
-        # append 'a' for atomic RISCV instruction extension
+        # append 'c' for compressed RISCV instruction extension
         isa = "{}c".format(isa)
 
 
     value = get_property_value(cfg, system_core, FPU)
     if value == "1":
-        # append 'fd' for floating point percision RISCV instruction extension
+        # append 'f' for floating point percision RISCV instruction extension
         isa = "{}f".format(isa)
 
     value = get_property_value(cfg, system_core, DOUBLE)
     if value == "1":
-        # append 'fd' for  double percision RISCV instruction extension
+        # append 'f' for  double percision RISCV instruction extension
         isa = "{}d".format(isa)
 
 
@@ -336,7 +334,6 @@ def get_cpu_metadata(cfg, idx=0, is_zephyr=False):
 
     core = "core{}".format(idx)
     isa = get_cpu_isa(cfg, idx)
-    print("isa = ",isa) #for testing 
     icache_way = get_cache_way(cfg, idx, ICACHE)
     icache_size = get_cache_size(cfg, idx, ICACHE)
     dcache_way = get_cache_way(cfg, idx, DCACHE)
@@ -1263,7 +1260,7 @@ def main():
             memory_selection = "int"
     else :  
         memory_selection = "ext"
-    print(memory_selection)
+
     soc_path = args.soc
     cfg = read_file(soc_path)
 
