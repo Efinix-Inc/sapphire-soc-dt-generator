@@ -557,7 +557,12 @@ def dt_create_cpu_node(cfg, is_zephyr=False):
         intc['interrupt-controller']['label'] = intc_label
 
         core = "core{}".format(cpu)
-        cpu_node = get_cpu_metadata(cfg, cpu, is_zephyr)
+        cpu_node = get_cpu_metadata(cfg, cpu)
+        if is_zephyr:
+            cpu_node.update({"clock-frequency": dt_get_clock_frequency(cfg)})
+            del_key = ["tlb"]
+            cpu_node = del_node_key(cpu_node, del_key)
+
         cpu_node = dt_insert_child_node({core: cpu_node}, intc)
         cpu_nodes.update(cpu_node)
 

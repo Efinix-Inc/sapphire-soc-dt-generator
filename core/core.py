@@ -268,7 +268,7 @@ get_cpu_metadata: get metadata of a cpu
 
 return: dict of a cpu metadata
 """
-def get_cpu_metadata(cfg, idx=0, is_zephyr=False):
+def get_cpu_metadata(cfg, idx=0):
     node = {}
 
     core = "core{}".format(idx)
@@ -300,11 +300,6 @@ def get_cpu_metadata(cfg, idx=0, is_zephyr=False):
             "dcache_block_size": "d-cache-block-size = <{}>;".format(cache_block),
         })
 
-    if is_zephyr:
-        # add clock-frequency
-        node.update({"clock-frequency": dt_get_clock_frequency(cfg)})
-        del_key = ["tlb"]
-        node = del_node_key(node, del_key)
     else:
         system_core = "SYSTEM_CORES_{}".format(idx)
         value = get_property_value(cfg, system_core, MMU)
