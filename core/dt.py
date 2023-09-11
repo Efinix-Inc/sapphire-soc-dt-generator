@@ -739,7 +739,7 @@ create_dts_file: create dts file
 
 return: string of nodes
 """
-def create_dts_file(cfg, bus_node, is_zephyr=False, soc_name=None):
+def create_dts_file(cfg, bus_node, memory_selection, is_zephyr=False, soc_name=None):
     dts_root_node = dt_create_root_node()
     node = {}
     nodes = {}

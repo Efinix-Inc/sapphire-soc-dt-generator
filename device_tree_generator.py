@@ -37,15 +37,11 @@ def main():
     else:
         is_zephyr = False
 
-    global memory_selection
+    memory_selection = "ext"
 
     if is_zephyr :
-        if args.extmemory:
-            memory_selection = "ext"
-        else:
+        if not args.extmemory:
             memory_selection = "int"
-    else :
-        memory_selection = "ext"
 
     soc_path = args.soc
     cfg = read_file(soc_path)
@@ -60,10 +56,6 @@ def main():
 
     if not board:
         print("Error: %s development kit is not supported\n" % args.board)
-        return -1
-
-    if (memory_selection != 'int' and memory_selection != 'ext'):
-        print("Error: Invalid input memory, %s . Supported: int, ext\n" % memory_selection)
         return -1
 
     output_json = 'sapphire.json'
@@ -147,7 +139,7 @@ def main():
     print("Info: SoC device tree source stored in %s" % output_filename)
 
     # create dts file
-    dts_out = create_dts_file(cfg, peripheral_parent, is_zephyr, output_filename_standalone)
+    dts_out = create_dts_file(cfg, peripheral_parent, memory_selection, is_zephyr, output_filename_standalone)
     save_file(dts_filename, dts_out)
     print("Info: save dts of board %s in %s" % (board, dts_filename))
 

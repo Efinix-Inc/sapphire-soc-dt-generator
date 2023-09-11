@@ -22,4 +22,3 @@ CONTROLLER = ["PLIC", "CLINT", "RAM"]
 PLIC = "PLIC"
 CLINT = "CLINT"
 SUPERVISOR = "SUPERVISOR "
-memory_selection = 'int'
