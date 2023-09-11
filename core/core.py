@@ -311,15 +311,21 @@ def get_cpu_metadata(cfg, idx=0):
 """
 get_peripherals: get a list of supported peripheral from soc.h
 
+soc.h might have lot of peripherals but it may not supported by the driver.
+For example, there are 2 spi and a i2c listed in soc.h. However, i2c is not
+supported by the driver. So, @filter_peripherals should only list the supported
+peripherals.
+
 @cfg (str): raw data of soc.h
+@filter_peripherals: list of supported peripherals
 
 return: list of supported peripheral
 """
-def get_peripherals(cfg):
+def get_peripherals(cfg, filter_peripherals):
     peripherals = []
 
     for line in cfg:
-        periph = ''.join([x for x in PERIPHERALS if x in line])
+        periph = ''.join([x for x in filter_peripherals if x in line])
         if periph:
             peripherals.append(periph)
 

@@ -22,5 +22,4 @@ CONTROLLER = ["PLIC", "CLINT", "RAM"]
 PLIC = "PLIC"
 CLINT = "CLINT"
 SUPERVISOR = "SUPERVISOR "
-PERIPHERALS = ["UART", "I2C", "SPI", "GPIO"]
 memory_selection = 'int'
