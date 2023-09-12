@@ -694,7 +694,8 @@ def dt_create_bus_node(cfg, bus_name, bus_label):
     bus = {
         "addr": addr,
         "ranges": bus_range,
-        "label": bus_label
+        "label": bus_label,
+        "peripherals": {}
     }
 
     bus_node[bus_label].update(bus)
