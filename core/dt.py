@@ -106,7 +106,7 @@ def dt_compatible(peripheral, controller=False, is_zephyr=False):
     if peripheral in drivers:
         compatible = drivers[peripheral]['compatible']
         drv = ', '.join('"{}"'.format(drv) for drv in compatible)
-        out = 'compatible = {};'.format(drv)
+        out = drv
 
     return out
 
