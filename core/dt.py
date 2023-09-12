@@ -57,7 +57,7 @@ def dt_reg(cfg, peripheral, is_zephyr=False):
         addr = get_peripheral_address(cfg, peripheral)
 
     if addr and size:
-        out = "reg = <{0} {1}>;".format(addr, size)
+        out = "<{0} {1}>".format(addr, size)
 
     return out
 
