@@ -21,6 +21,11 @@ def load_config_file():
 
     return cfg
 
+def load_json_file(filename):
+    with open(filename, 'r') as f:
+        cfg = json.load(f)
+
+    return cfg
 
 def print_node(node):
     print(json.dumps(node, sort_keys = False, indent = 4))
