@@ -667,12 +667,13 @@ def dt_create_root_node(cfg, model, os):
 dt_get_bus_range: get the bus address range
 
 @cfg (list): raw data of soc.h
-@bus_name (str): can be PERIPHERAL_BMB, DDR_BMB, AXI_A_BMB
+@bus_name (str): can be SYSTEM_BMB, SYSTEM_AXI, SYSTEM_RAM
 
 return: string of device tree ranges property
 """
 def dt_get_bus_range(cfg, bus_name):
-    addr = get_property_value(cfg, bus_name, bus_name + ' ')
+    bus_name = check_bus_keyword(bus_name)
+    addr = get_bus_address(cfg, bus_name)
     if not addr:
         print("Error: address for {} is invalid".format(bus_name))
 
@@ -681,16 +682,22 @@ def dt_get_bus_range(cfg, bus_name):
         keyword_size = '{}_SIZE'.format(bus_name)
         print("Error: size for {0} is invalid. Expecting {1}".format(bus_name, keyword_size))
 
-    ranges = "ranges = <0x0 {0} {1}>;".format(addr, size)
+    ranges = "0x0 {0} {1}".format(addr, size)
     return ranges
 
 
 def dt_create_bus_node(cfg, bus_name, bus_label):
     bus_node = dt_create_parent_node(cfg, bus_label, 1, 1)
-    bus_range = dt_get_bus_range(cfg, bus_name)
-    addr = get_property_value(cfg, bus_name, bus_name + ' ').lstrip('0x')
-    bus_node[bus_label].update({'ranges': bus_range})
-    bus_node[bus_label].update({'addr': addr})
+    bus_range = dt_get_bus_range(cfg, bus_label)
+    addr = get_bus_address(cfg, bus_label).lstrip('0x')
+
+    bus = {
+        "addr": addr,
+        "ranges": bus_range,
+        "label": bus_label
+    }
+
+    bus_node[bus_label].update(bus)
 
     return bus_node
 
