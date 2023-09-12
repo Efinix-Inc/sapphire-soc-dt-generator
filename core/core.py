@@ -39,9 +39,16 @@ get_property_value: get the value of peripheral properties from soc.h
 
 return: string of the property value
 """
-def __get_property_value(cfg, peripheral, name, match=False):
+def __get_property_value(cfg, peripheral, name, match=False, exclude=False):
     value = ''
     props = get_peripheral_properties(cfg, peripheral)
+
+    if exclude:
+        for prop in props:
+            if name in prop:
+                props.remove(prop)
+
+        name = peripheral
 
     for prop in props:
         if match:
@@ -60,6 +67,9 @@ def get_property_value(cfg, peripheral, name):
 
 def get_property_value_match(cfg, peripheral, name):
     return __get_property_value(cfg, peripheral, name, match=True)
+
+def get_property_value_exclude(cfg, peripheral, name):
+    return __get_property_value(cfg, peripheral, name, match=False, exclude=True)
 
 """
 get_size: get the peripheral allocated memory size
@@ -120,6 +130,22 @@ def get_peripheral_address(cfg, peripheral):
 
     return addr
 
+def check_bus_keyword(bus_name):
+    keywords = ["SYSTEM_BMB", "SYSTEM_AXI", "SYSTEM_RAM"]
+    bus_name = bus_name.upper()
+
+    for keyword in keywords:
+        if bus_name in keyword:
+            bus_name = keyword
+            break
+
+    return bus_name
+
+def get_bus_address(cfg, bus_name):
+    bus_name = check_bus_keyword(bus_name)
+    addr = get_property_value_exclude(cfg, bus_name, "SIZE ")
+
+    return addr
 
 """
 get_interrupt_id: get interrupt number of peripheral
