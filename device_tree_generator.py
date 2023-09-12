@@ -13,6 +13,7 @@ def main():
     out = ''
     board = ''
     path_dts = 'dts'
+    model = 'sapphire'
     path_dts = os.path.join(os.path.relpath(os.path.dirname(__file__)), path_dts)
     dt_parse = argparse.ArgumentParser(description='Device Tree Generator')
 
@@ -80,7 +81,7 @@ def main():
         output_filename = args.outfile
 
     # root
-    root_node = dt_create_root_node(is_zephyr)
+    root_node = dt_create_root_node(cfg, model, args.os)
     root_node['root'].update(create_includes(conf, is_zephyr))
 
     if is_zephyr:
@@ -139,7 +140,7 @@ def main():
     print("Info: SoC device tree source stored in %s" % output_filename)
 
     # create dts file
-    dts_out = create_dts_file(cfg, peripheral_parent, memory_selection, is_zephyr, output_filename_standalone)
+    dts_out = create_dts_file(cfg, peripheral_parent, memory_selection, model, args.os, output_filename_standalone)
     save_file(dts_filename, dts_out)
     print("Info: save dts of board %s in %s" % (board, dts_filename))
 
