@@ -93,7 +93,14 @@ get_size: get the peripheral allocated memory size
 return: string of size of memory allocated for the peripheral in hex
 """
 def get_size(cfg, peripheral):
-    size = get_property_value(cfg, peripheral, IO_SIZE)
+    size = 0
+
+    if 'APB' in peripheral:
+        size = get_property_value(cfg, peripheral, 'SIZE')
+
+    else:
+        size = get_property_value(cfg, peripheral, IO_SIZE)
+
     if not size:
         keyword_size = 'SYSTEM_{0}_IO_{1}'.format(peripheral, IO_SIZE)
         print("Error: Size for {0} is invalid. Expecting {1}".format(peripheral, keyword_size))
@@ -116,7 +123,14 @@ get_address: get the address of the peripheral
 return: string of address of the peripheral in hex
 """
 def get_address(cfg, peripheral):
-    addr = get_property_value(cfg, peripheral, PERIPHERAL)
+    addr = 0
+
+    if 'APB' in peripheral:
+        addr = get_property_value_exclude(cfg, peripheral, 'SIZE')
+
+    else:
+        addr = get_property_value(cfg, peripheral, PERIPHERAL)
+
     if not addr:
         keyword_addr = '{0}_{1}'.format(peripheral, PERIPHERAL)
         print("Error: Address for {0} not found. Expecting {1}".format(peripheral, keyword_addr))
@@ -207,12 +221,13 @@ return: number of peripheral in the soc
 """
 def count_peripheral(cfg, peripheral):
     count = 0
-    p = []
 
-    props = get_peripheral_properties(cfg, peripheral)
+    props = get_peripheral_properties_exclude(cfg, peripheral, "SIZE")
     for prop in props:
         if PERIPHERAL in prop:
-            p.append(prop)
+            count = count + 1
+
+        if 'APB' in prop:
             count = count + 1
 
     return count
