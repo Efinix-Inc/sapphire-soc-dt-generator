@@ -741,14 +741,14 @@ create_dts_file: create dts file
 
 return: string of nodes
 """
-def create_dts_file(cfg, bus_node, memory_selection, is_zephyr=False, soc_name=None):
-    dts_root_node = dt_create_root_node()
+def create_dts_file(cfg, bus_node, memory_selection, model, operating_system, soc_name=None):
+    dts_root_node = dt_create_root_node(cfg, model, operating_system)
     node = {}
     nodes = {}
 
     conf = load_config_file()
 
-    if is_zephyr:
+    if operating_system == 'zephyr':
         inc_file = {
             "#include": conf['zephyr_dts']['#include']
         }
@@ -768,10 +768,9 @@ def create_dts_file(cfg, bus_node, memory_selection, is_zephyr=False, soc_name=N
     dts_root_node['root'].update(dts_root)
 
     mem_node = None
-    if not is_zephyr:
+    if operating_system == 'linux':
         # memory
         mem_node=  dt_create_memory_node(cfg, False, False)
-
 
     if mem_node:
         dts_root_node = dt_insert_child_node(dts_root_node, mem_node)
