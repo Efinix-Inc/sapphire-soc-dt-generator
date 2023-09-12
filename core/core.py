@@ -179,9 +179,9 @@ def get_frequency(cfg):
 
 def get_status(okay=False):
     if okay:
-        return 'status = "okay";'
+        return "okay"
     else:
-        return 'status = "disabled";'
+        return "disabled"
 
 
 """
