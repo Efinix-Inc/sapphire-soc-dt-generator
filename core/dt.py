@@ -533,43 +533,53 @@ def dt_create_interrupt_controller_node(is_zephyr=False):
 
     node = {
         "name": name,
+        "label": "L",
         "private_data": priv_data
     }
 
-    node = {name: node}
+    node = {'intc': node}
 
     return node
 
 def dt_create_cpu_node(cfg, is_zephyr=False):
-    name = "cpus"
-    cpu_nodes = {}
     cpu_count = get_cpu_count(cfg)
+    cpu_node = {
+        "cpu": {
+            "label": "cpus",
+            "name": "cpu",
+            "cores": cpu_count,
+            "arch": "riscv",
+            "isa": get_cpu_isa(cfg, 0),
+            "tlb": True,
+            "i_cache_size": get_cache_way(cfg, 0, ICACHE),
+            "i_cache_sets": get_cache_size(cfg, 0, ICACHE),
+            "i_cache_block_size": get_cache_block(cfg, 0),
+            "d_cache_size": get_cache_way(cfg, 0, ICACHE),
+            "d_cache_sets": get_cache_size(cfg, 0, ICACHE),
+            "d_cache_block_size": get_cache_block(cfg, 0),
+        }
+    }
 
-    timebase_freq = {"timebase_freq": dt_get_timebase_frequency(cfg)}
-    cpu_nodes.update(timebase_freq)
+    system_core = "SYSTEM_RISCV_ISA"
+    mmu = get_property_value(cfg, system_core, MMU)
+    if mmu:
+        cpu_node["cpu"].update({"mmu_type": "riscv,sv32"})
 
-    for cpu in range(0, cpu_count):
-        # interrupt controller
-        intc = dt_create_interrupt_controller_node(is_zephyr=is_zephyr)
-        intc_label = "L{0}".format(cpu)
-        if is_zephyr:
-            intc_label = "hlic{0}".format(cpu)
-        intc['interrupt-controller']['label'] = intc_label
+    intc = dt_create_interrupt_controller_node(is_zephyr=is_zephyr)
 
-        core = "core{}".format(cpu)
-        cpu_node = get_cpu_metadata(cfg, cpu)
-        if is_zephyr:
-            cpu_node.update({"clock-frequency": dt_get_clock_frequency(cfg)})
-            del_key = ["tlb"]
-            cpu_node = del_node_key(cpu_node, del_key)
+    if is_zephyr:
+        intc_label = "hlic"
+        intc['interrupt-controller'].update({"label": intc_label})
 
-        cpu_node = dt_insert_child_node({core: cpu_node}, intc)
-        cpu_nodes.update(cpu_node)
+        z_cpu = {
+            "tlb": False,
+            "clock_frequency": True
+        }
+        cpu_node['cpu'].update(z_cpu)
 
-    parent = dt_create_parent_node(cfg, name, 1, 0)
-    parent = dt_insert_child_node(parent, cpu_nodes)
+    cpu_node['cpu'].update(intc)
 
-    return parent
+    return cpu_node
 
 """
 dt_create_memory_node: create memory node
