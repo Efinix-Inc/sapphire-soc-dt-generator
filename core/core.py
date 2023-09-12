@@ -22,13 +22,26 @@ get_peripheral_properties: get a list of a peripheral's properties
 
 return: list of peripheral's properties for a given peripheral
 """
-def get_peripheral_properties(cfg, peripheral):
+def __get_peripheral_properties(cfg, peripheral, exclude_properties="", exclude=False):
     props = []
 
     for line in cfg:
+        if exclude:
+            if exclude_properties in line:
+                continue
+
         if peripheral in line:
             props.append(line)
+
     return props
+
+def get_peripheral_properties(cfg, peripheral):
+    return __get_peripheral_properties(cfg, peripheral,
+                                        exclude_properties="",
+                                        exclude=False)
+
+def get_peripheral_properties_exclude(cfg, peripheral, exclude_properties, exclude=True):
+    return  __get_peripheral_properties(cfg, peripheral, exclude_properties, exclude)
 
 """
 get_property_value: get the value of peripheral properties from soc.h
