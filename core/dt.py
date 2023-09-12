@@ -635,18 +635,20 @@ def dt_model():
     model = 'model = "{}";'.format(conf['model'])
     return model
 
-
-def dt_create_root_node(is_zephyr=False):
+def dt_create_root_node(cfg, model, os):
     root_node = {
-            "root": {
-                "name": "/",
-                "version": dt_version(),
-                "model": dt_model(),
-                "addr_cell": 1,
-                "size_cell": 1
-                }
-            }
-    if is_zephyr:
+        "root": {
+            "version": "/dts-v1/",
+            "name": "/",
+            "model": model,
+            "address_cells": 1,
+            "size_cells": 1,
+            "os": os,
+            "frequency": get_frequency(cfg)
+        }
+    }
+
+    if os == 'zephyr':
         del root_node["root"]["version"]
 
     return root_node
