@@ -387,3 +387,31 @@ def get_peripherals(cfg, filter_peripherals):
     peripherals = list(dict.fromkeys(peripherals))
 
     return peripherals
+
+"""
+override_peripherals: override the peripherals properties
+
+The properties for each peripheral can be overrided using this function.
+It need to follow specific data structure to override the existing value.
+For example, to override the compatible property for apb_slave_0 node,
+the new_cfg should specify as follow.
+
+new_cfg = {
+    "overrides": {
+        "APB_SLAVE_0": {
+            "compatible": "new-apb-slave"
+        }
+    }
+}
+
+APB_SLAVE_0 is the key to override specific peripherals properties.
+
+@peripheral_parent (dict): a dictionary that have all of the peripherals
+@new_cfg (dict): new configuration to override the peripheral in @peripheral_parent.
+"""
+def override_peripherals(peripheral_parent, new_cfg):
+    for k1 in peripheral_parent['buses']:
+        for k2 in peripheral_parent['buses'][k1]['peripherals']:
+            for u1 in new_cfg['overrides']:
+                if k2 in u1:
+                    peripheral_parent['buses'][k1]['peripherals'][k2].update(new_cfg['overrides'][u1])
