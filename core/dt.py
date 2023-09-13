@@ -363,7 +363,7 @@ dt_create_node: create a device tree node for a peripheral
 
 return: dict of device tree peripheral nodes
 """
-def dt_create_node(cfg, peripheral, is_zephyr=False):
+def dt_create_node(cfg, root_node, peripheral, is_zephyr=False):
     node = {}
     nodes = {}
 
@@ -404,7 +404,7 @@ def dt_create_node(cfg, peripheral, is_zephyr=False):
 
         irq = dt_interrupt(cfg, node_idx, is_zephyr=is_zephyr)
         if irq:
-            node.update({"interrupt": irq})
+            node.update({"interrupts": irq})
 
         if not is_zephyr:
             clk_freq = dt_get_clock_frequency(cfg)
@@ -424,6 +424,14 @@ def dt_create_node(cfg, peripheral, is_zephyr=False):
             if peripheral == CLINT:
                 node.pop('interrupt')
 
+        if PLIC in peripheral:
+            intc_label = root_node['root']['cpu']['intc']['label']
+            cpu_num = root_node['root']['cpu']['cores']
+            irq_ext = []
+            for i in range(cpu_num):
+                irq_ext.append( "&{0}{1} 11 &{2}{3} 9".format(
+                    intc_label, i, intc_label, i))
+                node.update({"interrupts_extended": irq_ext})
 
         nodes.update({node_idx: node})
 
