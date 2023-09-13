@@ -31,11 +31,16 @@ return: string of device tree interrupt syntax
 def dt_interrupt(cfg, peripheral, is_zephyr=False):
     out = ''
 
+    #if 'APB' in peripheral:
+    #    return 0
+
     irq = get_interrupt_id(cfg, peripheral)
-    if irq and not is_zephyr:
-        out = "interrupts = <{}>;".format(irq)
-    else:
-        out = "interrupts = <{0} {1}>;".format(irq, 1)
+    if irq:
+        if is_zephyr:
+            out = "{0} {1}".format(irq, 1)
+
+        else:
+            out = "{}".format(irq)
 
     return out
 
