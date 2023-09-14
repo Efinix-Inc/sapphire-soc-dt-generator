@@ -76,7 +76,8 @@ def dt_reg_z_plic(cfg):
     irq_en = hex(int(addr,0) + 0x2000)
     reg = hex(int(addr,0) + 0x200000)
 
-    out = "reg = <{0} {1}\n\t{2} {3}\n\t{4} {5}>;".format(prio, '0x00001000', irq_en, '0x00002000', reg, '0x00010000')
+    out = "{0} {1}\n\t\t\t\t{2} {3}\n\t\t\t\t{4} {5}".format(
+            prio, '0x00001000', irq_en, '0x00002000', reg, '0x00010000')
 
     return out
 
@@ -359,7 +360,9 @@ def dt_get_private_data(peripheral, controller=False, is_zephyr=False):
 dt_create_node: create a device tree node for a peripheral
 
 @cfg (list): raw data of soc.h
+@root_node (dict): node which contain cpu node
 @peripheral (str): peripheral name such as SPI, I2C. Must be in capital letter
+@is_zephyr (bool): Set true if it is for zephyr
 
 return: dict of device tree peripheral nodes
 """
@@ -377,11 +380,7 @@ def dt_create_node(cfg, root_node, peripheral, is_zephyr=False):
             status = get_status(okay=True)
         else:
             node_idx = "{0}_{1}".format(peripheral, i)
-            if not is_zephyr:
-                node_label_id = chr(65+i)
-            else:
-                node_label_id = i
-            label = "{0}{1}".format(peripheral.lower(), node_label_id)
+            label = "{0}{1}".format(peripheral.lower(), i)
             status = get_status(okay=False)
 
         reg = dt_reg(cfg, node_idx, is_zephyr)
@@ -389,6 +388,8 @@ def dt_create_node(cfg, root_node, peripheral, is_zephyr=False):
 
         if is_zephyr:
             addr = get_address(cfg, node_idx)
+            if PLIC in peripheral:
+                reg = dt_reg_z_plic(cfg)
 
         node = {
             "name": peripheral.lower(),
@@ -416,21 +417,21 @@ def dt_create_node(cfg, root_node, peripheral, is_zephyr=False):
         if priv_data:
             node.update(priv_data)
 
-        if  is_zephyr:
-            if peripheral == PLIC:
-                node.update({"reg": dt_reg_z_plic(cfg)})
-                node.update({"reg-names": "reg-names = \"{0}\", \"{1}\", \"{2}\";".format('prio', 'irq_en', 'reg')})
-                node.pop('interrupt')
-            if peripheral == CLINT:
-                node.pop('interrupt')
-
+        drivers = load_config_file()
         if PLIC in peripheral:
             intc_label = root_node['root']['cpu']['intc']['label']
             cpu_num = root_node['root']['cpu']['cores']
             irq_ext = []
             for i in range(cpu_num):
-                irq_ext.append( "&{0}{1} 11 &{2}{3} 9".format(
-                    intc_label, i, intc_label, i))
+                l = "{0}{1}".format(intc_label, i)
+                if is_zephyr:
+                    irq_e = drivers['zephyr_dtsi']['drivers']['plic']['interrupts_extended']
+                else:
+                    irq_e = drivers['drivers']['plic']['interrupts_extended']
+
+                for q in irq_e:
+                    irq_ext.append("&{0} {1}".format(l, q))
+
                 node.update({"interrupts_extended": irq_ext})
 
         nodes.update({node_idx: node})
@@ -579,7 +580,7 @@ def dt_create_cpu_node(cfg, is_zephyr=False):
 
     if is_zephyr:
         intc_label = "hlic"
-        intc['interrupt-controller'].update({"label": intc_label})
+        intc['intc'].update({"label": intc_label})
 
         z_cpu = {
             "tlb": False,
