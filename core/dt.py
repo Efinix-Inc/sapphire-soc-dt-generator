@@ -608,7 +608,6 @@ def dt_create_memory_node(cfg, is_on_chip_ram=True, is_zephyr=False):
     keyword = 'SYSTEM_DDR_BMB'
 
     size = get_property_value(cfg, keyword, 'SIZE ')
-
     if is_zephyr:
         if is_on_chip_ram:
             label = 'ram0'
@@ -623,22 +622,22 @@ def dt_create_memory_node(cfg, is_on_chip_ram=True, is_zephyr=False):
             addr = get_property_value_match(cfg, keyword, keyword)
 
         size = int(size, 16) // 1024
-        reg = "reg = <{0} DT_SIZE_K({1})>;".format(addr, size)
+        reg = "{0} DT_SIZE_K({1})".format(addr, size)
 
     else:
         conf = load_config_file()
         # addr use linux start addr
         addr = conf['memory_mapped']['uImage']
         size = hex(int(size,0) - int(addr, 0))
-        reg = "reg = <{0} {1}>;".format(addr, size)
+        reg = "{0} {1}".format(addr, size)
 
     mem_node = {
         "label": label,
-        "name": name,
-        "device_type": 'device_type = "memory";',
+        "name": "memory",
         "addr": addr.lstrip('0x'),
         "size": size,
-        "reg": reg
+        "reg": reg,
+        "device_type": "memory"
     }
 
     mem_node = {name: mem_node}
