@@ -57,6 +57,7 @@
 	},
 	"plic": {
 		"compatible": ["sifive,plic-1.0.0", "sifive,fu540-c000-plic"],
+		"interrupts_extended": [11, 9],
 		"private_data": [
 			"#interrupt-cells = <1>;",
 			"interrupt-controller;",
@@ -93,7 +94,9 @@
 	"drivers":{
 		"plic": {
 			"compatible": ["sifive,plic-1.0.0"],
+			"interrupts_extended": [11],
 			"private_data": [
+				"reg-names = \"prio\", \"irq_en\", \"reg\";",
 				"#address-cells = <0>;",
 				"#interrupt-cells = <2>;",
 				"interrupt-controller;",
