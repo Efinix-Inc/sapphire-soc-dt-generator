@@ -697,15 +697,22 @@ def dt_get_bus_range(cfg, bus_name):
     return ranges
 
 
-def dt_create_bus_node(cfg, bus_name, bus_label):
+def dt_create_bus_node(cfg, bus_name, bus_label, is_zephyr=False):
+    bus_range = ''
+    label = ''
     bus_node = dt_create_parent_node(cfg, bus_label, 1, 1)
-    bus_range = dt_get_bus_range(cfg, bus_label)
+
+    if is_zephyr:
+        label = 'soc'
+    else:
+        bus_range = dt_get_bus_range(cfg, bus_label)
+
     addr = get_bus_address(cfg, bus_label).lstrip('0x')
 
     bus = {
         "addr": addr,
         "ranges": bus_range,
-        "label": bus_label,
+        "label": label,
         "peripherals": {}
     }
 
