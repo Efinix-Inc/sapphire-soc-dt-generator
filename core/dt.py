@@ -12,7 +12,7 @@ def dt_size_cells(num):
 
 def dt_get_clock_frequency(cfg):
     freq = get_frequency(cfg)
-    return "clock-frequency = <{}>;".format(freq)
+    return "{}".format(freq)
 
 
 def dt_get_timebase_frequency(cfg):
@@ -92,6 +92,7 @@ def dt_compatible(peripheral, controller=False, is_zephyr=False):
     out = ''
     drv = ''
 
+    peripheral = peripheral.lower()
     driver_data = get_driver_data(controller, is_zephyr)
 
     if peripheral in driver_data:
@@ -390,6 +391,10 @@ def dt_create_node(cfg, root_node, peripheral, is_zephyr=False):
 
                 node.update({"interrupts_extended": irq_ext})
 
+        if 'clock' in root_node['root']:
+            clock_label = root_node['root']['clock']['label']
+            node.update({"clocks": "<&{} 0>".format(clock_label)})
+
         nodes.update({node_idx: node})
 
     return nodes
@@ -468,21 +473,19 @@ def dt_create_clint_node(cfg, is_zephyr=False):
 
     return node
 
-def dt_create_clock_node(cfg):
+def dt_create_clock_node(cfg, label):
     name = "clock"
-    label = "apbA_clock"
 
     node = {
         "label": label,
         "name": name,
         "addr": "1",
-        "reg": "reg = <1 0>;",
+        "reg":  "1",
         "compatible": dt_compatible("clock"),
-        "clock_cells": "#clock-cells = <0>;",
         "clock_freq": dt_get_clock_frequency(cfg)
     }
 
-    node = {label: node}
+    #node = {label: node}
 
     parent_node = dt_create_parent_node(cfg, name, 1, 0)
     parent_node = dt_insert_child_node(parent_node, node)
