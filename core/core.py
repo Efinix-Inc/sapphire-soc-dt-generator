@@ -454,3 +454,24 @@ def get_driver_data(controller=False, is_zephyr=False):
         driver_data = driver_data['drivers']
 
     return driver_data
+
+"""
+get_driver_private_data: get the driver private data from drivers.json
+
+@peripheral (str): peripheral name such as SPI, I2C. Must be in capital letter
+@controller (bool): the peripheral is controller peripheral such as plic
+@is_zephyr (bool): specify is it zephyr else it will choose linux
+
+return: dictionary of driver private data
+"""
+def get_driver_private_data(peripheral, controller=False, is_zephyr=False):
+    priv_data = ''
+    peripheral = peripheral.lower()
+
+    driver_data = get_driver_data(controller, is_zephyr)
+
+    if peripheral in driver_data:
+        if 'private_data' in driver_data[peripheral]:
+            priv_data = driver_data[peripheral]['private_data']
+
+    return priv_data
