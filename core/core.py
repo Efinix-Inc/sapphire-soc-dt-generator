@@ -415,3 +415,30 @@ def override_peripherals(peripheral_parent, new_cfg):
             for u1 in new_cfg['overrides']:
                 if k2 in u1:
                     peripheral_parent['buses'][k1]['peripherals'][k2].update(new_cfg['overrides'][u1])
+
+"""
+get_driver_data: get the driver data from drivers.json
+
+@peripheral (str): peripheral name such as SPI, I2C. Must be in capital letter
+@controller (bool): the peripheral is controller peripheral such as plic
+@is_zephyr (bool): specify is it zephyr else it will choose linux
+
+return: dictionary of driver data
+"""
+def get_driver_data(peripheral, controller=False, is_zephyr=False):
+    operating_system = 'linux'
+    peripheral = peripheral.lower()
+
+    driver_data = load_config_file()
+
+    if is_zephyr:
+        operating_system = 'zephyr'
+
+    driver_data = driver_data['os'][operating_system]
+
+    if controller:
+        driver_data = driver_data['contoller']
+    else:
+        driver_data = driver_data['drivers']
+
+    return driver_data
