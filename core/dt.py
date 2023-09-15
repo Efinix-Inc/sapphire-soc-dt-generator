@@ -97,8 +97,8 @@ def dt_compatible(peripheral, controller=False, is_zephyr=False):
 
     if peripheral in driver_data:
         compatible = driver_data[peripheral]['compatible']
-        drv = ', '.join('{}'.format(drv) for drv in compatible)
-        out = drv
+        drv = ', '.join('"{}"'.format(drv) for drv in compatible)
+        out = drv.strip("\"")
 
     return out
 
