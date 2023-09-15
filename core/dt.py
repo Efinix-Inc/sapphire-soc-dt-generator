@@ -91,23 +91,11 @@ return: string of device tree compatible syntax
 def dt_compatible(peripheral, controller=False, is_zephyr=False):
     out = ''
     drv = ''
-    peripheral = peripheral.lower()
 
-    drivers = load_config_file()
+    driver_data = get_driver_data(controller, is_zephyr)
 
-    if controller:
-        drivers = drivers['controller']
-        if is_zephyr:
-            drivers = load_config_file()
-            drivers = drivers['zephyr_dtsi']['controller']
-    else:
-        drivers = drivers['drivers']
-        if is_zephyr:
-            drivers = load_config_file()
-            drivers = drivers['zephyr_dtsi']['drivers']
-
-    if peripheral in drivers:
-        compatible = drivers[peripheral]['compatible']
+    if peripheral in driver_data:
+        compatible = driver_data[peripheral]['compatible']
         drv = ', '.join('{}'.format(drv) for drv in compatible)
         out = drv
 
