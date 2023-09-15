@@ -1,4 +1,5 @@
 from core.variables import *
+from core.utils import *
 
 """
 get_value: get a value for a given property string
@@ -417,6 +418,25 @@ def override_peripherals(peripheral_parent, new_cfg):
                     peripheral_parent['buses'][k1]['peripherals'][k2].update(new_cfg['overrides'][u1])
 
 """
+get_os_data: get operating system data from drivers.json
+
+@is_zephyr (bool): specify is it zephyr else it will choose linux
+
+return: dictionary of operating system data
+"""
+def get_os_data(is_zephyr=False):
+    operating_system = 'linux'
+
+    os_data = load_config_file()
+
+    if is_zephyr:
+        operating_system = 'zephyr'
+
+    os_data = os_data['os'][operating_system]
+
+    return os_data
+
+"""
 get_driver_data: get the driver data from drivers.json
 
 @peripheral (str): peripheral name such as SPI, I2C. Must be in capital letter
@@ -425,19 +445,11 @@ get_driver_data: get the driver data from drivers.json
 
 return: dictionary of driver data
 """
-def get_driver_data(peripheral, controller=False, is_zephyr=False):
-    operating_system = 'linux'
-    peripheral = peripheral.lower()
-
-    driver_data = load_config_file()
-
-    if is_zephyr:
-        operating_system = 'zephyr'
-
-    driver_data = driver_data['os'][operating_system]
+def get_driver_data(controller=False, is_zephyr=False):
+    driver_data = get_os_data(is_zephyr=is_zephyr)
 
     if controller:
-        driver_data = driver_data['contoller']
+        driver_data = driver_data['controller']
     else:
         driver_data = driver_data['drivers']
 
