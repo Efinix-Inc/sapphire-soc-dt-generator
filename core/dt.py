@@ -309,38 +309,9 @@ def __dt_create_node(nodes):
 
     return out
 
-
-def get_private_data(peripheral, controller=False, is_zephyr=False):
-    priv_data = ''
-    peripheral = peripheral.lower()
-    drv_data = load_config_file()
-
-    if controller:
-        drv = 'controller'
-        if is_zephyr:
-            drv = ['zephyr_dtsi', 'controller']
-    else:
-        drv = 'drivers'
-        if is_zephyr:
-            drv = ['zephyr_dtsi', 'drivers']
-
-    if isinstance(drv, list): # if drv is a list, then we are dealing with a nested dictionary
-        if peripheral in drv_data[drv[0]][drv[1]]:
-            if 'private_data' in drv_data[drv[0]][drv[1]][peripheral]:
-                priv_data = drv_data[drv[0]][drv[1]][peripheral]['private_data']
-    else:
-        if peripheral in drv_data[drv]:
-            if 'private_data' in drv_data[drv][peripheral]:
-                priv_data = drv_data[drv][peripheral]['private_data']
-
-
-    return priv_data
-
-
-
-def dt_get_private_data(peripheral, controller=False, is_zephyr=False):
+def dt_get_driver_private_data(peripheral, controller=False, is_zephyr=False):
     priv_data = {}
-    priv_data['private_data'] = get_private_data(peripheral, controller, is_zephyr)
+    priv_data['private_data'] = get_driver_private_data(peripheral, controller, is_zephyr)
 
     return priv_data
 
@@ -401,21 +372,18 @@ def dt_create_node(cfg, root_node, peripheral, is_zephyr=False):
                 if not 'I2C' in peripheral:
                     node.update({"clock_freq": clk_freq})
 
-        priv_data = dt_get_private_data(peripheral, is_zephyr=is_zephyr)
+        priv_data = dt_get_driver_private_data(peripheral, is_zephyr=is_zephyr)
         if priv_data:
             node.update(priv_data)
 
-        drivers = load_config_file()
+        driver_data = get_driver_data(controller=False, is_zephyr=is_zephyr)
         if PLIC in peripheral:
             intc_label = root_node['root']['cpu']['intc']['label']
             cpu_num = root_node['root']['cpu']['cores']
             irq_ext = []
             for i in range(cpu_num):
                 l = "{0}{1}".format(intc_label, i)
-                if is_zephyr:
-                    irq_e = drivers['zephyr_dtsi']['drivers']['plic']['interrupts_extended']
-                else:
-                    irq_e = drivers['drivers']['plic']['interrupts_extended']
+                irq_e = driver_data['plic']['interrupts_extended']
 
                 for q in irq_e:
                     irq_ext.append("&{0} {1}".format(l, q))
@@ -483,7 +451,7 @@ def dt_create_plic_node(cfg, is_zephyr=False):
         ext += "\n\t\t&L{0} 11 &L{1} 9".format(i, i)
 
     ext = "interrupts-extended = <{}>;".format(ext)
-    priv_data = get_private_data('plic', is_zephyr=is_zephyr)
+    priv_data = get_driver_private_data('plic', is_zephyr=is_zephyr)
     priv_data.append(ext)
     plic_metadata = {"private_data": priv_data}
     node = dt_insert_data(node, plic_metadata, PLIC)
@@ -495,7 +463,7 @@ def dt_create_clint_node(cfg, is_zephyr=False):
     priv_data = {}
 
     node = dt_create_node(cfg, CLINT, is_zephyr)
-    priv_data = get_private_data('clint', is_zephyr=is_zephyr)
+    priv_data = get_driver_private_data('clint', is_zephyr=is_zephyr)
     node = dt_insert_data(node, priv_data, CLINT)
 
     return node
@@ -527,7 +495,7 @@ def dt_create_interrupt_controller_node(is_zephyr=False):
     node = {}
 
     compatible = dt_compatible('plic', controller=True, is_zephyr=is_zephyr)
-    priv_data = get_private_data('plic', controller=True, is_zephyr=is_zephyr)
+    priv_data = get_driver_private_data('plic', controller=True, is_zephyr=is_zephyr)
     priv_data.append(compatible)
 
     node = {
@@ -613,9 +581,9 @@ def dt_create_memory_node(cfg, is_on_chip_ram=True, is_zephyr=False):
         reg = "{0} DT_SIZE_K({1})".format(addr, size)
 
     else:
-        conf = load_config_file()
+        conf = get_os_data()
         # addr use linux start addr
-        addr = conf['memory_mapped']['uImage']
+        addr = conf['memory_mapped']['uimage']
         size = hex(int(size,0) - int(addr, 0))
         reg = "{0} {1}".format(addr, size)
 
