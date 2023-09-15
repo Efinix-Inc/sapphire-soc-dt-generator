@@ -1,6 +1,6 @@
 import os
 
-DRIVER_FILE = os.path.join(os.path.relpath(os.path.dirname(__file__)), "../drivers.json")
+DRIVER_FILE = os.path.join(os.path.relpath(os.path.dirname(__file__)), "../config/drivers.json")
 
 # search keyword in soc.h
 INTERRUPT = "IO_INTERRUPT"
