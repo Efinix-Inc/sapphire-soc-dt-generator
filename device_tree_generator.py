@@ -157,10 +157,16 @@ def main():
                 periph_node = dt_create_node(cfg, root_node, peripheral, is_zephyr)
                 buses_node['buses'][bus]['peripherals'].update(periph_node)
 
+    slaves_node = {}
     if args.user_config:
         if os.path.exists(args.user_config):
             user_cfg = load_json_file(args.user_config)
             override_peripherals(buses_node, user_cfg)
+
+            # add child node if specify
+            if 'child' in user_cfg:
+                slaves_node = {"child": user_cfg['child']}
+                root_node = dt_insert_child_node(root_node, slaves_node)
 
     root_node = dt_insert_child_node(root_node, buses_node)
 
@@ -171,8 +177,8 @@ def main():
                 slave_node = load_json_file(slave_cfg)
                 slaves_node = {**slaves_node, **slave_node['child']}
 
-        slaves_node = {"child": slaves_node}
-        root_node = dt_insert_child_node(root_node, slaves_node)
+                if 'child' in root_node['root']:
+                    root_node['root']['child'].update(slaves_node)
 
     out = dtsi_template.render(root_node)
     save_file(output_filename, out)
