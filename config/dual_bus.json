@@ -1,0 +1,23 @@
+{
+	"buses": {
+		"bmb": {
+			"name": "",
+			"label": "bmb",
+			"peripherals": [
+				"plic"
+			]
+		},
+		"axi": {
+			"name": "",
+			"label": "axi",
+			"peripherals": [
+				"uart",
+				"spi",
+				"i2c",
+				"gpio",
+				"apb_slave"
+			]
+		}
+	}
+}
+
