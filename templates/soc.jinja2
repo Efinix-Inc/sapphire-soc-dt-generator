@@ -2,9 +2,9 @@
 {{ root.version }};
 {%- endif %}
 
-{% if 'dtsi' in root.include_headers %}
+{%- if 'dtsi' in root.include_headers %}
 {%- if 'include' in root.include_headers.dtsi %}
-{%- for inc in root.include_headers.dtsi.include %}
+{% for inc in root.include_headers.dtsi.include %}
 {{ inc }}
 {%- endfor %}
 {%- endif %}
@@ -73,11 +73,7 @@
 	{%- if buses %}
 	{% for key, value in buses.items() recursive %}
 
-	{%- if 'label' in value and value.label != '' %}
-	{{ value.label }} {
-	{%- else %}
-	{{ key }}@{{ value.addr }} {
-	{%- endif %}
+	{{ value.header }}
 
 		#address-cells = <1>;
 		#size-cells = <1>;
@@ -92,11 +88,7 @@
 		{% set peri = value.peripherals %}
 
 		{%- for k, v in peri.items() recursive %}
-		{%- if 'label' in v and v.label != '' %}
-		{{ v.label }}: {{ v.name }}@{{ v.addr }} {
-		{%- else %}
-		{{ v.name }}@{{ v.addr }} {
-		{%- endif %}
+		{{ v.header }}
 			reg = {{ v.reg }};
 			{%- if v.compatible %}
 			compatible = "{{ v.compatible }}";

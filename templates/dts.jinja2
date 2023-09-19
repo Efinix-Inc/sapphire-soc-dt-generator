@@ -84,13 +84,10 @@
 	{%- if child %}
 	{%- for k_node, v_node in child.items() %}
 	{%- if v_node.parent_label == v.label %}
-	{%- if v_node.label %}
-	{{ v_node.label }} {
-	{%- else %}
-	{{ v_node.name }}@{{ v_node.address }} {
-	{%- endif %}
-		{%- if 'address' in v_node %}
-		reg = <{{ v_node.address }}>;
+
+	{{ v_node.header }}
+		{%- if 'addr' in v_node %}
+		reg = <{{ v_node.addr }}>;
 		{%- endif %}
 
 		{%- if v_node.compatible %}
@@ -108,15 +105,7 @@
 		{%- if 'child' in v_node %}
 		{% for ck, cv in v_node.child.items() %}
 
-		{%- if 'label' in cv %}
-		{{ cv.label }}: {{ cv.name }}@{{ cv.address }} {
-		{%- else %}
-		{{ cv.name }}@{{ cv.address }} {
-		{%- endif %}
-			{%- if 'address' in cv %}
-			reg = <{{ cv.address }}>;
-			{%- endif %}
-
+		{{ cv.header }}
 			{%- if 'compatible' in cv %}
                 	compatible = "{{ cv.compatible }}";
                 	{%- endif %}

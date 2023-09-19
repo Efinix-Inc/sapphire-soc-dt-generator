@@ -395,6 +395,8 @@ def dt_create_node(cfg, root_node, peripheral, is_zephyr=False):
             clock_label = root_node['root']['clock']['label']
             node.update({"clocks": "<&{} 0>".format(clock_label)})
 
+        node_header = get_node_header(node)
+        node['header'] = node_header
         nodes.update({node_idx: node})
 
     return nodes
@@ -657,24 +659,28 @@ def dt_get_bus_range(cfg, bus_name):
 
 def dt_create_bus_node(cfg, bus_name, bus_label, is_zephyr=False):
     bus_range = ''
-    label = ''
+    label = bus_label
     bus_node = dt_create_parent_node(cfg, bus_label, 1, 1)
 
     if is_zephyr:
         label = 'soc'
+        bus_label = 'bmb'
     else:
         bus_range = dt_get_bus_range(cfg, bus_label)
 
     addr = get_bus_address(cfg, bus_label).lstrip('0x')
 
     bus = {
+        "name": bus_name,
         "addr": addr,
         "ranges": bus_range,
         "label": label,
         "peripherals": {}
     }
 
-    bus_node[bus_label].update(bus)
+    node_header = get_node_header(bus)
+    bus['header'] = node_header
+    bus_node[label].update(bus)
 
     return bus_node
 
