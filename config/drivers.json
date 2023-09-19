@@ -26,7 +26,7 @@
 			"aliases": {
 				"name": "aliases",
 				"private_data": [
-					"serial0 = &uartA;"
+					"serial0 = &uart0;"
 				]
 			},
 			"memory_mapped": {
