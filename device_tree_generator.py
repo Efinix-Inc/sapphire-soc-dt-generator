@@ -112,6 +112,9 @@ def main():
 
     root_node = dt_insert_child_node(root_node, memory_node)
 
+    if 'reserved_memory' in os_data:
+        root_node['root']['reserved_memory'] = os_data['reserved_memory']
+
     if is_zephyr :
         if args.extmemory:
             root_node['root']['chosen']['private_data'].append("zephyr,sram = &external_ram;")
