@@ -30,6 +30,7 @@ def main():
     dt_parse.add_argument('-d', '--dir', type=str, help='Output generated output directory. By default is dts')
     dt_parse.add_argument('-o', '--outfile', type=str, help='Override output filename. By default is sapphire.dtsi')
     dt_parse.add_argument('-j', '--json', action='store_true', help='Save output file as json format')
+    dt_parse.add_argument('-s', '--slave', action='append', type=str, help='Specify path to slave device configuration json file. This file is a slave node for the master device which appear in DTS file.')
     subparsers = dt_parse.add_subparsers(title='os', dest='os')
     os_linux_parser = subparsers.add_parser('linux', help='Target OS, Linux')
     os_zephyr_parser = subparsers.add_parser('zephyr', help='Target OS, Zephyr')
@@ -159,6 +160,16 @@ def main():
             override_peripherals(buses_node, user_cfg)
 
     root_node = dt_insert_child_node(root_node, buses_node)
+
+    if args.slave:
+        slaves_node = {}
+        for slave_cfg in args.slave:
+            if os.path.exists(slave_cfg):
+                slave_node = load_json_file(slave_cfg)
+                slaves_node = {**slaves_node, **slave_node['child']}
+
+        slaves_node = {"child": slaves_node}
+        root_node = dt_insert_child_node(root_node, slaves_node)
 
     out = dtsi_template.render(root_node)
     save_file(output_filename, out)
