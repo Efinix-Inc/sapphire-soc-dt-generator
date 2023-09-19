@@ -415,7 +415,12 @@ def override_peripherals(peripheral_parent, new_cfg):
         for k2 in peripheral_parent['buses'][k1]['peripherals']:
             for u1 in new_cfg['overrides']:
                 if k2 in u1:
-                    peripheral_parent['buses'][k1]['peripherals'][k2].update(new_cfg['overrides'][u1])
+                    n_cfg = new_cfg['overrides'][u1]
+                    peripheral_node = peripheral_parent['buses'][k1]['peripherals'][k2]
+                    peripheral_node.update(n_cfg)
+                    #peripheral_parent['buses'][k1]['peripherals'][k2].update(new_cfg['overrides'][u1])
+                    node_header = get_node_header(peripheral_node)
+                    peripheral_node['header'] = node_header
 
 """
 get_os_data: get operating system data from drivers.json
@@ -475,3 +480,56 @@ def get_driver_private_data(peripheral, controller=False, is_zephyr=False):
             priv_data = driver_data[peripheral]['private_data']
 
     return priv_data
+
+"""
+get_node_header: construct the device tree node header
+
+@node (dict): any node which contain label, name and addr
+
+return: string of node header
+
+The node header could be constructed in three different ways
+depending on label, name and address property.
+For example, if label, name and address are available, it will
+create as follows.
+
+label: name@address {
+
+If only label is available, then it will create like this.
+
+label {
+
+Finally, if only name and address are available, then it will create
+like this.
+
+name@address {
+"""
+def get_node_header(node):
+    node_header = ''
+
+    if 'label' in node and node['label']:
+        if 'name' in node and node['name']:
+            node_header = "{}: {}@{}".format(node['label'], node['name'], node['addr'])
+        else:
+            node_header = "{}".format(node['label'])
+
+    elif 'name' in node and node['name']:
+        node_header = "{}@{}".format(node['name'], node['addr'])
+
+    node_header += " {"
+
+    return node_header
+
+def get_child_node_header(node):
+    if 'child' in node:
+        for child_node in node['child']:
+            node_header = get_node_header(node['child'][child_node])
+            node['child'][child_node]['header'] = node_header
+
+            child_node = node['child'][child_node]
+            if 'child' in child_node:
+                for child_node2 in child_node['child']:
+                    node_header = get_node_header(child_node['child'][child_node2])
+                    child_node['child'][child_node2]['header'] = node_header
+
+    return node
