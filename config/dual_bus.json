@@ -1,14 +1,14 @@
 {
 	"buses": {
 		"bmb": {
-			"name": "",
+			"name": "bmb",
 			"label": "bmb",
 			"peripherals": [
 				"plic"
 			]
 		},
 		"axi": {
-			"name": "",
+			"name": "axi",
 			"label": "axi",
 			"peripherals": [
 				"uart",

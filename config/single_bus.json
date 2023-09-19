@@ -2,7 +2,7 @@
 	"buses": {
 		"bmb": {
 			"label": "bmb",
-			"name": "",
+			"name": "bmb",
 			"peripherals": [
 				"plic",
 				"uart",
