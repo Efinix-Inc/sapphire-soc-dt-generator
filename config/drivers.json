@@ -35,6 +35,19 @@
 				"opensbi": "0x01000000",
 				"u-boot": "0x01040000"
 			},
+			"reserved_memory": {
+				"private_data": [
+					"ranges;"
+				],
+				"child": {
+					"opensbi": {
+						"name": "sbi",
+						"label": "opensbi",
+						"addr": "1000000",
+						"size": "80000"
+					}
+				}
+			},
 			"drivers": {
 				"bus": {
 					"compatible": ["simple-bus"]
