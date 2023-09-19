@@ -1,0 +1,141 @@
+{%- if root.version -%}
+{{ root.version }};
+{%- endif %}
+
+{%- if 'dts' in root.include_headers %}
+{%- if 'include' in root.include_headers.dts %}
+{%- for inc in root.include_headers.dts.include %}
+{{ inc }}
+{%- endfor %}
+{%- endif %}
+{%- endif %}
+
+/ {
+	model = "{{ root.model }}";
+	#address-cells = <1>;
+        #size-cells = <1>;
+
+	{%- if root.chosen %}
+	{% if root.chosen.private_data %}
+	chosen {
+		{%- for pdata in root.chosen.private_data %}
+		{{ pdata }}
+		{%- endfor %}
+	};
+	{%- endif %}
+	{%- endif %}
+
+	{%- if root.aliases %}
+	{% if root.aliases.private_data %}
+	aliases {
+		{%- for pdata in root.aliases.private_data %}
+		{{ pdata }}
+		{%- endfor %}
+	};
+	{%- endif %}
+	{%- endif %}
+
+	{%- set memory = root.memory %}
+	{%- for mem_k, mem_v in memory.items() %}
+
+	{% if mem_v.label %}
+	{{ mem_v.label }}: {{ mem_v.name }}@{{ mem_v.addr }} {
+	{%- else %}
+	{{ mem_v.name }}@{{ mem_v.addr }} {
+	{%- endif %}
+		device_type = "{{ mem_v.device_type }}";
+		reg = <{{ mem_v.reg }}>;
+	};
+	{%- endfor %}
+
+	{% if 'reserved_memory' in root %}
+	reserved-memory {
+		#address-cells = <1>;
+                #size-cells = <1>;
+		{%- if root.reserved_memory.private_data %}
+		{%- for pdata in root.reserved_memory.private_data %}
+		{{ pdata }}
+		{%- endfor %}
+
+		{%- if 'child' in root.reserved_memory %}
+		{%- for ck, cv in root.reserved_memory.child.items() %}
+		{{ cv.label }}: {{ cv.name }}@{{ cv.addr }} {
+			reg = <0x{{ cv.addr }} 0x{{ cv.size }}>;
+		};
+		{%- endfor %}
+		{%- endif %}
+		{%- endif %}
+	};
+	{%- endif %}
+};
+
+{%- set buses = root.buses %}
+{%- for key, value in buses.items() %}
+
+{%- if 'peripherals' in value %}
+{%- set peri = value.peripherals %}
+
+{%- for k, v in peri.items() %}
+{%- if not 'okay' in v.status %}
+&{{ v.label }} {
+	{%- set child = root.child %}
+	status = "okay";
+
+	{%- if child %}
+	{%- for k_node, v_node in child.items() %}
+	{%- if v_node.parent_label == v.label %}
+	{%- if v_node.label %}
+	{{ v_node.label }} {
+	{%- else %}
+	{{ v_node.name }}@{{ v_node.address }} {
+	{%- endif %}
+		{%- if 'address' in v_node %}
+		reg = <{{ v_node.address }}>;
+		{%- endif %}
+
+		{%- if v_node.compatible %}
+		compatible = "{{ v_node.compatible }}";
+		{%- endif %}
+
+		{%- for pdata in v_node.private_data %}
+                {{ pdata }}
+                {%- endfor %}
+
+		{%- if v_node.status %}
+		status = "{{ v_node.status }}";
+		{%- endif %}
+
+		{%- if 'child' in v_node %}
+		{% for ck, cv in v_node.child.items() %}
+
+		{%- if 'label' in cv %}
+		{{ cv.label }}: {{ cv.name }}@{{ cv.address }} {
+		{%- else %}
+		{{ cv.name }}@{{ cv.address }} {
+		{%- endif %}
+			{%- if 'address' in cv %}
+			reg = <{{ cv.address }}>;
+			{%- endif %}
+
+			{%- if 'compatible' in cv %}
+                	compatible = "{{ cv.compatible }}";
+                	{%- endif %}
+
+			{%- for pdata in cv.private_data %}
+			{{ pdata }}
+			{%- endfor %}
+		};
+		{% endfor %}
+		{%- endif %}
+	};
+	{%- endif %}
+	{%- endfor %}
+	{%- endif %}
+	
+};
+{%- endif %}
+{% endfor %}
+
+{%- endif %}
+
+{%- endfor %}
