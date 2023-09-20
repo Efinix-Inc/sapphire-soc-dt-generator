@@ -2,6 +2,7 @@
 
 import argparse
 import os
+import sys
 import shutil
 import pprint
 from core.core import *
@@ -170,6 +171,10 @@ def main():
                 slaves_node = {"child": child_node['child']}
                 root_node = dt_insert_child_node(root_node, slaves_node)
 
+        else:
+            print("Error: file %s does not exists" % args.user_config)
+            sys.exit(1)
+
     root_node = dt_insert_child_node(root_node, buses_node)
 
     if args.slave:
@@ -178,6 +183,10 @@ def main():
             if os.path.exists(slave_cfg):
                 slave_node = load_json_file(slave_cfg)
                 slaves_node = {**slaves_node, **slave_node['child']}
+
+            else:
+                print("Error: file %s does not exists" % slave_cfg)
+                sys.exit(1)
 
         slaves_node = {'child': slaves_node}
         slaves_node = get_child_node_header(slaves_node)
