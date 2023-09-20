@@ -395,8 +395,8 @@ def dt_create_root_node(cfg, model, os):
             "version": "/dts-v1/",
             "name": "/",
             "model": model,
-            "address_cells": 1,
-            "size_cells": 1,
+            "addr_cell": 1,
+            "size_cell": 1,
             "os": os,
             "frequency": get_frequency(cfg)
         }

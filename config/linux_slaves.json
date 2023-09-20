@@ -9,6 +9,7 @@
                         "private_data": [
 				"spi-max-frequency = <6000000>;"
 			],
+			"size_cell": 1,
 			"child": {
 				"partition0": {
 					"name": "partition",

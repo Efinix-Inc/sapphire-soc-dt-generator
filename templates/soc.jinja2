@@ -76,7 +76,11 @@
 	{{ value.header }}
 
 		#address-cells = <1>;
-		#size-cells = <1>;
+		{%- if 'size_cell' in value %}
+		#size-cells = <{{ value.size_cell }}>;
+		{%- else %}
+		#size-cells = <0>;
+		{%- endif %}
 		compatible = "{{ value.compatible }}";
 		{%- if value.ranges %}
 		ranges = <{{ value.ranges }}>;
