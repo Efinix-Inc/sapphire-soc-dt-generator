@@ -15,11 +15,6 @@ def dt_get_clock_frequency(cfg):
     return "{}".format(freq)
 
 
-def dt_get_timebase_frequency(cfg):
-    freq = get_frequency(cfg)
-    return "timebase-frequency = <{}>;".format(freq)
-
-
 """
 dt_interrupt: return a string of device tree syntax of interrupt
 
@@ -103,30 +98,6 @@ def dt_compatible(peripheral, controller=False, is_zephyr=False):
     return out
 
 """
-dt_get_phandle: get phandle or reference of device node label
-
-@node (dict): device tree node
-@peripheral (str): peripheral name such as SPI, I2C. Must be in capital letter
-
-return: string of phandle for a given peripheral
-"""
-def dt_get_phandle(nodes, peripheral):
-    phandle = ''
-
-    if isinstance(nodes, dict):
-        for key in nodes:
-            if peripheral in key:
-                if 'label' in nodes[key]:
-                    label = nodes[peripheral]['label']
-                    phandle = "&{}".format(label)
-                    return phandle
-
-            else:
-                phandle = dt_get_phandle(nodes[key], peripheral)
-
-    return phandle
-
-"""
 dt_insert_child_node: insert child node into parent node as nested dict
 
 @parent (dict): parent dictionary of paripheral
@@ -155,160 +126,6 @@ def dt_insert_data(node, new_data, peripheral):
         node[peripheral].update(new_data)
 
     return node
-
-"""
-__dt_create_node_str: convert node information to string
-
-@node (dict): node contain device tree metadata such as label, compatible, reg, interrupt
-@parent_node (dict): parent of @node
-
-return: string of device tree node
-"""
-def __dt_create_node_str(node, parent_node):
-    out = ''
-    output = ''
-
-    if 'version' in node:
-        out += node['version']
-
-    if 'include' in node:
-        for i in node['include']:
-            out += "/include/ \"{}\"\n".format(i)
-
-    if '#include' in node:
-        for i in node['#include']:
-            out += "#include <{}>\n".format(i)
-
-    out += '\n'
-
-    if 'label' in node:
-        label = ''
-        if not node['label'] == '':
-            label = "{0}:".format(node['label'])
-
-        if 'name' and 'addr' in node:
-            out += "{0} {1}@{2} {{\n".format(label, node['name'], node['addr'])
-
-        elif 'name' and not 'addr' in node:
-            out += "{0} {1} {{\n".format(label, node['name'])
-
-        else:
-            out += "{0} {{\n".format(label)
-
-    else:
-        if 'name' and 'addr' in node:
-            out += "{0}@{1} {{\n".format(node['name'], node['addr'])
-
-        elif 'name' and not 'addr' in node:
-            out += "{} {{\n".format(node['name'])
-
-        else:
-            out += ""
-
-    if 'model' in node:
-            out += "\t{}\n".format(node['model'])
-
-    if 'device_type' in node:
-            out += "\t{}\n".format(node['device_type'])
-
-    if 'addr_cell' in node:
-        #out += "\t{}\n".format(node['addr_cell'])
-        addr_cell = dt_address_cells(node['addr_cell'])
-        out += "\t{}\n".format(addr_cell)
-
-    if 'size_cell' in node:
-        #out += "\t{}\n".format(node['size_cell'])
-        size_cell = dt_size_cells(node['size_cell'])
-        out += "\t{}\n".format(size_cell)
-    if 'ranges_key' in node:
-        out += "\t{}\n".format(node['ranges_key'])
-
-    if 'reg' in node:
-        out += "\t{}\n".format(node['reg'])
-
-    if 'reg-names' in node:
-        out += "\t{}\n".format(node['reg-names'])
-
-    if 'compatible' in node:
-        out += "\t{}\n".format(node['compatible'])
-
-    if 'ranges' in node:
-        out += "\t{}\n".format(node['ranges'])
-
-    # TODO: SPI does not support interrupt
-    if not 'spi' in node['name']:
-        if 'interrupt' in node:
-            out += "\t{}\n".format(node['interrupt'])
-
-            #phandle of interrupt-parent
-            phandle = dt_get_phandle(parent_node, 'PLIC')
-            if phandle:
-                out += "\tinterrupt-parent = <{}>;\n".format(phandle)
-
-    if 'isa' in node:
-        out += "\t{}\n".format(node['isa'])
-
-    if 'mmu_type' in node:
-        out += "\t{}\n".format(node['mmu_type'])
-
-    if 'icache_size' in node:
-        out += "\t{}\n".format(node['icache_size'])
-
-    if 'icache_way' in node:
-        out += "\t{}\n".format(node['icache_way'])
-
-    if 'icache_block_size' in node:
-        out += "\t{}\n".format(node['icache_block_size'])
-
-    if 'dcache_size' in node:
-        out += "\t{}\n".format(node['dcache_size'])
-
-    if 'dcache_way' in node:
-        out += "\t{}\n".format(node['dcache_way'])
-
-    if 'dcache_block_size' in node:
-        out += "\t{}\n".format(node['dcache_block_size'])
-
-    if 'tlb' in node:
-        out += "\t{}\n".format(node['tlb'])
-    if 'clock-frequency' in node:
-        out += "\t{}\n".format(node['clock-frequency'])
-
-    if 'private_data' in node:
-        # private_data (list)
-        for p in node['private_data']:
-            out += "\t{}\n".format(p)
-
-    if 'clock_cells' in node:
-        out += "\t{}\n".format(node['clock_cells'])
-
-    if 'clock_freq' in node:
-        out += "\t{}\n".format(node['clock_freq'])
-
-    if 'timebase_freq' in node:
-        out += "\t{}\n".format(node['timebase_freq'])
-
-    if 'status' in node:
-        out += "\t{}\n".format(node['status'])
-
-    return out
-
-"""
-__dt_create_node: convert node information to string
-
-@nodes (dict): input node contain device tree metadata such as label, compatible, reg, interrupt
-
-return: string of device tree node
-"""
-def __dt_create_node(nodes):
-    out = ''
-
-    parent_node = nodes;
-
-    for node in nodes:
-        out = __dt_create_node_str(node, parent_node)
-
-    return out
 
 def dt_get_driver_private_data(peripheral, controller=False, is_zephyr=False):
     priv_data = {}
@@ -402,14 +219,6 @@ def dt_create_node(cfg, root_node, peripheral, is_zephyr=False):
     return nodes
 
 
-def dt_create_node_str(cfg, peripheral):
-    out = ''
-
-    nodes =  dt_create_node(cfg, peripheral)
-    out =  __dt_create_node(nodes)
-
-    return out
-
 """
 dt_create_parent_node: create parent node such as clock, apb, axi
 
@@ -441,40 +250,6 @@ def dt_create_parent_node(cfg, name, address_cell, size_cell, is_zephyr=False):
 
     return node
 
-def dt_create_plic_node(cfg, is_zephyr=False):
-    plic_metadata = []
-    ext = ''
-    node = {}
-    priv_data = {}
-
-    drivers = load_config_file()
-    cpu_count = get_cpu_count(cfg)
-    node = dt_create_node(cfg, PLIC, is_zephyr)
-
-    for i in range(0, cpu_count):
-        if is_zephyr:
-            ext += "\n\t\t&hlic{0} 11".format(i)
-            continue
-        ext += "\n\t\t&L{0} 11 &L{1} 9".format(i, i)
-
-    ext = "interrupts-extended = <{}>;".format(ext)
-    priv_data = get_driver_private_data('plic', is_zephyr=is_zephyr)
-    priv_data.append(ext)
-    plic_metadata = {"private_data": priv_data}
-    node = dt_insert_data(node, plic_metadata, PLIC)
-
-    return node
-
-def dt_create_clint_node(cfg, is_zephyr=False):
-    node = {}
-    priv_data = {}
-
-    node = dt_create_node(cfg, CLINT, is_zephyr)
-    priv_data = get_driver_private_data('clint', is_zephyr=is_zephyr)
-    node = dt_insert_data(node, priv_data, CLINT)
-
-    return node
-
 def dt_create_clock_node(cfg, label):
     name = "clock"
 
@@ -486,8 +261,6 @@ def dt_create_clock_node(cfg, label):
         "compatible": dt_compatible("clock"),
         "clock_freq": dt_get_clock_frequency(cfg)
     }
-
-    #node = {label: node}
 
     parent_node = dt_create_parent_node(cfg, name, 1, 0)
     parent_node = dt_insert_child_node(parent_node, node)
@@ -683,128 +456,3 @@ def dt_create_bus_node(cfg, bus_name, bus_label, is_zephyr=False):
     bus_node[label].update(bus)
 
     return bus_node
-
-def dt_create_soc_node(cfg):
-    soc_node = dt_create_parent_node(cfg, "soc", 1, 1, is_zephyr=True)
-
-    return soc_node
-
-def __dt_parser_nodes_recursive(nodes, parent_node, count):
-    out = ''
-    out_temp = ''
-    count += 1
-
-    for k in nodes:
-        if isinstance(nodes[k], dict):
-            out_temp = __dt_create_node_str(nodes[k], parent_node)
-            out_temp = indent(out_temp, count)
-            out += out_temp
-            out += __dt_parser_nodes_recursive(nodes[k], parent_node, count)
-            out_temp = "};\n"
-            out_temp = indent(out_temp, count)
-            out += out_temp
-
-    return out
-
-"""
-dt_parser_nodes: parser nodes to device tree format
-
-@nodes (dict): nested dict node of paripheral
-@parent_node (dict): parent node of @nodes or same level
-
-return: String of nodes in device tree format
-"""
-def dt_parser_nodes(nodes, parent_node):
-    out = ''
-    out_temp = ''
-    end_braces = True
-
-    for k in nodes:
-        n_node = nodes[k]
-        out += __dt_create_node_str(n_node, parent_node)
-        out1 = __dt_parser_nodes_recursive(n_node, parent_node, 0)
-
-        if out1:
-            out1 += "};\n"
-            out += out1
-
-        else:
-            out += "};\n"
-
-    return out
-
-"""
-create_dts_file: create dts file
-
-@cfg (list): raw data of soc.h
-@bus_node: node that contain all peripherals connected to it
-
-return: string of nodes
-"""
-def create_dts_file(cfg, bus_node, memory_selection, model, operating_system, soc_name=None):
-    dts_root_node = dt_create_root_node(cfg, model, operating_system)
-    node = {}
-    nodes = {}
-
-    conf = load_config_file()
-
-    if operating_system == 'zephyr':
-        inc_file = {
-            "#include": conf['zephyr_dts']['#include']
-        }
-        inc_file["#include"][0] += soc_name
-        if (memory_selection == 'ext'): # external memory selected
-            dts_root = conf['zephyr_dts']['root_ext']
-        else:
-            dts_root = conf['zephyr_dts']['root']
-    else:
-        inc_file = {
-            "include": conf['dts']['include'],
-            "#include": conf['dts']['#include']
-        }
-        dts_root = conf['dts']['root']
-
-    dts_root_node['root'].update(inc_file)
-    dts_root_node['root'].update(dts_root)
-
-    mem_node = None
-    if operating_system == 'linux':
-        # memory
-        mem_node=  dt_create_memory_node(cfg, False, False)
-
-    if mem_node:
-        dts_root_node = dt_insert_child_node(dts_root_node, mem_node)
-    dts = dt_parser_nodes(dts_root_node, dts_root_node)
-
-    for k in bus_node:
-        n_node = bus_node[k]
-        for periph in n_node:
-            if isinstance(n_node[periph], dict):
-                if 'status' in n_node[periph]:
-                    if 'disabled' in n_node[periph]['status']:
-                        node = {
-                            "name": dt_get_phandle(n_node, periph),
-                            "status": get_status(okay=True)
-                        }
-
-                        label = n_node[periph]['label']
-                        if label in conf['dts']:
-                            node.update(conf['dts'][label])
-
-                        nodes.update({periph: node})
-
-    dts += dt_parser_nodes(nodes, nodes)
-
-    return dts
-
-def create_includes(conf, is_zephyr=False):
-    inc_file = {}
-
-    if is_zephyr:
-        inc_file = {
-            "#include": [
-                conf['zephyr_dtsi']['includes'][0],
-                conf['zephyr_dtsi']['includes'][1]
-            ]
-        }
-    return inc_file
