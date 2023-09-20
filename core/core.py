@@ -418,7 +418,6 @@ def override_peripherals(peripheral_parent, new_cfg):
                     n_cfg = new_cfg['overrides'][u1]
                     peripheral_node = peripheral_parent['buses'][k1]['peripherals'][k2]
                     peripheral_node.update(n_cfg)
-                    #peripheral_parent['buses'][k1]['peripherals'][k2].update(new_cfg['overrides'][u1])
                     node_header = get_node_header(peripheral_node)
                     peripheral_node['header'] = node_header
 
