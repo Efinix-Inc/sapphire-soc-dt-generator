@@ -120,6 +120,10 @@
 		{% for ck, cv in v_node.child.items() %}
 
 		{{ cv.header }}
+			{%- if 'reg' in cv %}
+			reg = <{{ cv.reg }}>;
+			{%- endif %}
+
 			{%- if 'compatible' in cv %}
                 	compatible = "{{ cv.compatible }}";
                 	{%- endif %}

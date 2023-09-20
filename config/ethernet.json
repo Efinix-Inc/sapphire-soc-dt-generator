@@ -44,9 +44,10 @@
 			"label": "mdio",
 			"child":{
 				"phy": {
-					"name": "ethernet-phy0",
+					"name": "ethernet-phy",
 					"label": "phy0",
 					"addr": 0,
+					"reg": "0",
 					"compatible": "ethernet-phy-id001c.c916",
 					"private_data": [
 						"device_type = \"ethernet-phy\";",
