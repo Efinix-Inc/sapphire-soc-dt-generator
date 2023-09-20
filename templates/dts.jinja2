@@ -79,6 +79,8 @@
 {%- if not 'okay' in v.status %}
 &{{ v.label }} {
 	{%- set child = root.child %}
+	#address-cells = <1>;
+	#size-cells = <0>;
 	status = "okay";
 
 	{%- if child %}
@@ -86,6 +88,8 @@
 	{%- if v_node.parent_label == v.label %}
 
 	{{ v_node.header }}
+		#address-cells = <1>;
+		#size-cells = <0>;
 		{%- if 'addr' in v_node %}
 		reg = <{{ v_node.addr }}>;
 		{%- endif %}
