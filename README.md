@@ -5,7 +5,8 @@ A script to generate device tree for Linux and Zephyr based on Efinix RISCV Sapp
 ## Usage
 
 ```
-usage: device_tree_generator.py [-h] [-d DIR] [-o OUTFILE] [-j]
+usage: device_tree_generator.py [-h] [-b BUS] [-c USER_CONFIG] [-d DIR]
+                                [-o OUTFILE] [-j] [-s SLAVE]
                                 soc board {linux,zephyr} ...
 
 Device Tree Generator
@@ -16,10 +17,19 @@ positional arguments:
 
 optional arguments:
   -h, --help            show this help message and exit
+  -b BUS, --bus BUS     Specify path to bus architecture for the SoC in json
+                        format. By default is "config/single_bus.json"
+  -c USER_CONFIG, --user-config USER_CONFIG
+                        Specify path to user configuration json file to
+                        override the APB slave device property
   -d DIR, --dir DIR     Output generated output directory. By default is dts
   -o OUTFILE, --outfile OUTFILE
                         Override output filename. By default is sapphire.dtsi
   -j, --json            Save output file as json format
+  -s SLAVE, --slave SLAVE
+                        Specify path to slave device configuration json file.
+                        This file is a slave node for the master device which
+                        appear in DTS file.
 
 os:
   {linux,zephyr}
@@ -32,10 +42,8 @@ os:
 #### Linux
 
 ```bash
-python3 device_tree_generator.py /path/to/soc.h ti180 linux
+python3 device_tree_generator.py -s config/linux_slaves.json /path/to/soc.h ti180 linux
 ```
-
-
 
 #### Zephyr
 
