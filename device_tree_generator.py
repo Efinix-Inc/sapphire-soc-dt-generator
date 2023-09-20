@@ -9,7 +9,8 @@ from core.utils import *
 from core.dt import *
 from jinja2 import Environment, FileSystemLoader
 
-env = Environment(loader=FileSystemLoader("templates"))
+pwd = os.path.relpath(os.path.dirname(__file__))
+env = Environment(loader=FileSystemLoader(os.path.join(pwd, "templates")))
 dtsi_template = env.get_template("soc.jinja2")
 dts_template = env.get_template("dts.jinja2")
 
@@ -23,7 +24,7 @@ def main():
 
     dt_parse.add_argument('soc', type=str, help='path to soc.h')
     dt_parse.add_argument('board', type=str, help='development kit name such as t120, ti60')
-    dt_parse.add_argument('-b', '--bus', type=str, default="config/single_bus.json",
+    dt_parse.add_argument('-b', '--bus', type=str, default=os.path.join(pwd, "config/single_bus.json"),
             help='Specify path to bus architecture for the SoC in json format. By default is "config/single_bus.json"')
     dt_parse.add_argument('-c', '--user-config', type=str,
             help='Specify path to user configuration json file to override the APB slave device property')
@@ -140,7 +141,7 @@ def main():
     buses_node = {"buses": {}}
 
     if is_zephyr:
-        args.bus = 'config/z_single_bus.json'
+        args.bus = os.path.join(pwd, 'config/z_single_bus.json')
 
     bus_cfg = load_json_file(args.bus)
     for bus in bus_cfg['buses']:
