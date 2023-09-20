@@ -181,7 +181,9 @@ def main():
         slaves_node = {'child': slaves_node}
         slaves_node = get_child_node_header(slaves_node)
 
-        if 'child' in root_node['root']:
+        if not 'child' in root_node['root']:
+            root_node = dt_insert_child_node(root_node, slaves_node)
+        else:
             root_node['root']['child'].update(slaves_node['child'])
 
     out = dtsi_template.render(root_node)
