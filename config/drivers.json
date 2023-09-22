@@ -121,8 +121,7 @@
 				]
 			},
 			"aliases": {
-				"name": "aliases",
-				"private_data": ["led0 = &green_led;"]
+				"name": "aliases"
 			},
 			"drivers": {
 				"bus": {
