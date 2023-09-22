@@ -171,6 +171,14 @@ def main():
                 slaves_node = {"child": child_node['child']}
                 root_node = dt_insert_child_node(root_node, slaves_node)
 
+            # append items into aliases or chosen node if specify
+            if 'append' in user_cfg:
+                for key in user_cfg['append']:
+                    if 'private_data' in root_node['root'][key]:
+                        root_node['root'][key]['private_data'] += user_cfg['append'][key]
+                    else:
+                        root_node['root'][key]['private_data'] = user_cfg['append'][key]
+
         else:
             print("Error: file %s does not exists" % args.user_config)
             sys.exit(1)
