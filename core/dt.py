@@ -71,7 +71,7 @@ def dt_reg_z_plic(cfg):
     irq_en = hex(int(addr,0) + 0x2000)
     reg = hex(int(addr,0) + 0x200000)
 
-    out = "{0} {1}\n\t\t\t\t{2} {3}\n\t\t\t\t{4} {5}".format(
+    out = "<{0} {1}\n\t\t\t\t{2} {3}\n\t\t\t\t{4} {5}>".format(
             prio, '0x00001000', irq_en, '0x00002000', reg, '0x00010000')
 
     return out
