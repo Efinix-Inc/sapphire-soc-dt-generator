@@ -230,21 +230,16 @@ dt_create_parent_node: create parent node such as clock, apb, axi
 return: parent device tree node
 
 """
-def dt_create_parent_node(cfg, name, address_cell, size_cell, is_zephyr=False):
+def dt_create_parent_node(cfg, name, addr_cell, size_cell, is_zephyr=False):
     node = {
         "name": name,
-        "addr_cell": address_cell,
+        "addr_cell": addr_cell,
         "size_cell": size_cell
     }
 
     if not 'cpu' in name:
-        compatible = dt_compatible('bus')
+        compatible = dt_compatible('bus', controller=False, is_zephyr=is_zephyr)
         node['compatible'] = compatible
-        if name == 'soc':
-            node['compatible'] = dt_compatible('soc', controller=True, is_zephyr=is_zephyr)
-
-            if is_zephyr:
-                node.update({'ranges_key': 'ranges;'})
 
     node = {name: node}
 
@@ -433,7 +428,7 @@ def dt_get_bus_range(cfg, bus_name):
 def dt_create_bus_node(cfg, bus_name, bus_label, is_zephyr=False):
     bus_range = ''
     label = bus_label
-    bus_node = dt_create_parent_node(cfg, bus_label, 1, 1)
+    bus_node = dt_create_parent_node(cfg, bus_label, 1, 1, is_zephyr=is_zephyr)
 
     if is_zephyr:
         label = 'soc'
