@@ -125,6 +125,9 @@
 				"private_data": ["led0 = &green_led;"]
 			},
 			"drivers": {
+				"bus": {
+					"compatible": ["efinix,sapphire"]
+				},
 				"plic": {
 					"compatible": ["sifive,plic-1.0.0"],
 					"interrupts_extended": [11],
