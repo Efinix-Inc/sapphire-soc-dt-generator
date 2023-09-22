@@ -397,9 +397,6 @@ def dt_create_root_node(cfg, model, os):
         }
     }
 
-    if os == 'zephyr':
-        del root_node["root"]["version"]
-
     return root_node
 
 """
