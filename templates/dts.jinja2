@@ -1,3 +1,4 @@
+{%- import "child.jinja2" as ch %}
 {%- if root.version -%}
 {{ root.version }};
 {%- endif %}
@@ -67,6 +68,25 @@
 		{%- endif %}
 	};
 	{%- endif %}
+
+	{%- if root.child %}
+	{%- for ck, cv in root.child.items() %}
+
+	{%- if cv.parent_label == "root" %}
+
+	{{ ch.child_node(cv)|indent(8, False) }}
+		{%- if 'child' in cv %}
+		{% for ckk, cvv in cv.child.items() %}
+		{{ ch.child_node(cvv)|indent(16, False) }}
+		};
+		{%- endfor %}
+		{%- endif %}
+	};
+
+	{%- endif %}
+
+	{%- endfor %}
+	{%- endif %}
 };
 
 {%- set buses = root.buses %}
@@ -88,53 +108,17 @@
 	status = "okay";
 
 	{%- if child %}
-	{%- for k_node, v_node in child.items() %}
-	{%- if v_node.parent_label == v.label %}
-
-	{{ v_node.header }}
-		#address-cells = <1>;
-
-		{%- if 'size_cell' in v_node %}
-		#size-cells = <{{ v_node.size_cell }}>;
-		{%- else %}
-		#size-cells = <0>;
-		{%- endif %}
-
-		{%- if 'addr' in v_node %}
-		reg = <{{ v_node.addr }}>;
-		{%- endif %}
-
-		{%- if v_node.compatible %}
-		compatible = "{{ v_node.compatible }}";
-		{%- endif %}
-
-		{%- for pdata in v_node.private_data %}
-                {{ pdata }}
+	{%- for ck, cv in child.items() %}
+	{%- if cv.parent_label == v.label %}
+	{{ ch.child_node(cv)|indent(8, False) }}
+                {%- if 'child' in cv %}
+                {% for ckk, cvv in cv.child.items() %}
+                {{ ch.child_node(cvv)|indent(16, False) }}
+                };
                 {%- endfor %}
+                {%- endif %}
+        };
 
-		{%- if v_node.status %}
-		status = "{{ v_node.status }}";
-		{%- endif %}
-
-		{%- if 'child' in v_node %}
-		{% for ck, cv in v_node.child.items() %}
-
-		{{ cv.header }}
-			{%- if 'reg' in cv %}
-			reg = <{{ cv.reg }}>;
-			{%- endif %}
-
-			{%- if 'compatible' in cv %}
-                	compatible = "{{ cv.compatible }}";
-                	{%- endif %}
-
-			{%- for pdata in cv.private_data %}
-			{{ pdata }}
-			{%- endfor %}
-		};
-		{% endfor %}
-		{%- endif %}
-	};
 	{%- endif %}
 	{%- endfor %}
 	{%- endif %}
