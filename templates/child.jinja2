@@ -1,0 +1,28 @@
+{%- macro child_node(cv) %}
+{{ cv.header }}
+	#address-cells = <1>;
+	{%- if 'size_cell' in cv %}
+	#size-cells = <{{ cv.size_cell }}>;
+	{%- else %}
+	#size-cells = <0>;
+	{%- endif %}
+
+	{%- if 'reg' in cv %}
+	reg = <{{ cv.reg }}>;
+	{%- endif %}
+
+	{%- if 'compatible' in cv %}
+	compatible = "{{ cv.compatible }}";
+	{%- endif %}
+
+	{%- if 'private_data' in cv %}
+	{%- for pdata in cv.private_data %}
+	{{ pdata }}
+	{%- endfor %}
+	{%- endif %}
+
+	{%- if 'status' in cv %}
+	status = "{{ cv.status }}";
+	{%- endif %}
+
+{%- endmacro %}
