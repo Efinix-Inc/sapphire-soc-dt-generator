@@ -5,6 +5,7 @@
                         "name": "flash",
                         "label": "flash",
                         "addr": 0,
+			"reg": 0,
                         "compatible": "spi-nor",
                         "private_data": [
 				"spi-max-frequency = <6000000>;"
@@ -49,6 +50,7 @@
 			"parent_label": "spi1",
 			"name": "mmc-slot",
 			"addr": 0,
+			"reg": 0,
 			"compatible": "mmc-spi-slot",
 			"status": "okay",
 			"private_data": [
@@ -57,7 +59,8 @@
 			]
 		},
 		"gpio_leds": {
-			"parent_label": "gpio0",
+			"parent_label1": "gpio0",
+			"parent_label": "root",
 			"label": "efx_gpio_devs",
 			"compatible": "efinix,efx-gpio",
 			"addr": 0,

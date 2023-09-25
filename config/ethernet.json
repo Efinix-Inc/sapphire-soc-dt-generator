@@ -60,12 +60,14 @@
 		"dma_channel0": {
 			"parent_label": "dma0",
 			"name": "dma-channel",
-			"addr": 0
+			"addr": 0,
+			"reg": 0
 		},
 		"dma_channel1": {
 			"parent_label": "dma0",
                         "name": "dma-channel",
-                        "addr": 1
+			"addr": 1,
+                        "reg": 1
 		}
 	}
 }
