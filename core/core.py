@@ -506,6 +506,7 @@ name@address {
 """
 def get_node_header(node):
     node_header = ''
+    addr = ''
 
     if 'addr' in node:
         addr = str(node['addr'])
@@ -514,7 +515,10 @@ def get_node_header(node):
 
     if 'label' in node and node['label']:
         if 'name' in node and node['name']:
-            node_header = "{}: {}@{}".format(node['label'], node['name'], addr)
+            if 'addr' in node:
+                node_header = "{}: {}@{}".format(node['label'], node['name'], addr)
+            else:
+                node_header = "{}: {}".format(node['label'], node['name'])
         else:
             node_header = "{}".format(node['label'])
 
