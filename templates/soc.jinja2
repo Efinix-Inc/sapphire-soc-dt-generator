@@ -1,0 +1,139 @@
+{%- if root.version -%}
+{{ root.version }};
+{%- endif %}
+
+{%- if 'dtsi' in root.include_headers %}
+{%- if 'include' in root.include_headers.dtsi %}
+{% for inc in root.include_headers.dtsi.include %}
+{{ inc }}
+{%- endfor %}
+{%- endif %}
+{%- endif %}
+
+{{ root.name }} {
+	{%- set cpu = root.cpu %}
+	model = "{{ root.model }}";
+	#address-cells = <1>;
+	#size-cells = <1>;
+
+	{{ cpu.label }} {
+		#address-cells = <1>;
+		#size-cells = <0>;
+		timebase-frequency = <{{ root.frequency }}>;
+
+		{% for core in range(cpu.cores) %}
+		{{ cpu.name }}@{{ core }} {
+			reg = <{{ core }}>;
+			device_type = "cpu";
+			compatible = "{{ cpu.arch }}";
+			riscv,isa = "{{ cpu.isa }}";
+			mmu_type = "{{ cpu.mmu_type }}";
+			{%- if cpu.clock_frequency %}
+			clock-frequency = <{{ root.frequency }}>;
+			{%- endif %}
+			i-cache-size = <{{ cpu.i_cache_size }}>;
+			i-cache-sets = <{{ cpu.i_cache_sets }}>;
+			i-cache-block-size = <{{ cpu.i_cache_block_size }}>;
+			d-cache-size = <{{ cpu.d_cache_size }}>;
+			d-cache-sets = <{{ cpu.d_cache_sets }}>;
+			d-cache-block-size = <{{ cpu.d_cache_block_size }}>;
+			{%- if cpu.tlb %}
+			tlb-split;
+			{%- endif %}
+			status = "okay";
+
+			{% if cpu.intc %}
+			{{ cpu.intc.label }}{{ core }}: {{ cpu.intc.name }} {
+				#interrupt-cells = <1>;
+				interrupt-controller;
+				compatible = "riscv,cpu-intc";
+			};
+			{%- endif %}
+		};
+		{% endfor %}
+	};
+
+	{%- set clock = root.clock %}
+	{%- if clock %}
+	{{ clock.name }} {
+		#address-cells = <1>;
+		#size-cells = <0>;
+		compatible = "simple-bus";
+
+		{{ clock.label }}: {{ clock.name }}@1 {
+			reg = <{{ clock.reg }}>;
+			compatible = "{{ clock.compatible }}";
+			#clock-cells = <0>;
+			clock-frequency = <{{ root.frequency }}>;
+		};	
+	};
+	{%- endif %}
+
+	{%- set buses = root.buses %}
+	{%- if buses %}
+	{% for key, value in buses.items() recursive %}
+
+	{{ value.header }}
+
+		#address-cells = <1>;
+		{%- if 'size_cell' in value %}
+		#size-cells = <{{ value.size_cell }}>;
+		{%- else %}
+		#size-cells = <0>;
+		{%- endif %}
+		compatible = "{{ value.compatible }}";
+		{%- if value.ranges %}
+		ranges = <{{ value.ranges }}>;
+		{%- else %}
+		ranges;
+		{%- endif %}
+
+		{%- if 'peripherals' in value %}
+		{% set peri = value.peripherals %}
+
+		{%- for k, v in peri.items() recursive %}
+		{{ v.header }}
+			reg = {{ v.reg }};
+			{%- if v.compatible %}
+			compatible = "{{ v.compatible }}";
+			{%- endif %}
+
+			{%- if 'interrupts' in v and v.interrupts %}
+			{%- if 'interrupt_cells' in v %}
+			#interrupt-cells = <{{ v.interrupt_cells }}>;
+			{%- endif %}
+			interrupt-parent = <&plic>;
+			interrupts = <{{ v.interrupts }}>;
+			{%- endif %}
+
+			{%- if v.clocks %}
+			clocks = {{ v.clocks }};
+			{%- endif %}
+
+			{%- if v.clock_freq %}
+                        clock-frequency = <{{ root.frequency }}>;
+                        {%- endif %}
+
+			{%- if 'private_data' in v %}
+			{%- for pdata in v.private_data %}
+			{{ pdata }}
+			{%- endfor %}
+			{%- endif %}
+
+			{%- if 'interrupts_extended' in v %}
+                        interrupts-extended = <
+                        {%- for ext in v.interrupts_extended %}
+                                {{ ext }}
+                        {%- endfor %}
+                        >;
+                        {%- endif %}
+			status = "{{ v.status }}";
+
+		};
+		{% endfor %}
+		{%- endif %}
+	};
+	{% endfor %}
+
+	{%- endif %}
+};

@@ -159,10 +159,12 @@ with open(kconfig_defconfig_path, 'w') as f:
     f.write("endif\n")
 
 dt_gen_script_path = os.path.join(current_dir, "device_tree_generator.py")
+z_config = os.path.join(current_dir, "config/zephyr_slaves.json")
+
 if selected_memory == "int": 
-    subprocess.run(["python3", dt_gen_script_path, soc_h_path, args.efx_dev_board, "zephyr", soc_name, board_name])
+    subprocess.run(["python3", dt_gen_script_path, "-c", z_config, soc_h_path, args.efx_dev_board, "zephyr", soc_name, board_name])
 else: 
-    subprocess.run(["python3", dt_gen_script_path, soc_h_path, args.efx_dev_board, "zephyr", soc_name, board_name, "-em"])
+    subprocess.run(["python3", dt_gen_script_path, "-c", z_config, soc_h_path, args.efx_dev_board, "zephyr", soc_name, board_name, "-em"])
 
 
 

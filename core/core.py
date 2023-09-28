@@ -1,4 +1,5 @@
 from core.variables import *
+from core.utils import *
 
 """
 get_value: get a value for a given property string
@@ -22,13 +23,26 @@ get_peripheral_properties: get a list of a peripheral's properties
 
 return: list of peripheral's properties for a given peripheral
 """
-def get_peripheral_properties(cfg, peripheral):
+def __get_peripheral_properties(cfg, peripheral, exclude_properties="", exclude=False):
     props = []
 
     for line in cfg:
+        if exclude:
+            if exclude_properties in line:
+                continue
+
         if peripheral in line:
             props.append(line)
+
     return props
+
+def get_peripheral_properties(cfg, peripheral):
+    return __get_peripheral_properties(cfg, peripheral,
+                                        exclude_properties="",
+                                        exclude=False)
+
+def get_peripheral_properties_exclude(cfg, peripheral, exclude_properties, exclude=True):
+    return  __get_peripheral_properties(cfg, peripheral, exclude_properties, exclude)
 
 """
 get_property_value: get the value of peripheral properties from soc.h
@@ -39,9 +53,16 @@ get_property_value: get the value of peripheral properties from soc.h
 
 return: string of the property value
 """
-def __get_property_value(cfg, peripheral, name, match=False):
+def __get_property_value(cfg, peripheral, name, match=False, exclude=False):
     value = ''
     props = get_peripheral_properties(cfg, peripheral)
+
+    if exclude:
+        for prop in props:
+            if name in prop:
+                props.remove(prop)
+
+        name = peripheral
 
     for prop in props:
         if match:
@@ -61,6 +82,9 @@ def get_property_value(cfg, peripheral, name):
 def get_property_value_match(cfg, peripheral, name):
     return __get_property_value(cfg, peripheral, name, match=True)
 
+def get_property_value_exclude(cfg, peripheral, name):
+    return __get_property_value(cfg, peripheral, name, match=False, exclude=True)
+
 """
 get_size: get the peripheral allocated memory size
 
@@ -70,7 +94,14 @@ get_size: get the peripheral allocated memory size
 return: string of size of memory allocated for the peripheral in hex
 """
 def get_size(cfg, peripheral):
-    size = get_property_value(cfg, peripheral, IO_SIZE)
+    size = 0
+
+    if 'APB' in peripheral:
+        size = get_property_value(cfg, peripheral, 'SIZE')
+
+    else:
+        size = get_property_value(cfg, peripheral, IO_SIZE)
+
     if not size:
         keyword_size = 'SYSTEM_{0}_IO_{1}'.format(peripheral, IO_SIZE)
         print("Error: Size for {0} is invalid. Expecting {1}".format(peripheral, keyword_size))
@@ -93,7 +124,14 @@ get_address: get the address of the peripheral
 return: string of address of the peripheral in hex
 """
 def get_address(cfg, peripheral):
-    addr = get_property_value(cfg, peripheral, PERIPHERAL)
+    addr = 0
+
+    if 'APB' in peripheral:
+        addr = get_property_value_exclude(cfg, peripheral, 'SIZE')
+
+    else:
+        addr = get_property_value(cfg, peripheral, PERIPHERAL)
+
     if not addr:
         keyword_addr = '{0}_{1}'.format(peripheral, PERIPHERAL)
         print("Error: Address for {0} not found. Expecting {1}".format(peripheral, keyword_addr))
@@ -120,6 +158,22 @@ def get_peripheral_address(cfg, peripheral):
 
     return addr
 
+def check_bus_keyword(bus_name):
+    keywords = ["SYSTEM_BMB", "SYSTEM_AXI", "SYSTEM_RAM"]
+    bus_name = bus_name.upper()
+
+    for keyword in keywords:
+        if bus_name in keyword:
+            bus_name = keyword
+            break
+
+    return bus_name
+
+def get_bus_address(cfg, bus_name):
+    bus_name = check_bus_keyword(bus_name)
+    addr = get_property_value_exclude(cfg, bus_name, "SIZE ")
+
+    return addr
 
 """
 get_interrupt_id: get interrupt number of peripheral
@@ -153,9 +207,9 @@ def get_frequency(cfg):
 
 def get_status(okay=False):
     if okay:
-        return 'status = "okay";'
+        return "okay"
     else:
-        return 'status = "disabled";'
+        return "disabled"
 
 
 """
@@ -168,12 +222,13 @@ return: number of peripheral in the soc
 """
 def count_peripheral(cfg, peripheral):
     count = 0
-    p = []
 
-    props = get_peripheral_properties(cfg, peripheral)
+    props = get_peripheral_properties_exclude(cfg, peripheral, "SIZE")
     for prop in props:
         if PERIPHERAL in prop:
-            p.append(prop)
+            count = count + 1
+
+        if 'APB' in prop:
             count = count + 1
 
     return count
@@ -333,3 +388,157 @@ def get_peripherals(cfg, filter_peripherals):
     peripherals = list(dict.fromkeys(peripherals))
 
     return peripherals
+
+"""
+override_peripherals: override the peripherals properties
+
+The properties for each peripheral can be overrided using this function.
+It need to follow specific data structure to override the existing value.
+For example, to override the compatible property for apb_slave_0 node,
+the new_cfg should specify as follow.
+
+new_cfg = {
+    "overrides": {
+        "APB_SLAVE_0": {
+            "compatible": "new-apb-slave"
+        }
+    }
+}
+
+APB_SLAVE_0 is the key to override specific peripherals properties.
+
+@peripheral_parent (dict): a dictionary that have all of the peripherals
+@new_cfg (dict): new configuration to override the peripheral in @peripheral_parent.
+"""
+def override_peripherals(peripheral_parent, new_cfg):
+    for k1 in peripheral_parent['buses']:
+        for k2 in peripheral_parent['buses'][k1]['peripherals']:
+            if 'overrides' in new_cfg:
+                for u1 in new_cfg['overrides']:
+                    if k2 in u1:
+                        n_cfg = new_cfg['overrides'][u1]
+                        peripheral_node = peripheral_parent['buses'][k1]['peripherals'][k2]
+                        peripheral_node.update(n_cfg)
+                        node_header = get_node_header(peripheral_node)
+                        peripheral_node['header'] = node_header
+
+"""
+get_os_data: get operating system data from drivers.json
+
+@is_zephyr (bool): specify is it zephyr else it will choose linux
+
+return: dictionary of operating system data
+"""
+def get_os_data(is_zephyr=False):
+    operating_system = 'linux'
+
+    os_data = load_config_file()
+
+    if is_zephyr:
+        operating_system = 'zephyr'
+
+    os_data = os_data['os'][operating_system]
+
+    return os_data
+
+"""
+get_driver_data: get the driver data from drivers.json
+
+@peripheral (str): peripheral name such as SPI, I2C. Must be in capital letter
+@controller (bool): the peripheral is controller peripheral such as plic
+@is_zephyr (bool): specify is it zephyr else it will choose linux
+
+return: dictionary of driver data
+"""
+def get_driver_data(controller=False, is_zephyr=False):
+    driver_data = get_os_data(is_zephyr=is_zephyr)
+
+    if controller:
+        driver_data = driver_data['controller']
+    else:
+        driver_data = driver_data['drivers']
+
+    return driver_data
+
+"""
+get_driver_private_data: get the driver private data from drivers.json
+
+@peripheral (str): peripheral name such as SPI, I2C. Must be in capital letter
+@controller (bool): the peripheral is controller peripheral such as plic
+@is_zephyr (bool): specify is it zephyr else it will choose linux
+
+return: dictionary of driver private data
+"""
+def get_driver_private_data(peripheral, controller=False, is_zephyr=False):
+    priv_data = ''
+    peripheral = peripheral.lower()
+
+    driver_data = get_driver_data(controller, is_zephyr)
+
+    if peripheral in driver_data:
+        if 'private_data' in driver_data[peripheral]:
+            priv_data = driver_data[peripheral]['private_data']
+
+    return priv_data
+
+"""
+get_node_header: construct the device tree node header
+
+@node (dict): any node which contain label, name and addr
+
+return: string of node header
+
+The node header could be constructed in three different ways
+depending on label, name and address property.
+For example, if label, name and address are available, it will
+create as follows.
+
+label: name@address {
+
+If only label is available, then it will create like this.
+
+label {
+
+Finally, if only name and address are available, then it will create
+like this.
+
+name@address {
+"""
+def get_node_header(node):
+    node_header = ''
+    addr = ''
+
+    if 'addr' in node:
+        addr = str(node['addr'])
+        if '0x' in addr:
+            addr = addr.strip('0x')
+
+    if 'label' in node and node['label']:
+        if 'name' in node and node['name']:
+            if 'addr' in node:
+                node_header = "{}: {}@{}".format(node['label'], node['name'], addr)
+            else:
+                node_header = "{}: {}".format(node['label'], node['name'])
+        else:
+            node_header = "{}".format(node['label'])
+
+    elif 'name' in node and node['name']:
+        node_header = "{}@{}".format(node['name'], addr)
+
+    node_header += " {"
+
+    return node_header
+
+def get_child_node_header(node):
+    if 'child' in node:
+        for child_node in node['child']:
+            node_header = get_node_header(node['child'][child_node])
+            node['child'][child_node]['header'] = node_header
+
+            child_node = node['child'][child_node]
+            if 'child' in child_node:
+                for child_node2 in child_node['child']:
+                    node_header = get_node_header(child_node['child'][child_node2])
+                    child_node['child'][child_node2]['header'] = node_header
+
+    return node

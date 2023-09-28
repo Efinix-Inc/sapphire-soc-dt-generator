@@ -1,0 +1,73 @@
+{
+	"overrides": {
+                "SPI_0": {
+                        "interrupts": ""
+                },
+                "SPI_1": {
+                        "interrupts": ""
+                },
+                "APB_SLAVE_1": {
+                        "name": "dma",
+                        "label": "dma0",
+                        "compatible": "spinal,lib-dmasg",
+                        "interrupts": "16 17",
+                        "private_data": [
+                                "#dma-cells = <1>;",
+                                "#address-cells = <1>;",
+                                "#size-cells = <0>;",
+                                "axistream-connected = <&tsemac0>;",
+                                "axistream-control-connected = <&tsemac0>;"
+                        ]
+                },
+                "APB_SLAVE_0": {
+                        "name": "tsemac",
+                        "label": "tsemac0",
+                        "compatible": "efinix,tsemac-0.01.a",
+                        "private_data": [
+                                "axistream-connected = <&dma0>;",
+                                "axistream-control-connected = <&dma0>;",
+                                "device_type = \"network\";",
+                                "local-mac-address = [ 00 11 22 33 44 55 ];",
+                                "efx,rxcsum = <0x0>;",
+                                "efx,rxmem = <0x1000>;",
+                                "efx,stats = <0x0>;",
+                                "efx,txcsum = <0x0>;",
+                                "efx,txmem = <0x1000>;",
+                                "phy-handle = <&phy0>;",
+                                "phy-mode = \"rgmii\";"
+                        ]
+                }
+        },
+	"child": {
+		"tsemac": {
+			"parent_label": "tsemac0",
+			"label": "mdio",
+			"child":{
+				"phy": {
+					"name": "ethernet-phy",
+					"label": "phy0",
+					"addr": 0,
+					"reg": "0",
+					"compatible": "ethernet-phy-id001c.c916",
+					"private_data": [
+						"device_type = \"ethernet-phy\";",
+						"reset-assert-us = <500000>;",
+						"reset-deassert-us = <500000>;"
+					]
+				}
+			}
+		},
+		"dma_channel0": {
+			"parent_label": "dma0",
+			"name": "dma-channel",
+			"addr": 0,
+			"reg": 0
+		},
+		"dma_channel1": {
+			"parent_label": "dma0",
+                        "name": "dma-channel",
+			"addr": 1,
+                        "reg": 1
+		}
+	}
+}

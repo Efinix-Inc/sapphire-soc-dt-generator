@@ -1,0 +1,15 @@
+{
+	"buses": {
+		"soc": {
+			"label": "soc",
+			"name": "",
+			"peripherals": [
+				"plic",
+				"clint",
+				"uart",
+				"gpio",
+				"apb_slave"
+			]
+		}
+	}
+}

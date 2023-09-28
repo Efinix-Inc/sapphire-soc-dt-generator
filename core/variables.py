@@ -1,6 +1,6 @@
 import os
 
-DRIVER_FILE = os.path.join(os.path.relpath(os.path.dirname(__file__)), "../drivers.json")
+DRIVER_FILE = os.path.join(os.path.relpath(os.path.dirname(__file__)), "../config/drivers.json")
 
 # search keyword in soc.h
 INTERRUPT = "IO_INTERRUPT"
@@ -22,3 +22,4 @@ CONTROLLER = ["PLIC", "CLINT", "RAM"]
 PLIC = "PLIC"
 CLINT = "CLINT"
 SUPERVISOR = "SUPERVISOR "
+PERIPHERALS = ["UART", "I2C", "SPI", "GPIO", "APB_SLAVE", "CLINT", "PLIC"]

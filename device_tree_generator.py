@@ -2,11 +2,18 @@
 
 import argparse
 import os
+import sys
 import shutil
 import pprint
 from core.core import *
 from core.utils import *
 from core.dt import *
+from jinja2 import Environment, FileSystemLoader
+
+pwd = os.path.relpath(os.path.dirname(__file__))
+env = Environment(loader=FileSystemLoader(os.path.join(pwd, "templates")))
+dtsi_template = env.get_template("soc.jinja2")
+dts_template = env.get_template("dts.jinja2")
 
 def main():
 
@@ -18,9 +25,14 @@ def main():
 
     dt_parse.add_argument('soc', type=str, help='path to soc.h')
     dt_parse.add_argument('board', type=str, help='development kit name such as t120, ti60')
+    dt_parse.add_argument('-b', '--bus', type=str, default=os.path.join(pwd, "config/single_bus.json"),
+            help='Specify path to bus architecture for the SoC in json format. By default is "config/single_bus.json"')
+    dt_parse.add_argument('-c', '--user-config', type=str,
+            help='Specify path to user configuration json file to override the APB slave device property')
     dt_parse.add_argument('-d', '--dir', type=str, help='Output generated output directory. By default is dts')
     dt_parse.add_argument('-o', '--outfile', type=str, help='Override output filename. By default is sapphire.dtsi')
     dt_parse.add_argument('-j', '--json', action='store_true', help='Save output file as json format')
+    dt_parse.add_argument('-s', '--slave', action='append', type=str, help='Specify path to slave device configuration json file. This file is a slave node for the master device which appear in DTS file.')
     subparsers = dt_parse.add_subparsers(title='os', dest='os')
     os_linux_parser = subparsers.add_parser('linux', help='Target OS, Linux')
     os_zephyr_parser = subparsers.add_parser('zephyr', help='Target OS, Zephyr')
@@ -36,12 +48,6 @@ def main():
         is_zephyr = True
     else:
         is_zephyr = False
-
-    memory_selection = "ext"
-
-    if is_zephyr :
-        if not args.extmemory:
-            memory_selection = "int"
 
     soc_path = args.soc
     cfg = read_file(soc_path)
@@ -59,13 +65,13 @@ def main():
         return -1
 
     output_json = 'sapphire.json'
+    output_filename_standalone = ""
 
     if is_zephyr:
         output_filename_standalone = "sapphire_soc_{soc_name}.dtsi".format(soc_name=args.socname)
         output_filename = os.path.join(path_dts, output_filename_standalone)
         dts_filename = '{}.dts'.format(args.zephyrboard)
     else:
-        output_filename_standalone = ""
         output_filename = 'sapphire.dtsi'
         output_filename = os.path.join(path_dts, output_filename)
         dts_filename = 'linux.dts'
@@ -80,31 +86,43 @@ def main():
         output_filename = args.outfile
 
     # root
-    root_node = dt_create_root_node(is_zephyr)
-    root_node['root'].update(create_includes(conf, is_zephyr))
+    model = conf['model']
+    root_node = dt_create_root_node(cfg, model, args.os)
 
+    os_data = get_os_data(is_zephyr=is_zephyr)
+    misc_node = {
+            "include_headers": os_data['include_headers'],
+            "chosen": os_data['chosen'],
+            "aliases": os_data['aliases']
+    }
     if is_zephyr:
-        root_node['root'].update(conf['zephyr_dtsi']['root'])
-        ram_node = dt_create_memory_node(cfg, True, True) #onChipRAM, Zephyr
-        if ram_node:
-            root_node = dt_insert_child_node(root_node, ram_node)
-        ext_ram_node = dt_create_memory_node(cfg, False, True) # External RAM, Zephyr
-        if ext_ram_node:
-            root_node = dt_insert_child_node(root_node, ext_ram_node)
+        if not 'dts' in misc_node['include_headers']:
+            misc_node['include_headers']['dts'] = {'include': []}
 
+        misc_node['include_headers']['dts']['include'].append(
+                "#include <efinix/{}>".format(output_filename_standalone))
 
+    root_node = dt_insert_child_node(root_node, misc_node)
 
-
-    # bus
-    bus_name = 'PERIPHERAL_BMB'
-    bus_label = 'apbA'
-    apb_node = dt_create_bus_node(cfg, bus_name, bus_label)
-
+    memory_node = {"memory": {}}
     if is_zephyr:
-        soc_node = dt_create_soc_node(cfg)
-        peripheral_parent  = soc_node
-    else:
-        peripheral_parent = apb_node
+        mem_node = dt_create_memory_node(cfg, False, is_zephyr)
+        memory_node['memory'].update(mem_node)
+
+    mem_node = dt_create_memory_node(cfg, True, is_zephyr)
+    memory_node['memory'].update(mem_node)
+
+    root_node = dt_insert_child_node(root_node, memory_node)
+
+    if 'reserved_memory' in os_data:
+        root_node['root']['reserved_memory'] = os_data['reserved_memory']
+
+    if is_zephyr :
+        if args.extmemory:
+            root_node['root']['chosen']['private_data'].append("zephyr,sram = &external_ram;")
+        else:
+            root_node['root']['chosen']['private_data'].append("zephyr,sram = &ram0;")
+
 
     # cpu
     cpu_node = dt_create_cpu_node(cfg, is_zephyr)
@@ -112,35 +130,87 @@ def main():
         root_node = dt_insert_child_node(root_node, cpu_node)
 
     # clock
-    clk_node = dt_create_clock_node(cfg)
+    clk_node = dt_create_clock_node(cfg, 'apb_clock')
 
     if clk_node and not is_zephyr:
         root_node = dt_insert_child_node(root_node, clk_node)
 
-    # plic
-    plic_node = dt_create_plic_node(cfg, is_zephyr=is_zephyr)
-    if plic_node:
-        peripheral_parent = dt_insert_child_node(peripheral_parent, plic_node)
-
-    PERIPHERALS = ["UART", "I2C", "SPI", "GPIO"]
-    #zephyr does not support i2c and spi yet
-    if is_zephyr:
-        PERIPHERALS = ["UART", "GPIO", "CLINT"]
 
     peripheral_list = get_peripherals(cfg, PERIPHERALS)
-    for peripheral in peripheral_list:
-        periph_node = dt_create_node(cfg, peripheral, is_zephyr)
-        if periph_node:
-            peripheral_parent = dt_insert_child_node(peripheral_parent, periph_node)
 
-    root_node = dt_insert_child_node(root_node, peripheral_parent)
-    out = dt_parser_nodes(root_node, root_node)
+    # bus
+    buses_node = {"buses": {}}
+
+    if is_zephyr:
+        args.bus = os.path.join(pwd, 'config/z_single_bus.json')
+
+    bus_cfg = load_json_file(args.bus)
+    for bus in bus_cfg['buses']:
+        bus_label = bus_cfg['buses'][bus]['label']
+
+        for bus in bus_cfg['buses']:
+            bus_name = bus_cfg['buses'][bus]['name']
+            bus_node = dt_create_bus_node(cfg, bus_name, bus_label, is_zephyr)
+            buses_node["buses"].update(bus_node)
+
+    for bus in bus_cfg['buses']:
+        for peripheral in peripheral_list:
+            if peripheral.lower() in bus_cfg['buses'][bus]['peripherals']:
+                periph_node = dt_create_node(cfg, root_node, peripheral, is_zephyr)
+                buses_node['buses'][bus]['peripherals'].update(periph_node)
+
+    slaves_node = {}
+    if args.user_config:
+        if os.path.exists(args.user_config):
+            user_cfg = load_json_file(args.user_config)
+            override_peripherals(buses_node, user_cfg)
+
+            # add child node if specify
+            if 'child' in user_cfg:
+                child_node = get_child_node_header(user_cfg)
+                slaves_node = {"child": child_node['child']}
+                root_node = dt_insert_child_node(root_node, slaves_node)
+
+            # append items into aliases or chosen node if specify
+            if 'append' in user_cfg:
+                for key in user_cfg['append']:
+                    if 'private_data' in root_node['root'][key]:
+                        root_node['root'][key]['private_data'] += user_cfg['append'][key]
+                    else:
+                        root_node['root'][key]['private_data'] = user_cfg['append'][key]
+
+        else:
+            print("Error: file %s does not exists" % args.user_config)
+            sys.exit(1)
+
+    root_node = dt_insert_child_node(root_node, buses_node)
+
+    if args.slave:
+        slaves_node = {}
+        for slave_cfg in args.slave:
+            if os.path.exists(slave_cfg):
+                slave_node = load_json_file(slave_cfg)
+                slaves_node = {**slaves_node, **slave_node['child']}
+
+            else:
+                print("Error: file %s does not exists" % slave_cfg)
+                sys.exit(1)
+
+        slaves_node = {'child': slaves_node}
+        slaves_node = get_child_node_header(slaves_node)
+
+        if not 'child' in root_node['root']:
+            root_node = dt_insert_child_node(root_node, slaves_node)
+        else:
+            root_node['root']['child'].update(slaves_node['child'])
+
+    out = dtsi_template.render(root_node)
     save_file(output_filename, out)
     print("Info: SoC device tree source stored in %s" % output_filename)
 
     # create dts file
-    dts_out = create_dts_file(cfg, peripheral_parent, memory_selection, is_zephyr, output_filename_standalone)
-    save_file(dts_filename, dts_out)
+    out = dts_template.render(root_node)
+    save_file(dts_filename, out)
     print("Info: save dts of board %s in %s" % (board, dts_filename))
 
     # save in json format

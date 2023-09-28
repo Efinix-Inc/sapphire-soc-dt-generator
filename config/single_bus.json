@@ -1,0 +1,16 @@
+{
+	"buses": {
+		"bmb": {
+			"label": "bmb",
+			"name": "bmb",
+			"peripherals": [
+				"plic",
+				"uart",
+				"spi",
+				"i2c",
+				"gpio",
+				"apb_slave"
+			]
+		}
+	}
+}

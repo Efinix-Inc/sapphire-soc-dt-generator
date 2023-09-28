@@ -1,0 +1,41 @@
+{
+	"append": {
+		"aliases": [
+			"led0 = &led_green;"
+		]
+	},
+	"child": {
+		"leds": {
+			"parent_label": "gpio0",
+			"label": "leds",
+			"compatible": "gpio-leds",
+			"status": "okay",
+			"child": {
+				"gpio_led_green": {
+					"name": "led0",
+					"label": "led_green",
+					"private_data": [
+						"gpios = <&gpio0 3 GPIO_ACTIVE_LOW>;",
+						"label = \"Green LED 3\";"
+					]
+				},
+				"gpio_led_red": {
+					"name": "led1",
+					"label": "led_red",
+					"private_data": [
+						"gpios = <&gpio0 2 GPIO_ACTIVE_LOW>;",
+						"label = \"Red LED 2\";"
+					]
+				},
+				"gpio_led_blue": {
+					"name": "led2",
+					"label": "led_blue",
+					"private_data": [
+						"gpios = <&gpio0 1 GPIO_ACTIVE_LOW>;",
+						"label = \"Red LED 1\";"
+					]
+				}
+			}
+		}
+	}
+}

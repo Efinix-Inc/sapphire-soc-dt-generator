@@ -1,0 +1,179 @@
+{
+	"dt_version": "/dts-v1/;",
+	"model": "efinix,sapphire",
+	"devkits": [
+		"T120F324",
+		"Ti60F225",
+		"Ti180J484"
+	],
+	"os": {
+		"linux": {
+			"include_headers": {
+				"dts": {
+					"include": [
+						"/include/ \"sapphire.dtsi\"",
+						"#include <dt-bindings/gpio/gpio.h>"
+					]
+				}
+			},
+			"chosen": {
+				"name": "chosen",
+				"private_data": [
+					"stdout-path = \"serial0:115200n8\";",
+					"bootargs = \"rootwait console=ttySL0 earlycon root=/dev/mmcblk0p2 init=/sbin/init mmc_core.use_spi_crc=0\";"
+				]
+			},
+			"aliases": {
+				"name": "aliases",
+				"private_data": [
+					"serial0 = &uart0;"
+				]
+			},
+			"memory_mapped": {
+				"uimage": "0x00400000",
+				"linux.dtb": "0x00CF0000",
+				"opensbi": "0x01000000",
+				"u-boot": "0x01040000"
+			},
+			"reserved_memory": {
+				"private_data": [
+					"ranges;"
+				],
+				"child": {
+					"opensbi": {
+						"name": "sbi",
+						"label": "opensbi",
+						"addr": "1000000",
+						"size": "80000"
+					}
+				}
+			},
+			"drivers": {
+				"bus": {
+					"compatible": ["simple-bus"]
+				},
+				"spi": {
+					"compatible": ["spinal-lib,spi-1.0"],
+					"private_data": [
+						"cmd_fifo_depth = <256>;",
+						"rsp_fifo_depth = <256>;",
+						"num-cs = <1>;"
+					]
+				},
+				"uart": {
+					"compatible": ["spinal-lib,uart-2.0"],
+					"private_data": [
+						"current-speed = <115200>;"
+					]
+				},
+				"gpio": {
+					"compatible": ["spinal-lib,gpio-1.0"],
+					"private_data": [
+						"ngpio = <4>;",
+						"gpio-controller;",
+						"#gpio-cells = <2>;",
+						 "#interrupt-cells = <2>;"
+					]
+				},
+				"i2c": {
+					"compatible": ["efinix,efx-i2c"],
+					"private_data": [
+						"clock-frequency = <100000>;"
+					]
+				},
+				"clock": {
+					"compatible": ["fixed-clock"]
+				},
+				"plic": {
+					"compatible": ["sifive,plic-1.0.0", "sifive,fu540-c000-plic"],
+					"interrupts_extended": [11, 9],
+					"private_data": [
+						"#interrupt-cells = <1>;",
+						"interrupt-controller;",
+						"riscv,ndev = <32>;"
+					]
+				}
+			},
+			"controller": {
+				"plic": {
+					"compatible": ["riscv,cpu-intc"],
+					"private_data": [
+						"#interrupt-cells = <1>;",
+						"interrupt-controller;"
+					]
+				}
+			}
+		},
+		"zephyr": {
+			"include_headers": {
+				"dtsi": {
+					"include": [
+						"#include <mem.h>",
+						"#include <zephyr/dt-bindings/gpio/gpio.h>"
+					]
+				}
+			},
+			"chosen": {
+				"name": "chosen",
+				"private_data": [
+					"zephyr,console = &uart0;",
+					"zephyr,shell-uart = &uart0;"
+				]
+			},
+			"aliases": {
+				"name": "aliases"
+			},
+			"drivers": {
+				"bus": {
+					"compatible": ["efinix,sapphire"]
+				},
+				"plic": {
+					"compatible": ["sifive,plic-1.0.0"],
+					"interrupts_extended": [11],
+					"private_data": [
+						"reg-names = \"prio\", \"irq_en\", \"reg\";",
+						"#address-cells = <0>;",
+						"#interrupt-cells = <2>;",
+						"interrupt-controller;",
+						"riscv,max-priority = <3>;",
+						"riscv,ndev = <32>;"
+					]
+				},
+				"clint": {
+					"compatible": ["sifive,clint0"],
+					"private_data": [
+						"interrupts-extended = <&hlic0 3 &hlic0 7>;"
+					]
+				},
+				"uart": {
+					"compatible": ["efinix,sapphire-uart0"],
+					"private_data": [
+						"reg-names = \"base\";",
+						"current-speed = <115200>;"
+					]
+				},
+				"gpio": {
+					"compatible": ["efinix,sapphire-gpio"],
+					"private_data": [
+						"ngpios = <4>;",
+						"gpio-controller;",
+						"#gpio-cells = <2>;",
+						"#address-cells = <1>;",
+						"#size-cells = <1>;"
+					]
+				}
+			},
+			"controller": {
+				"plic": {
+                                        "compatible": ["riscv,cpu-intc"],
+                                        "private_data": [
+                                                "#address-cells = <0>;",
+                                                "#interrupt-cells = <1>;",
+                                                "interrupt-controller;"
+                                        ]
+                                }
+
+			}
+		}
+	}
+}
