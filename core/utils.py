@@ -1,3 +1,7 @@
+# SPDX-License-Identifier: MIT
+#
+# Copyright (C) 2023 Efinix, Inc.
+
 import os
 import json
 

@@ -1,4 +1,7 @@
 #!/usr/bin/python3
+# SPDX-License-Identifier: MIT
+#
+# Copyright (C) 2023 Efinix, Inc.
 
 import argparse
 import os

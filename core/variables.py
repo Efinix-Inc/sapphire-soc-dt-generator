@@ -1,3 +1,7 @@
+# SPDX-License-Identifier: MIT
+#
+# Copyright (C) 2023 Efinix, Inc.
+
 import os
 
 DRIVER_FILE = os.path.join(os.path.relpath(os.path.dirname(__file__)), "../config/drivers.json")

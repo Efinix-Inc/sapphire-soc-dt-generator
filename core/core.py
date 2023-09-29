@@ -1,3 +1,7 @@
+# SPDX-License-Identifier: MIT
+#
+# Copyright (C) 2023 Efinix, Inc.
+
 from core.variables import *
 from core.utils import *
 
