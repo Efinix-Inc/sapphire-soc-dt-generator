@@ -1,11 +1,5 @@
 {
 	"overrides": {
-                "SPI_0": {
-                        "interrupts": ""
-                },
-                "SPI_1": {
-                        "interrupts": ""
-                },
                 "APB_SLAVE_1": {
                         "name": "dma",
                         "label": "dma0",
