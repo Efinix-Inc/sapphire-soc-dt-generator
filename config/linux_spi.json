@@ -1,0 +1,10 @@
+{
+	"overrides": {
+		"SPI_0": {
+			"interrupts": ""
+		},
+		"SPI_1": {
+			"interrupts": ""
+		}
+	}
+}
