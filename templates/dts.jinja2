@@ -105,6 +105,12 @@
 	{%- else %}
 	#size-cells = <0>;
 	{%- endif %}
+
+	{%- if 'private_data' in v %}
+	{%- for pdata in v.private_data %}
+	{{ pdata }}
+	{%- endfor %}
+	{%- endif %}
 	status = "okay";
 
 	{%- if child %}

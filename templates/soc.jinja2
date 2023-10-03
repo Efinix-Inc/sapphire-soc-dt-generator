@@ -114,10 +114,12 @@
                         clock-frequency = <{{ root.frequency }}>;
                         {%- endif %}
 
+			{%- if 'okay' in v.status %}
 			{%- if 'private_data' in v %}
 			{%- for pdata in v.private_data %}
 			{{ pdata }}
 			{%- endfor %}
+			{%- endif %}
 			{%- endif %}
 
 			{%- if 'interrupts_extended' in v %}
