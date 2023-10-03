@@ -30,7 +30,7 @@ def main():
     dt_parse.add_argument('board', type=str, help='development kit name such as t120, ti60')
     dt_parse.add_argument('-b', '--bus', type=str, default=os.path.join(pwd, "config/single_bus.json"),
             help='Specify path to bus architecture for the SoC in json format. By default is "config/single_bus.json"')
-    dt_parse.add_argument('-c', '--user-config', type=str,
+    dt_parse.add_argument('-c', '--user-config', action='append', type=str,
             help='Specify path to user configuration json file to override the APB slave device property')
     dt_parse.add_argument('-d', '--dir', type=str, help='Output generated output directory. By default is dts')
     dt_parse.add_argument('-o', '--outfile', type=str, help='Override output filename. By default is sapphire.dtsi')
@@ -164,27 +164,28 @@ def main():
 
     slaves_node = {}
     if args.user_config:
-        if os.path.exists(args.user_config):
-            user_cfg = load_json_file(args.user_config)
-            override_peripherals(buses_node, user_cfg)
+        for uc in args.user_config:
+            if os.path.exists(uc):
+                user_cfg = load_json_file(uc)
+                override_peripherals(buses_node, user_cfg)
 
-            # add child node if specify
-            if 'child' in user_cfg:
-                child_node = get_child_node_header(user_cfg)
-                slaves_node = {"child": child_node['child']}
-                root_node = dt_insert_child_node(root_node, slaves_node)
+                # add child node if specify
+                if 'child' in user_cfg:
+                    child_node = get_child_node_header(user_cfg)
+                    slaves_node = {"child": child_node['child']}
+                    root_node = dt_insert_child_node(root_node, slaves_node)
 
-            # append items into aliases or chosen node if specify
-            if 'append' in user_cfg:
-                for key in user_cfg['append']:
-                    if 'private_data' in root_node['root'][key]:
-                        root_node['root'][key]['private_data'] += user_cfg['append'][key]
-                    else:
-                        root_node['root'][key]['private_data'] = user_cfg['append'][key]
+                # append items into aliases or chosen node if specify
+                if 'append' in user_cfg:
+                    for key in user_cfg['append']:
+                        if 'private_data' in root_node['root'][key]:
+                            root_node['root'][key]['private_data'] += user_cfg['append'][key]
+                        else:
+                            root_node['root'][key]['private_data'] = user_cfg['append'][key]
 
-        else:
-            print("Error: file %s does not exists" % args.user_config)
-            sys.exit(1)
+            else:
+                print("Error: file %s does not exists" % uc)
+                sys.exit(1)
 
     root_node = dt_insert_child_node(root_node, buses_node)
 
