@@ -1,0 +1,29 @@
+v2.0,
+	Summary,
+	Create a new data structure for root node of device tree.
+	Use jinja2 template files to generate device tree output files (dtsi and dts).
+	Create a new data structure for drivers.json file.
+	Fixed some function and return value.
+	Add new features for users to add and overrides device tree nodes.
+
+	Features,
+	Allow users to create the bus architecture for the SoC.
+	Allow users to override the device tree property value for peripheral node.
+	Allow users to add slave device, append string to aliases and chosen node.
+
+	Fixed,
+	Change the output of dt_*. For example, dt_compatible(), dt_reg(), dt_interrupt().
+	Rewrite the main() to use new data structure.
+
+v1.0,
+	Summary,
+	Add device tree scripts for generating device tree for Linux and Zephyr
+
+	Features,
+	Add support board dts gen for zephyr
+	Add zephyr support for generating device tree
+	Add support for external memory
+
+	Fixed,
+	DT: refactor code for creating memory node
+	DT: do not generate clock-frequency DT property for I2C
