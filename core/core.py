@@ -112,11 +112,31 @@ def get_size(cfg, peripheral):
 
     return size
 
+"""
+get_base_address: get the base address of the bus node
 
-def get_base_address(cfg):
+Do a lookup for the bus address of the peripheral that connected to.
+For example, if spi peripheral is connected to axi4 bus, then we need to get the
+address of the axi4 bus.
+"""
+def get_base_address(cfg, root_node, bus):
+    addr = '0x0'
+
     props = get_peripheral_properties(cfg, BASE_ADDR_PROP)
     for prop in props:
         addr = get_value(prop)
+
+    if 'buses' in root_node['root']:
+        if not bus in root_node['root']['buses']:
+            print("Error: bus %s is not found" % bus)
+            return addr
+
+        addr = root_node['root']['buses'][bus]['addr']
+        addr = "0x{}".format(addr)
+
+    else:
+        print("Warning: buses node not found. The offset address of %s is set to %s" % (peripheral, addr))
+
     return addr
 
 """
@@ -142,20 +162,23 @@ def get_address(cfg, peripheral):
     return addr
 
 """
-get_peripheral_base_address: calculate the base address of peripheral
+get_peripheral_offset_address: calculate the offset address of peripheral
+from bus address
 
 @cfg (list): raw data of soc.h
 @peripheral (str): peripheral name such as SPI, I2C. Must be in capital letter
+@root_node (dict): node which contain buses node
+@bus (str): bus label on which the peripheral is connected on
 
 return: string of peripheral base address in hex
 """
-def get_peripheral_base_address(cfg, peripheral):
+def get_peripheral_offset_address(cfg, peripheral, root_node=None, bus=None):
     addr = get_address(cfg, peripheral)
-    base = get_base_address(cfg)
+    base = get_base_address(cfg, root_node, bus)
 
-    addr = hex(int(addr, 0) - int(base, 0))
+    offset = hex(int(addr, 0) - int(base, 0))
 
-    return addr
+    return offset
 
 def get_peripheral_address(cfg, peripheral):
     addr = get_address(cfg, peripheral)

@@ -156,10 +156,13 @@ def main():
             bus_node = dt_create_bus_node(cfg, bus_name, bus_label, is_zephyr)
             buses_node["buses"].update(bus_node)
 
+    root_node = dt_insert_child_node(root_node, buses_node)
+
     for bus in bus_cfg['buses']:
         for peripheral in peripheral_list:
-            if peripheral.lower() in bus_cfg['buses'][bus]['peripherals']:
-                periph_node = dt_create_node(cfg, root_node, peripheral, is_zephyr)
+            peripheral_l = peripheral.lower()
+            if peripheral_l in bus_cfg['buses'][bus]['peripherals']:
+                periph_node = dt_create_node(cfg, root_node, peripheral, is_zephyr, bus)
                 buses_node['buses'][bus]['peripherals'].update(periph_node)
 
     slaves_node = {}

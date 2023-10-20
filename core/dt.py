@@ -48,10 +48,10 @@ dt_reg: string of device tree syntax of reg
 
 return: string of device tree reg syntax
 """
-def dt_reg(cfg, peripheral, is_zephyr=False):
+def dt_reg(cfg, peripheral, is_zephyr=False, root_node=None, bus=None):
     out = ''
 
-    addr = get_peripheral_base_address(cfg, peripheral)
+    addr = get_peripheral_offset_address(cfg, peripheral, root_node, bus)
     size = get_size(cfg, peripheral)
 
     if is_zephyr:
@@ -144,10 +144,10 @@ dt_create_node: create a device tree node for a peripheral
 @root_node (dict): node which contain cpu node
 @peripheral (str): peripheral name such as SPI, I2C. Must be in capital letter
 @is_zephyr (bool): Set true if it is for zephyr
-
+@bus (str): bus label where the peripheral is connected to
 return: dict of device tree peripheral nodes
 """
-def dt_create_node(cfg, root_node, peripheral, is_zephyr=False):
+def dt_create_node(cfg, root_node, peripheral, is_zephyr=False, bus=None):
     node = {}
     nodes = {}
 
@@ -164,8 +164,8 @@ def dt_create_node(cfg, root_node, peripheral, is_zephyr=False):
             label = "{0}{1}".format(peripheral.lower(), i)
             status = get_status(okay=False)
 
-        reg = dt_reg(cfg, node_idx, is_zephyr)
-        addr = get_peripheral_base_address(cfg, node_idx)
+        reg = dt_reg(cfg, node_idx, is_zephyr, root_node, bus)
+        addr = get_peripheral_offset_address(cfg, node_idx, root_node, bus)
 
         if is_zephyr:
             addr = get_address(cfg, node_idx)
@@ -176,7 +176,7 @@ def dt_create_node(cfg, root_node, peripheral, is_zephyr=False):
             "name": peripheral.lower(),
             "label": label,
             "reg": reg,
-            "addr": addr.lstrip('0x'),
+            "addr": addr[2:],
             "status": status
         }
 
