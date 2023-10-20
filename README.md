@@ -19,9 +19,16 @@ The table below show the files used by `device_tree_generator.py` script.
 
 The `device_tree_generator.py` script read 4 types of files which are `soc .h` an, `drivers.json`, `user_config.json` and `slave_config.json`. The script then generate an intermediate json file called `sapphire.json`. The content of `sapphire.json` then converted to device tree format called `sapphire.dtsi` and `*.dts` using the template files `soc.jinja2` and `dts.jinja2` respectively. The intermediate `sapphire.json` file gets removed after generate `*.dtsi` and `*.dts` files. However, this file can be saved using `-j` argument when invoke  the script. The diagram below illustrate the flow of device tree generation.
 
-
-
 ![alt text](docs/device_tree_generation_flow.png)
+
+## Dependencies
+
+Require python3, pip3 and some python packages.
+
+```
+sudo apt-get install python3-pip
+pip3 install -r requirements.txt
+```
 
 ## Usage
 
