@@ -69,9 +69,15 @@ os:
 
 #### Linux
 
+##### Example,
+
+This is an example to generate device tree with multicores for Linux based on Sapphire SoC and Ti180 board. It use sample [soc.h](samples/multicores/soc.h).
+
 ```bash
-python3 device_tree_generator.py -s config/linux_slaves.json /path/to/soc.h ti180 linux
+python3 device_tree_generator.py -s config/linux_slaves.json -c config/linux_spi.json samples/multicores/soc.h ti180 linux
 ```
+
+> Please note that you are require to use your own soc.h which generated from Efinity software.
 
 #### Zephyr
 
@@ -91,18 +97,18 @@ optional arguments:
 
 ##### Example,
 
-This is an example to generate device tree for Zephyr OS. It is based on Sapphire SoC and Ti180 board. The custom socname is `zoro` and the zephyrboard is `zero-one`.
+This is an example to generate device tree for Zephyr OS. It is based on Sapphire SoC and Ti180 board. The custom socname is `zoro` and the zephyrboard is `zero-one`. It use sample [soc.h](samples/multicores/soc.h).
 
 ###### Using on chip RAM
 
 ```bash
-python3 device_tree_generator.py /path/to/soc.h ti180 zephyr zoro zero-one
+python3 device_tree_generator.py -c config/zephyr_slaves.json samples/multicores/soc.h ti180 zephyr zoro zero-one
 ```
 
 ###### Using external memory
 
 ```bash
-python3 device_tree_generator.py /path/to/soc.h ti180 zephyr zoro zero-one -em
+python3 device_tree_generator.py -c config/zephyr_slaves.json samples/multicores/soc.h ti180 zephyr zoro zero-one -em
 ```
 
 ## Additional Resources
