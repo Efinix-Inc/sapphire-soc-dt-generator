@@ -13,7 +13,7 @@ from core.utils import *
 from core.dt import *
 from jinja2 import Environment, FileSystemLoader
 
-pwd = os.path.relpath(os.path.dirname(__file__))
+pwd = os.path.dirname(os.path.realpath(__file__))
 env = Environment(loader=FileSystemLoader(os.path.join(pwd, "templates")))
 dtsi_template = env.get_template("soc.jinja2")
 dts_template = env.get_template("dts.jinja2")
@@ -23,7 +23,7 @@ def main():
     out = ''
     board = ''
     path_dts = 'dts'
-    path_dts = os.path.join(os.path.relpath(os.path.dirname(__file__)), path_dts)
+    path_dts = os.path.join(pwd, path_dts)
     dt_parse = argparse.ArgumentParser(description='Device Tree Generator')
 
     dt_parse.add_argument('soc', type=str, help='path to soc.h')
