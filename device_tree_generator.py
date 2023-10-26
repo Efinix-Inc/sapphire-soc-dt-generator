@@ -149,10 +149,10 @@ def main():
 
     bus_cfg = load_json_file(args.bus)
     for bus in bus_cfg['buses']:
-        bus_label = bus_cfg['buses'][bus]['label']
 
         for bus in bus_cfg['buses']:
             bus_name = bus_cfg['buses'][bus]['name']
+            bus_label = bus_cfg['buses'][bus]['label']
             bus_node = dt_create_bus_node(cfg, bus_name, bus_label, is_zephyr)
             buses_node["buses"].update(bus_node)
 
