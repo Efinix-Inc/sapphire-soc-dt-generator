@@ -73,6 +73,15 @@
 	{%- for ck, cv in root.child.items() %}
 
 	{%- if cv.parent_label == "root" %}
+	{%- set buses = root.buses %}
+	{%- for x, y in buses.items() %}
+	{%- if 'peripherals' in y %}
+
+	{%- set peri = y.peripherals %}
+
+	{%- for x1, y1 in peri.items() %}
+	{%- if 'parent_device' in cv %}
+	{%- if cv.parent_device in y1.label %}
 
 	{{ ch.child_node(cv)|indent(8, False) }}
 		{%- if 'child' in cv %}
@@ -82,6 +91,13 @@
 		{%- endfor %}
 		{%- endif %}
 	};
+
+	{%- endif %}
+	{%- endif %}
+	{%- endfor %}
+
+	{%- endif %}
+	{%- endfor %}
 
 	{%- endif %}
 

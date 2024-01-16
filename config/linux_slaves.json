@@ -59,8 +59,8 @@
 			]
 		},
 		"gpio_leds": {
-			"parent_label1": "gpio0",
 			"parent_label": "root",
+			"parent_device": "gpio0",
 			"label": "efx_gpio_devs",
 			"compatible": "efinix,efx-gpio",
 			"addr": 0,
