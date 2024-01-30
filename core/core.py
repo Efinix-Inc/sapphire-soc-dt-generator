@@ -214,6 +214,10 @@ def get_interrupt_id(cfg, peripheral):
     irq_name = "{0}_{1}".format(peripheral, INTERRUPT)
 
     irq = get_property_value(cfg, peripheral, irq_name)
+
+    if not irq.isdigit() and not irq == '':
+        irq = dereference_symbol(cfg, irq)
+
     return irq
 
 """
