@@ -2,6 +2,7 @@
 #
 # Copyright (C) 2023 Efinix, Inc.
 
+import sys
 from core.variables import *
 from core.utils import *
 
@@ -109,6 +110,7 @@ def get_size(cfg, peripheral):
     if not size:
         keyword_size = 'SYSTEM_{0}_IO_{1}'.format(peripheral, IO_SIZE)
         print("Error: Size for {0} is invalid. Expecting {1}".format(peripheral, keyword_size))
+        sys.exit(1)
 
     return size
 
@@ -159,6 +161,7 @@ def get_address(cfg, peripheral):
     if not addr:
         keyword_addr = '{0}_{1}'.format(peripheral, PERIPHERAL)
         print("Error: Address for {0} not found. Expecting {1}".format(peripheral, keyword_addr))
+        sys.exit(1)
     return addr
 
 """

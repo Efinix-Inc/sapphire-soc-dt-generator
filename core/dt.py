@@ -421,6 +421,7 @@ def dt_get_bus_range(cfg, bus_name):
     if not size:
         keyword_size = '{}_SIZE'.format(bus_name)
         print("Error: size for {0} is invalid. Expecting {1}".format(bus_name, keyword_size))
+        sys.exit(1)
 
     ranges = "0x0 {0} {1}".format(addr, size)
     return ranges
