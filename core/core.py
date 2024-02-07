@@ -46,6 +46,17 @@ def get_peripheral_properties(cfg, peripheral):
                                         exclude_properties="",
                                         exclude=False)
 
+"""
+get_peripheral_properties_exclude: get a list of a peripheral by excluding the keyword
+which defined in @exclude_properties
+
+@cfg (list): raw data of soc.h
+@peripheral (str): peripheral name such as SPI, I2C. Must be in capital letter
+@exclude_properties (str): the properties to exclude such as SIZE
+@exclude (bool): flag to exclude the properties defined in @exclude_properties
+
+return: list of peripheral's properties for a given peripheral
+"""
 def get_peripheral_properties_exclude(cfg, peripheral, exclude_properties, exclude=True):
     return  __get_peripheral_properties(cfg, peripheral, exclude_properties, exclude)
 
