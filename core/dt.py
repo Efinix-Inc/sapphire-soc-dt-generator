@@ -295,11 +295,11 @@ def dt_create_cpu_node(cfg, is_zephyr=False):
             "arch": "riscv",
             "isa": get_cpu_isa(cfg, 0),
             "tlb": True,
-            "i_cache_size": get_cache_way(cfg, 0, ICACHE),
-            "i_cache_sets": get_cache_size(cfg, 0, ICACHE),
+            "i_cache_size": get_cache_size(cfg, 0, ICACHE),
+            "i_cache_sets": get_cache_way(cfg, 0, ICACHE),
             "i_cache_block_size": get_cache_block(cfg, 0),
-            "d_cache_size": get_cache_way(cfg, 0, ICACHE),
-            "d_cache_sets": get_cache_size(cfg, 0, ICACHE),
+            "d_cache_size": get_cache_size(cfg, 0, ICACHE),
+            "d_cache_sets": get_cache_way(cfg, 0, ICACHE),
             "d_cache_block_size": get_cache_block(cfg, 0),
         }
     }
