@@ -388,15 +388,18 @@ def dt_model():
     model = 'model = "{}";'.format(conf['model'])
     return model
 
-def dt_create_root_node(cfg, model, os):
+def dt_create_root_node(cfg, **kwargs):
     root_node = {
         "root": {
             "version": "/dts-v1/",
             "name": "/",
-            "model": model,
+            "model": kwargs['model'],
             "addr_cell": 1,
             "size_cell": 1,
-            "os": os,
+            "os": kwargs['os'],
+            "device_family": kwargs['device_family'],
+            "board": kwargs['board'],
+            "soc_name": kwargs['soc_name'],
             "frequency": get_frequency(cfg)
         }
     }

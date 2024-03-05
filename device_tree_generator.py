@@ -56,12 +56,18 @@ def main():
     cfg = read_file(soc_path)
 
     conf = load_config_file()
+    device_family = ""
     devkits = conf['devkits']
+    for dev_family, devs in devkits.items():
+        for dev in devs:
+            if args.board in dev.lower():
+                board = dev
+                device_family = dev_family
 
-    for devkit in devkits:
-        devkit = devkit.lower()
-        if args.board in devkit:
-            board = devkit
+    if "ti375" in board.lower():
+        soc_name = conf['soc_name']['hard']
+    else:
+        soc_name = conf['soc_name']['soft']
 
     if not board:
         print("Error: %s development kit is not supported\n" % args.board)
@@ -90,7 +96,14 @@ def main():
 
     # root
     model = conf['model']
-    root_node = dt_create_root_node(cfg, model, args.os)
+    metadata = {
+        'model': model,
+        'os': args.os,
+        'device_family': device_family,
+        'board': board,
+        'soc_name': soc_name
+    }
+    root_node = dt_create_root_node(cfg, **metadata)
 
     os_data = get_os_data(is_zephyr=is_zephyr)
     misc_node = {

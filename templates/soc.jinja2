@@ -27,6 +27,8 @@
 			device_type = "cpu";
 			compatible = "{{ cpu.arch }}";
 			riscv,isa = "{{ cpu.isa }}";
+			cpu-name = "{{ root.soc_name }}";
+			board = "Efinix {{ root.device_family }} {{ root.board }} Development Kit";
 			mmu_type = "{{ cpu.mmu_type }}";
 			{%- if cpu.clock_frequency %}
 			clock-frequency = <{{ root.frequency }}>;

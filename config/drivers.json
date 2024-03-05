@@ -1,12 +1,20 @@
 {
 	"dt_version": "/dts-v1/;",
 	"model": "efinix,sapphire",
-	"devkits": [
-		"T120F324",
-		"Ti60F225",
-		"Ti180J484",
-		"Ti375C529"
-	],
+	"soc_name": {
+		"soft": "Efinix Sapphire RISC-V SoC",
+		"hard": "Efinix Sapphire High Performance RISC-V SoC"
+	},
+	"devkits": {
+		"Trion": [
+			"T120F324"
+		],
+		"Titanium": [
+			"Ti60F225",
+			"Ti180J484",
+			"Ti375C529"
+		]
+	},
 	"os": {
 		"linux": {
 			"include_headers": {
