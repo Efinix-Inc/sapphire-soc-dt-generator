@@ -31,7 +31,7 @@
 			board = "Efinix {{ root.device_family }} {{ root.board }} Development Kit";
 			mmu_type = "{{ cpu.mmu_type }}";
 			{%- if cpu.clock_frequency %}
-			clock-frequency = <{{ root.frequency }}>;
+			clock-frequency = <{{ cpu.clock_frequency }}>;
 			{%- endif %}
 			i-cache-size = <{{ cpu.i_cache_size }}>;
 			i-cache-sets = <{{ cpu.i_cache_sets }}>;
