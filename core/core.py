@@ -587,3 +587,228 @@ def get_child_node_header(node):
                     child_node['child'][child_node2]['header'] = node_header
 
     return node
+
+"""
+get_interrupts: get list of interrupts for each peripheral
+
+Some peripheral might have multiple interrupt number such as gpio.
+@cfg (str): raw content of soc.h
+@periph_name (str): peripheral name include number such as SPI_0, UART_0
+
+return: list of interrupt number for the peripheral
+"""
+def get_interrupts(cfg, periph_name):
+    irqs = []
+    interrupts = []
+
+    for line in cfg:
+        lines = line.split()
+        if len(lines) < 3:
+            continue
+
+        if periph_name in lines[1]:
+            if 'IO_INTERRUPT' in lines[1]:
+                irqs.append(lines[2])
+
+    # if the interrupts are not number, then we need to dereference it
+    for irq in irqs:
+        if irq.isdigit():
+            interrupts.append(irq)
+        else:
+            irq_num = dereference_symbol(cfg, irq)
+            interrupts.append(irq_num)
+
+    return interrupts
+
+"""
+get_buses: get bus list
+"""
+def get_buses():
+    return BUSES
+
+"""
+count_bus: count the number of the same bus type
+
+@cfg (str): raw data of soc.h
+bus (str): the bus name such as axi, bmb
+
+return: number of bus for the same type
+"""
+def count_bus(cfg, bus):
+    bus_props = []
+    count = 0
+
+    if 'BMB' in bus:
+        bus_props = get_peripheral_properties(cfg, 'BMB_PERIPHERAL_BMB')
+
+    if 'AXI' in bus:
+        bus_props = get_peripheral_properties(cfg, 'SYSTEM_AXI')
+
+    for line in bus_props:
+        lines = line.split()
+        if lines[1].endswith('BMB_PERIPHERAL_BMB_SIZE') or (lines[1].startswith('SYSTEM_AXI') and lines[1].endswith('SIZE')):
+            count += 1
+
+    return count
+
+"""
+get_bus_group: group of same bus type
+
+@cfg (str): raw data of soc.h
+bus (str): the bus name such as axi, bmb
+
+return (dict): the dict of the same bus group
+"""
+def get_bus_group(cfg, bus):
+    bus = bus.upper()
+    addr = 0
+    size = 0
+    bus_size_keyword = ''
+    bus_name_keyword = ''
+    bus_group = {}
+
+    props = get_peripheral_properties(cfg, bus)
+    count = count_bus(props, bus)
+
+    for i in range(count):
+        if 'AXI' in bus:
+            bus_name = "{}_{}".format(bus, chr(65+i))
+            bus_name_keyword = "SYSTEM_{}_BMB".format(bus_name)
+            bus_size_keyword = "{}_SIZE".format(bus_name_keyword)
+
+        else:
+            bus_name = bus
+            bus_name_keyword = 'BMB_PERIPHERAL_BMB'
+            bus_size_keyword = 'BMB_PERIPHERAL_BMB_SIZE'
+
+        buses = {bus_name: {}}
+        for line in props:
+            lines = line.split()
+
+            if lines[1].endswith(bus_name_keyword):
+                addr = lines[2]
+            if lines[1].endswith(bus_size_keyword):
+                size = lines[2]
+
+            buses[bus_name].update({
+                "name": bus_name.lower(),
+                "label": bus_name.lower(),
+                "addr": addr,
+                "size": size
+            })
+
+        bus_group.update(buses)
+
+    return bus_group
+
+"""
+get_bus_groups: group together the different bus type
+
+@cfg (str): raw data of soc.h
+buses (list): list of the bus type
+
+return (dict): different bus type
+"""
+def get_bus_groups(cfg, buses):
+    bus_groups = {'buses': {}}
+
+    for bus in buses:
+        b = get_bus_group(cfg, bus)
+        bus_groups['buses'].update(b)
+
+    return bus_groups
+
+"""
+get_peripheral_group: get the same type of each peripheral
+
+@cfg (str): raw data of soc.h
+@peripheral (str): the type of the peripheral such as UART, SPI, I2C
+
+return (dict): a group of the same type of the peripheral
+"""
+def get_peripheral_group(cfg, peripheral):
+    props = []
+    peripheral_group = {}
+    count = 0
+
+    peripheral = peripheral.upper()
+    props = get_peripheral_properties(cfg, peripheral)
+
+    count = count_peripheral(cfg, peripheral)
+    peripheral_group = {peripheral: {}}
+
+    for i in range(count):
+        interrupt = ''
+        addr = 0
+        size = 0
+
+        if peripheral in ['PLIC', 'CLINT']:
+            periph_name = peripheral
+        else:
+            periph_name = "{}_{}".format(peripheral, i)
+
+        device = {periph_name: {}}
+        for line in props:
+            lines = line.split()
+
+            if periph_name in lines[1]:
+                if lines[1].endswith('CTRL') or lines[1].endswith('INPUT'):
+                    addr = lines[2]
+
+                if lines[1].endswith('CTRL_SIZE') or lines[1].endswith('INPUT_SIZE'):
+                    size = lines[2]
+
+                device[periph_name].update({
+                    "name": "{}{}".format(peripheral.lower(), i),
+                    "label": periph_name,
+                    "addr": addr,
+                    "size": size,
+                    "type": peripheral
+                })
+
+        interrupts = get_interrupts(cfg, periph_name)
+        device[periph_name].update({"interrupts": interrupts})
+        peripheral_group[peripheral].update(device)
+
+    return peripheral_group
+
+"""
+get_peripheral_groups: get the mix types of peripherals
+
+@cfg (str): raw data of soc.h
+@peripherals (list): peripheral type such as UART, SPI, I2C in list
+
+return (dict): mix types of peripherals group
+"""
+def get_peripheral_groups(cfg, peripherals):
+    peripheral_groups = {'peripherals': {}}
+
+    for peripheral in peripherals:
+        peripheral_group = get_peripheral_group(cfg, peripheral)
+        peripheral_groups['peripherals'].update(peripheral_group)
+
+    return peripheral_groups
+
+"""
+parse_soc_config: create a dictionary and group the peripherals based on the type
+
+@filename(str): file name of soc configuration such as soc.h
+
+return (dict):
+"""
+def parse_soc_config(filename):
+    soc_config = {}
+    peripheral_groups = {'peripherals': {}}
+    bus_groups = {'buses': {}}
+    buses = get_buses()
+
+    cfg = read_file(filename)
+    peripherals = get_peripherals(cfg, PERIPHERALS)
+
+    peripheral_groups = get_peripheral_groups(cfg, peripherals)
+    bus_groups = get_bus_groups(cfg, buses)
+
+    soc_config.update(peripheral_groups)
+    soc_config.update(bus_groups)
+
+    return soc_config
