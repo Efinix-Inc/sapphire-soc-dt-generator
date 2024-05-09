@@ -425,9 +425,9 @@ def get_peripherals(cfg, filter_peripherals):
     peripherals = []
 
     for line in cfg:
-        periph = ''.join([x for x in filter_peripherals if x in line])
-        if periph:
-            peripherals.append(periph)
+        for x in filter_peripherals:
+            if x in line:
+                peripherals.append(x)
 
     # remove duplicate from list
     peripherals = list(dict.fromkeys(peripherals))
