@@ -727,7 +727,7 @@ def get_bus_groups(cfg, buses):
     return bus_groups
 
 """
-get_peripheral_group: get the same type of each peripheral
+get_peripheral_group: get the same type for each peripheral
 
 @cfg (str): raw data of soc.h
 @peripheral (str): the type of the peripheral such as UART, SPI, I2C
@@ -802,11 +802,12 @@ def get_peripheral_groups(cfg, peripherals):
     return peripheral_groups
 
 """
-parse_soc_config: create a dictionary and group the peripherals based on the type
+parse_soc_config: parsing the @filename to create a dictionary and
+group the peripherals based on its type.
 
 @filename(str): file name of soc configuration such as soc.h
 
-return (dict):
+return (dict): the parsed data in dictionary format
 """
 def parse_soc_config(filename):
     soc_config = {}
