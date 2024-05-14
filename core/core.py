@@ -673,11 +673,13 @@ def get_bus_group(cfg, bus):
     for i in range(count):
         if 'AXI' in bus:
             bus_name = "{}_{}".format(bus, chr(65+i))
+            bus_label = "{}{}".format(bus, i)
             bus_name_keyword = "SYSTEM_{}_BMB".format(bus_name)
             bus_size_keyword = "{}_SIZE".format(bus_name_keyword)
 
         else:
             bus_name = bus
+            bus_label = bus
             bus_name_keyword = 'BMB_PERIPHERAL_BMB'
             bus_size_keyword = 'BMB_PERIPHERAL_BMB_SIZE'
 
@@ -692,9 +694,10 @@ def get_bus_group(cfg, bus):
 
             buses[bus_name].update({
                 "name": bus_name.lower(),
-                "label": bus_name.lower(),
+                "label": bus_label.lower(),
                 "addr": addr,
-                "size": size
+                "size": size,
+                "type": "bus"
             })
 
         bus_group.update(buses)
@@ -744,8 +747,12 @@ def get_peripheral_group(cfg, peripheral):
 
         if peripheral in ['PLIC', 'CLINT']:
             periph_name = peripheral
+            name = peripheral.lower()
+            label = peripheral.lower()
         else:
             periph_name = "{}_{}".format(peripheral, i)
+            name = "{}{}".format(peripheral.lower(), i)
+            label = "{}{}".format(peripheral.lower(), i)
 
         device = {periph_name: {}}
         for line in props:
@@ -759,8 +766,8 @@ def get_peripheral_group(cfg, peripheral):
                     size = lines[2]
 
                 device[periph_name].update({
-                    "name": "{}{}".format(peripheral.lower(), i),
-                    "label": periph_name,
+                    "name": name,
+                    "label": label,
                     "addr": addr,
                     "size": size,
                     "type": peripheral
@@ -812,3 +819,12 @@ def parse_soc_config(filename):
     soc_config.update(bus_groups)
 
     return soc_config
+
+def get_peripheral_data(config, name):
+    for _type in config['peripherals']:
+        if name in config['peripherals'][_type]:
+            return config['peripherals'][_type][name]
+
+def get_bus_data(config, name):
+    if name in config['buses']:
+        return config['buses'][name]
