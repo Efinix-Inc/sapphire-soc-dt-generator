@@ -551,16 +551,19 @@ name@address {
 """
 def get_node_header(node):
     node_header = ''
-    addr = ''
+    addr = 0
 
-    if 'addr' in node:
-        addr = str(node['addr'])
-        if '0x' in addr:
-            addr = addr.strip('0x')
+    if 'offset' in node:
+        addr = node['offset']
+    elif 'addr' in node:
+        addr = node['addr']
+
+    if '0x' in str(addr):
+        addr = addr.lstrip('0x')
 
     if 'label' in node and node['label']:
         if 'name' in node and node['name']:
-            if 'addr' in node:
+            if 'addr' in node or 'offset' in node:
                 node_header = "{}: {}@{}".format(node['label'], node['name'], addr)
             else:
                 node_header = "{}: {}".format(node['label'], node['name'])
