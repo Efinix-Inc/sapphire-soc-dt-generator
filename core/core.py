@@ -595,7 +595,7 @@ Some peripheral might have multiple interrupt number such as gpio.
 @cfg (str): raw content of soc.h
 @periph_name (str): peripheral name include number such as SPI_0, UART_0
 
-return: list of interrupt number for the peripheral
+return (str): list of interrupt number for the peripheral
 """
 def get_interrupts(cfg, periph_name):
     irqs = []
@@ -617,6 +617,8 @@ def get_interrupts(cfg, periph_name):
         else:
             irq_num = dereference_symbol(cfg, irq)
             interrupts.append(irq_num)
+
+    interrupts = ' '.join(interrupts)
 
     return interrupts
 
