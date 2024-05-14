@@ -468,6 +468,24 @@ def override_peripherals(peripheral_parent, new_cfg):
                         peripheral_node['header'] = node_header
 
 """
+get_os: get operating system
+
+@soc_config (dict): configuration of soc.h which already parse in dictionary
+
+return: operating system name such as linux or zephyr
+"""
+def get_os(soc_config):
+    os = ''
+
+    if 'root' in soc_config:
+        if 'os' in soc_config['root']:
+            os = soc_config['root']['os']
+        else:
+            print("Error: unknown operating system specify for device tree generation.")
+
+    return os
+
+"""
 get_os_data: get operating system data from drivers.json
 
 @is_zephyr (bool): specify is it zephyr else it will choose linux
