@@ -524,6 +524,22 @@ def get_os(soc_config):
     return os
 
 """
+check_is_zephyr: check if it is zephyr OS
+
+@soc_config (dict): configuration of soc.h which already parse in dictionary
+
+return: true if zephyr, else false
+"""
+def check_is_zephyr(soc_config):
+    is_zephyr = False
+
+    operating_system = get_os(soc_config)
+    if 'zephyr' in operating_system:
+        is_zephyr = True
+
+    return is_zephyr
+
+"""
 get_os_data: get operating system data from drivers.json
 
 @is_zephyr (bool): specify is it zephyr else it will choose linux
