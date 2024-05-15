@@ -138,6 +138,58 @@ def dt_get_driver_private_data(peripheral, controller=False, is_zephyr=False):
     return priv_data
 
 """
+dt_create_node: create a device tree node
+
+@soc_config (dict): soc configuration after parse it
+@node (dict): peripheral or bus node
+
+return (dict): device tree node for peripherals or bus
+"""
+def dt_create_node(soc_config, node):
+    name = ''
+    is_zephyr = check_is_zephyr(soc_config)
+
+    if 'type' in node:
+        name = node['type'].lower()
+
+    compatible = dt_compatible(name, is_zephyr=is_zephyr)
+
+    n = {
+        "addr_cell": 1,
+        "size_cell": 1,
+        "offset": 0,
+        "compatible": compatible,
+        "status": "disabled"
+    }
+    n.update(node)
+
+    if is_zephyr:
+        if 'interrupts' in n and n['interrupts']:
+            n['interrupts'] = "{} 1".format(n['interrupts'])
+
+    private_data = dt_get_driver_private_data(name, is_zephyr=is_zephyr)
+    if private_data:
+        n.update(private_data)
+
+    if 'root' in soc_config:
+        if 'plic' in name:
+           plic_node = update_plic_node(soc_config, is_zephyr)
+           n.update(plic_node)
+
+        if 'clint' in name:
+            n.update({"status": "okay"})
+
+        if 'clock' in soc_config['root']:
+            clock_label = soc_config['root']['clock']['label']
+            clock_freq = soc_config['root']['clock']['clock_freq']
+            n.update({
+                "clocks": "<&{0} 0>".format(clock_label),
+                "clock_freq": clock_freq
+            })
+
+    return n
+
+"""
 dt_create_parent_node: create parent node such as clock, apb, axi
 
 @cfg (list): raw data of soc.h
