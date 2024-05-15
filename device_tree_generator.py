@@ -28,8 +28,6 @@ def main():
 
     dt_parse.add_argument('soc', type=str, help='path to soc.h')
     dt_parse.add_argument('board', type=str, help='development kit name such as t120, ti60')
-    dt_parse.add_argument('-b', '--bus', type=str, default=os.path.join(pwd, "config/single_bus.json"),
-            help='Specify path to bus architecture for the SoC in json format. By default is "config/single_bus.json"')
     dt_parse.add_argument('-c', '--user-config', action='append', type=str,
             help='Specify path to user configuration json file to override the APB slave device property')
     dt_parse.add_argument('-d', '--dir', type=str, help='Output generated output directory. By default is dts')
@@ -54,6 +52,7 @@ def main():
 
     soc_path = args.soc
     cfg = read_file(soc_path)
+    soc_config = parse_soc_config(soc_path)
 
     conf = load_config_file()
     device_family = ""
@@ -155,28 +154,8 @@ def main():
     peripheral_list = get_peripherals(cfg, PERIPHERALS)
 
     # bus
-    buses_node = {"buses": {}}
-
-    if is_zephyr:
-        args.bus = os.path.join(pwd, 'config/z_single_bus.json')
-
-    bus_cfg = load_json_file(args.bus)
-    for bus in bus_cfg['buses']:
-
-        for bus in bus_cfg['buses']:
-            bus_name = bus_cfg['buses'][bus]['name']
-            bus_label = bus_cfg['buses'][bus]['label']
-            bus_node = dt_create_bus_node(cfg, bus_name, bus_label, is_zephyr)
-            buses_node["buses"].update(bus_node)
-
-    root_node = dt_insert_child_node(root_node, buses_node)
-
-    for bus in bus_cfg['buses']:
-        for peripheral in peripheral_list:
-            peripheral_l = peripheral.lower()
-            if peripheral_l in bus_cfg['buses'][bus]['peripherals']:
-                periph_node = dt_create_node(cfg, root_node, peripheral, is_zephyr, bus)
-                buses_node['buses'][bus]['peripherals'].update(periph_node)
+    soc_config.update(root_node)
+    buses_node = create_bus_nodes(soc_config)
 
     slaves_node = {}
     if args.user_config:
