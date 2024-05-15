@@ -213,6 +213,22 @@ def dt_create_node(soc_config, node):
     return n
 
 """
+dt_create_peripheral_node: create the peripheral node
+
+@soc_config (dict): soc configuration after parse it
+@peripheral (str): name of the peripheral
+
+return (dict): peripheral node
+"""
+def dt_create_peripheral_node(soc_config, peripheral):
+    peri_node = None
+
+    peri_node = get_peripheral_data(soc_config, peripheral)
+    node = dt_create_node(soc_config, peri_node)
+
+    return node
+
+"""
 dt_create_bus_node: create the bus node
 
 @soc_config (dict): soc configuration after parse it
