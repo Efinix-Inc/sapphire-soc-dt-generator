@@ -63,28 +63,6 @@ def dt_reg(cfg, peripheral, is_zephyr=False, root_node=None, bus=None):
     return out
 
 """
-dt_reg_z_plic: string of device tree syntax of reg for zephyr plic
-
-@soc_config (dict): soc configuration after parse it
-
-return (str): device tree reg for zephyr plic
-"""
-def dt_reg_z_plic(soc_config):
-    out = ''
-
-    node = get_peripheral_data(soc_config, PLIC)
-    addr = node['addr']
-
-    prio = hex(int(addr,0))
-    irq_en = hex(int(addr,0) + 0x2000)
-    reg = hex(int(addr,0) + 0x200000)
-
-    out = "<{0} {1}\n\t\t\t\t{2} {3}\n\t\t\t\t{4} {5}>".format(
-            prio, '0x00001000', irq_en, '0x00002000', reg, '0x00010000')
-
-    return out
-
-"""
 dt_compatible: get compatible driver for the peripheral
 
 @peripheral (str): peripheral name such as SPI, I2C. Must be in capital letter
@@ -161,6 +139,16 @@ def update_plic_node(soc_config, is_zephyr):
         "interrupts": '',
         "status": "okay"
     }
+
+    if is_zephyr:
+        node = get_peripheral_data(soc_config, PLIC)
+        addr = node['addr']
+        prio = hex(int(addr, 0))
+        irq_en = hex(int(addr, 0) + 0x2000)
+        regs = hex(int(addr,0) + 0x200000)
+        reg = "<{0} {1}\n\t\t\t\t{2} {3}\n\t\t\t\t{4} {5}>".format(
+                prio, '0x00001000', irq_en, '0x00002000', regs, '0x00010000')
+        plic_node.update({"reg": reg})
 
     return plic_node
 
