@@ -577,7 +577,7 @@ def get_node_header(node):
         addr = node['addr']
 
     if '0x' in str(addr):
-        addr = addr.lstrip('0x')
+        addr = addr[2:]
 
     if 'label' in node and node['label']:
         if 'name' in node and node['name']:
@@ -669,7 +669,7 @@ def count_bus(cfg, bus):
 
     for line in bus_props:
         lines = line.split()
-        if lines[1].endswith('BMB_PERIPHERAL_BMB_SIZE') or (lines[1].startswith('SYSTEM_AXI') and lines[1].endswith('SIZE')):
+        if lines[1].endswith('BMB_PERIPHERAL_BMB_SIZE') or (lines[1].startswith('SYSTEM_AXI') and lines[1].endswith('BMB_SIZE')):
             count += 1
 
     return count
@@ -745,7 +745,7 @@ def get_bus_groups(cfg, buses):
     return bus_groups
 
 """
-get_peripheral_group: get the same type for each peripheral
+get_peripheral_group: group the same type of the peripheral
 
 @cfg (str): raw data of soc.h
 @peripheral (str): the type of the peripheral such as UART, SPI, I2C
@@ -758,6 +758,7 @@ def get_peripheral_group(cfg, peripheral):
     count = 0
 
     peripheral = peripheral.upper()
+    peripheral_lo = peripheral.lower()
     props = get_peripheral_properties(cfg, peripheral)
 
     count = count_peripheral(cfg, peripheral)
@@ -768,14 +769,14 @@ def get_peripheral_group(cfg, peripheral):
         addr = 0
         size = 0
 
-        if peripheral in ['PLIC', 'CLINT']:
+        if peripheral in CONTROLLER:
             periph_name = peripheral
-            name = peripheral.lower()
-            label = peripheral.lower()
+            name = peripheral_lo
+            label = peripheral_lo
         else:
             periph_name = "{}_{}".format(peripheral, i)
-            name = "{}{}".format(peripheral.lower(), i)
-            label = "{}{}".format(peripheral.lower(), i)
+            name = "{}{}".format(peripheral_lo, i)
+            label = "{}{}".format(peripheral_lo, i)
 
         device = {periph_name: {}}
         for line in props:
