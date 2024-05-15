@@ -64,12 +64,16 @@ def dt_reg(cfg, peripheral, is_zephyr=False, root_node=None, bus=None):
 
 """
 dt_reg_z_plic: string of device tree syntax of reg for zephyr plic
-@cfg (list): raw data of soc.h
+
+@soc_config (dict): soc configuration after parse it
+
+return (str): device tree reg for zephyr plic
 """
-def dt_reg_z_plic(cfg):
+def dt_reg_z_plic(soc_config):
     out = ''
 
-    addr = get_peripheral_address(cfg, "PLIC")
+    node = get_peripheral_data(soc_config, PLIC)
+    addr = node['addr']
 
     prio = hex(int(addr,0))
     irq_en = hex(int(addr,0) + 0x2000)
