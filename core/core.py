@@ -435,6 +435,44 @@ def get_peripherals(cfg, filter_peripherals):
     return peripherals
 
 """
+get_supported_peripherals: get the list of supported peripherals
+
+@soc_config might have lot of peripherals but it may not supported by the driver.
+For example, there are 2 spi and a i2c listed in soc.h. However, i2c is not
+supported by the driver. So, the linux_peripherals.json and zephyr_peripherals.json
+only contain the whitelist of supported peripherals.
+
+@soc_config (dict): soc configuration after parse_soc_config
+
+return (list): list of peripherals name
+"""
+def get_supported_peripherals(soc_config):
+    peripherals = []
+    d = os.path.dirname(os.path.abspath(__file__))
+    f = ''
+
+    operating_system = get_os(soc_config)
+    if 'linux' in operating_system:
+        f = "linux_peripherals.json"
+
+    elif 'zephyr' in operating_system:
+        f = "zephyr_peripherals.json"
+
+    else:
+        f = "linux_peripherals.json"
+
+    f = os.path.join(d, "../config", f)
+    cfg = load_json_file(f)
+    whitelist = cfg['peripherals']
+
+    if 'peripherals' in soc_config:
+        for peri in soc_config['peripherals']:
+            if peri.lower() in whitelist:
+                peripherals.append(peri)
+
+    return peripherals
+
+"""
 override_peripherals: override the peripherals properties
 
 The properties for each peripheral can be overrided using this function.
