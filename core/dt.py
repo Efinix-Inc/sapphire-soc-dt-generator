@@ -482,17 +482,19 @@ def create_bus_nodes(soc_config):
                     if is_zephyr:
                         reg_addr = peri_addr
                         offset = peri_addr
-                        reg = "<{0} {1}>".format(reg_addr, peri_size)
-                        if 'PLIC' in pp:
-                            reg = dt_reg_z_plic(soc_config)
                     else:
                         reg_addr = offset
+
+                    if 'reg' in peripheral_node and peripheral_node['reg']:
+                        reg = peripheral_node['reg']
+                    else:
                         reg = "<{0} {1}>".format(reg_addr, peri_size)
 
                     peripheral_node.update({
                         "offset": offset,
                         "reg": reg
                     })
+
                     header = get_node_header(peripheral_node)
                     peripheral_node.update({"header": header})
                     buses_node[bus]['peripherals'].update({pp: peripheral_node})
