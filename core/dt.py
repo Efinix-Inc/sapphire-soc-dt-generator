@@ -137,6 +137,29 @@ def dt_get_driver_private_data(peripheral, controller=False, is_zephyr=False):
 
     return priv_data
 
+def update_plic_node(soc_config, is_zephyr):
+    plic_node = {}
+    cpu_config = soc_config['root']['cpu']
+    intc_label = cpu_config['intc']['label']
+    cpu_num = cpu_config['cores']
+    irq_ext = []
+
+    driver_data = get_driver_data(controller=False, is_zephyr=is_zephyr)
+    for i in range(cpu_num):
+        l = "{0}{1}".format(intc_label, i)
+        irq_e = driver_data['plic']['interrupts_extended']
+
+        for q in irq_e:
+            irq_ext.append("&{0} {1}".format(l, q))
+
+    plic_node = {
+        "interrupts_extended": irq_ext,
+        "interrupts": '',
+        "status": "okay"
+    }
+
+    return plic_node
+
 """
 dt_create_node: create a device tree node
 
