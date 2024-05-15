@@ -213,6 +213,36 @@ def dt_create_node(soc_config, node):
     return n
 
 """
+dt_create_bus_node: create the bus node
+
+@soc_config (dict): soc configuration after parse it
+@bus (str): name of the bus such as bmb or axi
+
+return (dict): bus node
+"""
+def dt_create_bus_node(soc_config, bus):
+    bus_node = get_bus_data(soc_config, bus)
+    node = dt_create_node(soc_config, bus_node)
+
+    addr = bus_node['addr']
+    size = bus_node['size']
+    label = bus_node['label']
+    header = "{0}: {1}@{2} {{".format(label, label, str(addr).lstrip('0x'))
+
+    if check_is_zephyr(soc_config):
+        ranges = ''
+    else:
+        ranges = "0x0 {0} {1}".format(addr, size)
+
+    node.update({
+        "peripherals": {},
+        "ranges": ranges,
+        "header": header
+    })
+
+    return node
+
+"""
 dt_create_parent_node: create parent node such as clock, apb, axi
 
 @cfg (list): raw data of soc.h
