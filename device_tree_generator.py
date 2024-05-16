@@ -18,6 +18,103 @@ env = Environment(loader=FileSystemLoader(os.path.join(pwd, "templates")))
 dtsi_template = env.get_template("soc.jinja2")
 dts_template = env.get_template("dts.jinja2")
 
+"""
+update_peripheral_nodes: update the reg and offset of peripheral
+
+The offset of a peripheral is calculate by minus the peripheral address
+from the bus address. It is unknown during dt_create_peripheral_node().
+This is because of the bus address is not define for the said peripheral.
+We only know the bus address during connect_peripheral_to_bus(). Thus,
+the offset, reg and header property get updated at very late stage.
+
+@peripheral_node (dict): peripheral node of a device
+@reg_addr (int): start address of the peripheral
+@peri_size (int): size of the peripheral
+@offset (int): offset of the peripheral
+
+return (dict): updated peripheral node with offset, reg and header property
+"""
+def update_peripheral_nodes(peripheral_node, reg_addr, peri_size, offset):
+    if 'reg' in peripheral_node and peripheral_node['reg']:
+        reg = peripheral_node['reg']
+    else:
+        reg = "<{0} {1}>".format(reg_addr, peri_size)
+
+    peripheral_node.update({
+        "offset": offset,
+        "reg": reg
+    })
+    header = get_node_header(peripheral_node)
+    peripheral_node.update({"header": header})
+
+    return peripheral_node
+
+"""
+connect_peripheral_to_bus: connect the peripherals to its own bus
+
+This function create a data structure to connect the peripherals
+to its own bus based on the bus address range and peripherals addresses.
+This will create a complete bus architecture and the set of peripherals.
+
+@soc_config (dict): soc configuration after parse it
+@buses_node (dict): bus node
+@bus (str): bus name
+@bus_addr (int): start address of the @bus
+@bus_range (int): range address of the @bus
+
+return (dict): bus node with the peripherals attach to it
+"""
+def connect_peripheral_to_bus(soc_config, buses_node, bus, bus_addr, bus_range):
+    available_peripherals = get_supported_peripherals(soc_config)
+    peri_config = soc_config['peripherals']
+    peripheral_node = {}
+
+    for peripheral in available_peripherals:
+        for pp in peri_config[peripheral]:
+            peri_addr = peri_config[peripheral][pp]['addr']
+            peri_size = peri_config[peripheral][pp]['size']
+            peri_range = hex(int(peri_addr, 16) + int(peri_size, 16))
+
+            if check_is_zephyr(soc_config):
+                peripheral_node = dt_create_peripheral_node(soc_config, pp)
+                peripheral_node = update_peripheral_nodes(peripheral_node, peri_addr, peri_size, peri_addr)
+                buses_node[bus]['peripherals'].update({pp: peripheral_node})
+
+            else:
+                if (peri_range <= bus_range) and (bus_addr <= peri_addr):
+                    offset = hex(int(peri_addr, 16) - int(bus_addr, 16))
+                    peripheral_node = dt_create_peripheral_node(soc_config, pp)
+                    peripheral_node = update_peripheral_nodes(peripheral_node, offset, peri_size, offset)
+                    buses_node[bus]['peripherals'].update({pp: peripheral_node})
+
+    return buses_node
+
+def __create_bus_nodes(soc_config, buses_node, bus, bus_addr, bus_range):
+    bus_node = dt_create_bus_node(soc_config, bus)
+    buses_node.update({bus: bus_node})
+    buses_node = connect_peripheral_to_bus(soc_config, buses_node, bus, bus_addr, bus_range)
+
+    return buses_node
+
+def create_bus_nodes(soc_config):
+    buses_node = {}
+    bus_cfg = soc_config['buses']
+
+    if check_is_zephyr(soc_config):
+        bus = 'BMB'
+        buses_node = __create_bus_nodes(soc_config, buses_node, bus, '', '')
+
+    else:
+        for bus in bus_cfg:
+            bus_addr = bus_cfg[bus]['addr']
+            bus_size = bus_cfg[bus]['size']
+            bus_range = hex(int(bus_addr, 16) + int(bus_size, 16))
+            buses_node = __create_bus_nodes(soc_config, buses_node, bus, bus_addr, bus_range)
+
+    buses_node = {"buses": buses_node}
+
+    return buses_node
+
 def main():
 
     out = ''
