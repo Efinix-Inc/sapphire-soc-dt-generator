@@ -1,0 +1,10 @@
+{
+	"peripherals": [
+		"plic",
+		"uart",
+		"spi",
+		"i2c",
+		"gpio",
+		"apb_slave"
+	]
+}

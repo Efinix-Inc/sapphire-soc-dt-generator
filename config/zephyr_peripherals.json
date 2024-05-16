@@ -1,0 +1,9 @@
+{
+	"peripherals": [
+		"plic",
+		"clint",
+		"uart",
+		"gpio",
+		"apb_slave"
+	]
+}
