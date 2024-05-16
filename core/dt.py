@@ -235,11 +235,12 @@ def dt_create_bus_node(soc_config, bus):
     addr = bus_node['addr']
     size = bus_node['size']
     label = bus_node['label']
-    header = "{0}: {1}@{2} {{".format(label, label, str(addr).lstrip('0x'))
 
     if check_is_zephyr(soc_config):
+        header = "soc {"
         ranges = ''
     else:
+        header = "{0}: {1}@{2} {{".format(label, label, str(addr)[2:])
         ranges = "0x0 {0} {1}".format(addr, size)
 
     node.update({
