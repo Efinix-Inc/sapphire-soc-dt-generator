@@ -1,10 +1,10 @@
 {
 	"overrides": {
-                "APB_SLAVE_3": {
+                "APB_SLAVE_0": {
                         "name": "dma",
                         "label": "dma0",
                         "compatible": "spinal,lib-dmasg",
-                        "interrupts": "3 4",
+                        "interrupts": "7 8",
                         "private_data": [
                                 "#dma-cells = <1>;",
                                 "#address-cells = <1>;",
@@ -13,7 +13,7 @@
                                 "axistream-control-connected = <&tsemac0>;"
                         ]
                 },
-                "APB_SLAVE_0": {
+                "AXI_SLAVE_2": {
                         "name": "tsemac",
                         "label": "tsemac0",
                         "compatible": "efinix,tsemac-0.01.a",
@@ -30,7 +30,20 @@
                                 "phy-handle = <&phy0>;",
                                 "phy-mode = \"rgmii\";"
                         ]
-                }
+                },
+		"AXI_SLAVE_1": {
+			"name": "sdmmc",
+			"label": "sdmmc0",
+			"compatible": "efx,sdhci",
+			"interrupts": "6",
+			"private_data": [
+				"bus-width = <4>;",
+				"no-sdio;",
+				"no-mmc;",
+				"max-frequency = <100000000>;"
+			],
+			"status": "okay"
+		}
         },
 	"child": {
 		"tsemac": {
