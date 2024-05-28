@@ -337,6 +337,8 @@ def dt_create_cpu_node(cfg, is_zephyr=False):
     if cpu_type == str(1):
         print("DEBUG: cpu is hard soc")
         cpu_node["cpu"].update({"clock_frequency": 1000000000})
+    else:
+        cpu_node["cpu"].update({"clock_frequency": 0})
 
     system_core = "SYSTEM_RISCV_ISA"
     mmu = get_property_value(cfg, system_core, MMU)
