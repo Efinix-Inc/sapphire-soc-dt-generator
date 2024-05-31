@@ -1,3 +1,20 @@
+v2.1,
+	Summary,
+	Add user configuration for Ti375C529 example design.
+	Add some helper functions to extract the soc configuration.
+	Create a new structure to store the soc configuration.
+	Add whitelist peripherals for linux and zephyr.
+	Remove user define bus configuration file.
+	Remove bus optional argument.
+
+	Features,
+	Automatically detect the peripherals connection to the bus without user define bus configuration.
+
+	Fixed,
+	Fix generating node header.
+	Fix get the list of peripherals.
+	Fix calculate offset address of peripheral with dual buses system.
+
 v2.0,
 	Summary,
 	Create a new data structure for root node of device tree.
