@@ -183,6 +183,67 @@
                                 }
 
 			}
+		},
+		"uboot": {
+			"include_headers": {
+				"dts": {
+					"include": [
+						"#include <config.h>",
+						"/include/ \"sapphire.dtsi\""
+					]
+				}
+			},
+			"chosen": {
+				"name": "chosen",
+				"private_data": [
+					"bootargs = \"console=ttyS0,115200n8\";",
+					"stdout-path = \"serial0:115200n8\";"
+				]
+			},
+			"aliases": {
+				"name": "aliases",
+				"private_data": [
+					"serial0 = &uart0;"
+				]
+			},
+			"memory_mapped": {
+                                "uimage": "0x00400000",
+                                "linux.dtb": "0x00CF0000",
+                                "opensbi": "0x01000000",
+                                "u-boot": "0x01040000"
+                        },
+			"drivers": {
+				"uart": {
+					"compatible": ["riscv_sbi,uart"],
+					"private_data": [
+						"device_type = \"serial\";"
+					]
+				},
+				"spi": {
+					"compatible": ["vexriscv,spi"]
+				},
+				"plic": {
+                                        "compatible": ["sifive,plic-1.0.0"],
+                                        "interrupts_extended": [11],
+                                        "private_data": [
+                                                "reg-names = \"prio\", \"irq_en\", \"reg\";",
+                                                "#address-cells = <0>;",
+                                                "#interrupt-cells = <2>;",
+                                                "interrupt-controller;",
+                                                "riscv,max-priority = <3>;",
+                                                "riscv,ndev = <32>;"
+                                        ]
+                                }
+			},
+			"controller": {
+                                "plic": {
+                                        "compatible": ["riscv,cpu-intc"],
+                                        "private_data": [
+                                                "#interrupt-cells = <1>;",
+                                                "interrupt-controller;"
+                                        ]
+                                }
+                        }
 		}
 	}
 }
