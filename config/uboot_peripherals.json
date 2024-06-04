@@ -1,0 +1,7 @@
+{
+	"peripherals": [
+		"uart",
+		"spi",
+		"apb_slave"
+	]
+}
