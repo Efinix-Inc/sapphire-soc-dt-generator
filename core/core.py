@@ -148,7 +148,7 @@ def get_base_address(cfg, root_node, bus):
         addr = "0x{}".format(addr)
 
     else:
-        print("Warning: buses node not found. The offset address of %s is set to %s" % (peripheral, addr))
+        print("Warning: buses node not found. The offset address is set to %s" % addr)
 
     return addr
 
@@ -520,6 +520,7 @@ def get_os(soc_config):
             os = soc_config['root']['os']
         else:
             print("Error: unknown operating system specify for device tree generation.")
+            sys.exit(1)
 
     return os
 
@@ -528,7 +529,7 @@ check_is_zephyr: check if it is zephyr OS
 
 @soc_config (dict): configuration of soc.h which already parse in dictionary
 
-return: true if zephyr, else false
+return (bool): true if zephyr, else false
 """
 def check_is_zephyr(soc_config):
     is_zephyr = False
@@ -542,19 +543,17 @@ def check_is_zephyr(soc_config):
 """
 get_os_data: get operating system data from drivers.json
 
-@is_zephyr (bool): specify is it zephyr else it will choose linux
+@config (dict): soc configuration
 
 return: dictionary of operating system data
 """
-def get_os_data(is_zephyr=False):
-    operating_system = 'linux'
+def get_os_data(config):
+    cfg = load_config_file()
+    operating_system = get_os(config)
+    os_data = {}
 
-    os_data = load_config_file()
-
-    if is_zephyr:
-        operating_system = 'zephyr'
-
-    os_data = os_data['os'][operating_system]
+    if 'root' in config and 'os' in config['root']:
+        os_data = cfg['os'][operating_system]
 
     return os_data
 
@@ -563,12 +562,11 @@ get_driver_data: get the driver data from drivers.json
 
 @peripheral (str): peripheral name such as SPI, I2C. Must be in capital letter
 @controller (bool): the peripheral is controller peripheral such as plic
-@is_zephyr (bool): specify is it zephyr else it will choose linux
 
 return: dictionary of driver data
 """
-def get_driver_data(controller=False, is_zephyr=False):
-    driver_data = get_os_data(is_zephyr=is_zephyr)
+def get_driver_data(soc_config, controller=False):
+    driver_data = get_os_data(soc_config)
 
     if controller:
         driver_data = driver_data['controller']
@@ -582,15 +580,14 @@ get_driver_private_data: get the driver private data from drivers.json
 
 @peripheral (str): peripheral name such as SPI, I2C. Must be in capital letter
 @controller (bool): the peripheral is controller peripheral such as plic
-@is_zephyr (bool): specify is it zephyr else it will choose linux
 
 return: dictionary of driver private data
 """
-def get_driver_private_data(peripheral, controller=False, is_zephyr=False):
+def get_driver_private_data(soc_config, peripheral, controller=False):
     priv_data = ''
     peripheral = peripheral.lower()
 
-    driver_data = get_driver_data(controller, is_zephyr)
+    driver_data = get_driver_data(soc_config, controller)
 
     if peripheral in driver_data:
         if 'private_data' in driver_data[peripheral]:
