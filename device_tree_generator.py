@@ -201,7 +201,8 @@ def main():
     }
     root_node = dt_create_root_node(cfg, **metadata)
 
-    os_data = get_os_data(is_zephyr=is_zephyr)
+    #os_data = get_os_data(is_zephyr=is_zephyr)
+    os_data = get_os_data(root_node)
     misc_node = {
             "include_headers": os_data['include_headers'],
             "chosen": os_data['chosen'],
@@ -218,10 +219,10 @@ def main():
 
     memory_node = {"memory": {}}
     if is_zephyr:
-        mem_node = dt_create_memory_node(cfg, False, is_zephyr)
+        mem_node = dt_create_memory_node(cfg, root_node, False, is_zephyr)
         memory_node['memory'].update(mem_node)
 
-    mem_node = dt_create_memory_node(cfg, True, is_zephyr)
+    mem_node = dt_create_memory_node(cfg, root_node, True, is_zephyr)
     memory_node['memory'].update(mem_node)
 
     root_node = dt_insert_child_node(root_node, memory_node)
@@ -237,12 +238,12 @@ def main():
 
 
     # cpu
-    cpu_node = dt_create_cpu_node(cfg, is_zephyr)
+    cpu_node = dt_create_cpu_node(cfg, root_node)
     if cpu_node:
         root_node = dt_insert_child_node(root_node, cpu_node)
 
     # clock
-    clk_node = dt_create_clock_node(cfg, 'apb_clock')
+    clk_node = dt_create_clock_node(cfg, root_node, 'apb_clock')
 
     if clk_node and not is_zephyr:
         root_node = dt_insert_child_node(root_node, clk_node)

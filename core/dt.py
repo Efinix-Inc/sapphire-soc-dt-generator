@@ -65,16 +65,18 @@ def dt_reg(cfg, peripheral, is_zephyr=False, root_node=None, bus=None):
 """
 dt_compatible: get compatible driver for the peripheral
 
+@soc_config (dict): soc configuration
 @peripheral (str): peripheral name such as SPI, I2C. Must be in capital letter
+@controller (bool): the peripheral is controller peripheral such as plic
 
 return: string of device tree compatible syntax
 """
-def dt_compatible(peripheral, controller=False, is_zephyr=False):
+def dt_compatible(soc_config, peripheral, controller=False):
     out = ''
     drv = ''
 
     peripheral = peripheral.lower()
-    driver_data = get_driver_data(controller, is_zephyr)
+    driver_data = get_driver_data(soc_config, controller)
 
     if peripheral in driver_data:
         compatible = driver_data[peripheral]['compatible']
@@ -113,9 +115,9 @@ def dt_insert_data(node, new_data, peripheral):
 
     return node
 
-def dt_get_driver_private_data(peripheral, controller=False, is_zephyr=False):
+def dt_get_driver_private_data(soc_config, peripheral):
     priv_data = {}
-    priv_data['private_data'] = get_driver_private_data(peripheral, controller, is_zephyr)
+    priv_data['private_data'] = get_driver_private_data(soc_config, peripheral)
 
     return priv_data
 
@@ -126,7 +128,7 @@ def update_plic_node(soc_config, is_zephyr):
     cpu_num = cpu_config['cores']
     irq_ext = []
 
-    driver_data = get_driver_data(controller=False, is_zephyr=is_zephyr)
+    driver_data = get_driver_data(soc_config)
     for i in range(cpu_num):
         l = "{0}{1}".format(intc_label, i)
         irq_e = driver_data['plic']['interrupts_extended']
@@ -167,7 +169,7 @@ def dt_create_node(soc_config, node):
     if 'type' in node:
         name = node['type'].lower()
 
-    compatible = dt_compatible(name, is_zephyr=is_zephyr)
+    compatible = dt_compatible(soc_config, name)
 
     n = {
         "addr_cell": 1,
@@ -182,7 +184,7 @@ def dt_create_node(soc_config, node):
         if 'interrupts' in n and n['interrupts']:
             n['interrupts'] = "{} 1".format(n['interrupts'])
 
-    private_data = dt_get_driver_private_data(name, is_zephyr=is_zephyr)
+    private_data = dt_get_driver_private_data(soc_config, name)
     if private_data:
         n.update(private_data)
 
@@ -262,7 +264,7 @@ dt_create_parent_node: create parent node such as clock, apb, axi
 return: parent device tree node
 
 """
-def dt_create_parent_node(cfg, name, addr_cell, size_cell, is_zephyr=False):
+def dt_create_parent_node(cfg, soc_config, name, addr_cell, size_cell, is_zephyr=False):
     node = {
         "name": name,
         "addr_cell": addr_cell,
@@ -270,14 +272,14 @@ def dt_create_parent_node(cfg, name, addr_cell, size_cell, is_zephyr=False):
     }
 
     if not 'cpu' in name:
-        compatible = dt_compatible('bus', controller=False, is_zephyr=is_zephyr)
+        compatible = dt_compatible(soc_config, 'bus')
         node['compatible'] = compatible
 
     node = {name: node}
 
     return node
 
-def dt_create_clock_node(cfg, label):
+def dt_create_clock_node(cfg, soc_config, label):
     name = "clock"
 
     node = {
@@ -285,22 +287,22 @@ def dt_create_clock_node(cfg, label):
         "name": name,
         "addr": "1",
         "reg":  "1",
-        "compatible": dt_compatible("clock"),
+        "compatible": dt_compatible(soc_config, "clock"),
         "clock_freq": dt_get_clock_frequency(cfg)
     }
 
-    parent_node = dt_create_parent_node(cfg, name, 1, 0)
+    parent_node = dt_create_parent_node(cfg, soc_config, name, 1, 0)
     parent_node = dt_insert_child_node(parent_node, node)
 
     return parent_node
 
 
-def dt_create_interrupt_controller_node(is_zephyr=False):
+def dt_create_interrupt_controller_node(soc_config):
     name = "interrupt-controller"
     node = {}
 
-    compatible = dt_compatible('plic', controller=True, is_zephyr=is_zephyr)
-    priv_data = get_driver_private_data('plic', controller=True, is_zephyr=is_zephyr)
+    compatible = dt_compatible(soc_config, 'plic', controller=True)
+    priv_data = get_driver_private_data(soc_config, 'plic', controller=True)
     priv_data.append(compatible)
 
     node = {
@@ -313,7 +315,7 @@ def dt_create_interrupt_controller_node(is_zephyr=False):
 
     return node
 
-def dt_create_cpu_node(cfg, is_zephyr=False):
+def dt_create_cpu_node(cfg, soc_config):
     cpu_count = get_cpu_count(cfg)
     cpu_node = {
         "cpu": {
@@ -345,9 +347,9 @@ def dt_create_cpu_node(cfg, is_zephyr=False):
     if mmu:
         cpu_node["cpu"].update({"mmu_type": "riscv,sv32"})
 
-    intc = dt_create_interrupt_controller_node(is_zephyr=is_zephyr)
+    intc = dt_create_interrupt_controller_node(soc_config)
 
-    if is_zephyr:
+    if check_is_zephyr(soc_config):
         intc_label = "hlic"
         intc['intc'].update({"label": intc_label})
 
@@ -369,7 +371,7 @@ dt_create_memory_node: create memory node
 
 return: a dictionary of memory node
 """
-def dt_create_memory_node(cfg, is_on_chip_ram=True, is_zephyr=False):
+def dt_create_memory_node(cfg, soc_config, is_on_chip_ram=True, is_zephyr=False):
     label = ''
     addr = ''
     size = ''
@@ -394,7 +396,7 @@ def dt_create_memory_node(cfg, is_on_chip_ram=True, is_zephyr=False):
         reg = "{0} DT_SIZE_K({1})".format(addr, size)
 
     else:
-        conf = get_os_data()
+        conf = get_os_data(soc_config)
         # addr use linux start addr
         addr = conf['memory_mapped']['uimage']
         size = hex(int(size,0) - int(addr, 0))
