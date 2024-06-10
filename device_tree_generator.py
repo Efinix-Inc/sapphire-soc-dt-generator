@@ -133,6 +133,7 @@ def main():
     dt_parse.add_argument('-s', '--slave', action='append', type=str, help='Specify path to slave device configuration json file. This file is a slave node for the master device which appear in DTS file.')
     subparsers = dt_parse.add_subparsers(title='os', dest='os')
     os_linux_parser = subparsers.add_parser('linux', help='Target OS, Linux')
+    os_uboot_parser = subparsers.add_parser('uboot', help='Target OS, U-Boot')
     os_zephyr_parser = subparsers.add_parser('zephyr', help='Target OS, Zephyr')
     os_zephyr_parser.add_argument('socname', type=str, help='Custom soc name for Zephyr SoC dtsi')
     os_zephyr_parser.add_argument('zephyrboard', type=str, help='Zephyr board name')
@@ -179,7 +180,7 @@ def main():
     else:
         output_filename = 'sapphire.dtsi'
         output_filename = os.path.join(path_dts, output_filename)
-        dts_filename = 'linux.dts'
+        dts_filename = "{}.dts".format(args.os)
 
     if (os.path.exists(path_dts)):
             shutil.rmtree(path_dts)
