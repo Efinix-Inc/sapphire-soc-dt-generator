@@ -364,49 +364,74 @@ def del_node_key(node, keys_to_delete):
 get_cpu_metadata: get metadata of a cpu
 
 @cfg (list): raw data of soc.h
-@idx (int): cpu core number
 
 return: dict of a cpu metadata
 """
-def get_cpu_metadata(cfg, idx=0):
-    node = {}
-
-    core = "core{}".format(idx)
-    isa = get_cpu_isa(cfg, idx)
-    icache_way = get_cache_way(cfg, idx, ICACHE)
-    icache_size = get_cache_size(cfg, idx, ICACHE)
-    dcache_way = get_cache_way(cfg, idx, DCACHE)
-    dcache_size = get_cache_size(cfg, idx, DCACHE)
-    cache_block = get_cache_block(cfg, idx)
-
-    node = {
-        "name": "cpu",
-        "addr": idx,
-        "reg": "reg = <{}>;".format(idx),
-        "device_type": 'device_type = "cpu";',
-        "compatible": 'compatible = "riscv";',
-        "isa": 'riscv,isa = "{}";'.format(isa),
-        "tlb": "tlb-split;",
-        "status": get_status(okay=True)
+def get_cpu_metadata(cfg):
+    cpu_count = get_cpu_count(cfg)
+    cpu_node = {
+        "cpu": {
+            "label": "cpus",
+            "name": "cpu",
+            "cores": cpu_count,
+            "arch": "riscv",
+            "isa": get_cpu_isa(cfg, 0),
+            "tlb": True,
+            "i_cache_size": get_cache_size(cfg, 0, ICACHE),
+            "i_cache_sets": get_cache_way(cfg, 0, ICACHE),
+            "i_cache_block_size": get_cache_block(cfg, 0),
+            "d_cache_size": get_cache_size(cfg, 0, ICACHE),
+            "d_cache_sets": get_cache_way(cfg, 0, ICACHE),
+            "d_cache_block_size": get_cache_block(cfg, 0),
+            "frequency": get_frequency(cfg)
+        }
     }
 
-    if icache_way and icache_size and dcache_way and dcache_size:
-        node.update({
-            "icache_way": "i-cache-sets = <{}>;".format(icache_way),
-            "icache_size": "i-cache-size = <{}>;".format(icache_size),
-            "icache_block_size": "i-cache-block-size = <{}>;".format(cache_block),
-            "dcache_way": "d-cache-sets = <{}>;".format(dcache_way),
-            "dcache_size": "d-cache-size = <{}>;".format(dcache_size),
-            "dcache_block_size": "d-cache-block-size = <{}>;".format(cache_block),
-        })
+    cpu_type = get_property_value(cfg, "SYSTEM_HARD_RISCV_QC32", "SYSTEM_HARD_RISCV_QC32")
 
+    if cpu_type == str(1):
+        print("DEBUG: cpu is hard soc")
+        cpu_node["cpu"].update({"clock_frequency": 1000000000})
     else:
-        system_core = "SYSTEM_CORES_{}".format(idx)
-        value = get_property_value(cfg, system_core, MMU)
-        if value:
-            node.update({"mmu_type": 'mmu_type = "riscv,sv32";'})
+        cpu_node["cpu"].update({"clock_frequency": 0})
 
-    return node
+    system_core = "SYSTEM_RISCV_ISA"
+    mmu = get_property_value(cfg, system_core, MMU)
+    if mmu:
+        cpu_node["cpu"].update({"mmu_type": "riscv,sv32"})
+
+    return cpu_node
+
+"""
+get_memory_config: get the memory information from the soc.h then create the dictionary
+of internal memory and external memory.
+
+@cfg (list): raw data of soc.h
+
+return (dict): memory node for internal and external
+"""
+def get_memory_config(cfg):
+    memory_types = ['external_memory', 'internal_memory']
+    mem_node = {"memory": {}}
+
+    for i, keyword in enumerate(['SYSTEM_DDR_BMB', 'RAM_A']):
+        size = get_property_value(cfg, keyword, 'SIZE ')
+        addr = get_property_value(cfg, keyword, 'CTRL ')
+        if not addr:
+            addr = get_property_value_match(cfg, keyword, keyword)
+
+        mem_type = memory_types[i]
+        memory_node = {
+            "label": "{}".format(mem_type),
+            "name": "memory",
+            "addr": addr.lstrip('0x'),
+            "size": size,
+            "device_type": "memory"
+        }
+
+        mem_node['memory'][mem_type] = memory_node
+
+    return mem_node
 
 """
 get_peripherals: get a list of supported peripheral from soc.h
@@ -891,9 +916,13 @@ def parse_soc_config(filename):
     cfg = read_file(filename)
     peripherals = get_peripherals(cfg, PERIPHERALS)
 
+    cpu_config = get_cpu_metadata(cfg)
+    memory_config = get_memory_config(cfg)
     peripheral_groups = get_peripheral_groups(cfg, peripherals)
     bus_groups = get_bus_groups(cfg, buses)
 
+    soc_config.update(cpu_config)
+    soc_config.update(memory_config)
     soc_config.update(peripheral_groups)
     soc_config.update(bus_groups)
 
