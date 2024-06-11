@@ -6,62 +6,6 @@ from core.core import *
 from core.utils import *
 from core.variables import *
 
-def dt_address_cells(num):
-    return "#address-cells = <{}>;".format(num)
-
-
-def dt_size_cells(num):
-    return "#size-cells = <{}>;".format(num)
-
-
-def dt_get_clock_frequency(cfg):
-    freq = get_frequency(cfg)
-    return "{}".format(freq)
-
-
-"""
-dt_interrupt: return a string of device tree syntax of interrupt
-
-@cfg (list): raw data of soc.h
-@peripheral (str): peripheral name such as SPI, I2C. Must be in capital letter
-
-return: string of device tree interrupt syntax
-"""
-def dt_interrupt(cfg, peripheral, is_zephyr=False):
-    out = ''
-
-    irq = get_interrupt_id(cfg, peripheral)
-    if irq:
-        if is_zephyr:
-            out = "{0} {1}".format(irq, 1)
-
-        else:
-            out = "{}".format(irq)
-
-    return out
-
-"""
-dt_reg: string of device tree syntax of reg
-
-@cfg (list): raw data of soc.h
-@peripheral (str): peripheral name such as SPI, I2C. Must be in capital letter
-
-return: string of device tree reg syntax
-"""
-def dt_reg(cfg, peripheral, is_zephyr=False, root_node=None, bus=None):
-    out = ''
-
-    addr = get_peripheral_offset_address(cfg, peripheral, root_node, bus)
-    size = get_size(cfg, peripheral)
-
-    if is_zephyr:
-        addr = get_peripheral_address(cfg, peripheral)
-
-    if addr and size:
-        out = "<{0} {1}>".format(addr, size)
-
-    return out
-
 """
 dt_compatible: get compatible driver for the peripheral
 
@@ -256,7 +200,7 @@ def dt_create_bus_node(soc_config, bus):
 """
 dt_create_parent_node: create parent node such as clock, apb, axi
 
-@cfg (list): raw data of soc.h
+@soc_config (dict): soc configuration after parse it
 @name (str): name of the parent node
 @address_cell (int):
 @size_cell (int):
