@@ -4,7 +4,7 @@
                         "name": "dma",
                         "label": "dma0",
                         "compatible": "spinal,lib-dmasg",
-                        "interrupts": "2 3",
+                        "interrupts": "17 22",
                         "private_data": [
                                 "#dma-cells = <1>;",
                                 "#address-cells = <1>;",
@@ -35,7 +35,7 @@
 			"name": "mmc",
 			"label": "mmc0",
 			"compatible": "efx,sdhci",
-			"interrupts": "4",
+			"interrupts": "23",
 			"private_data": [
 				"bus-width = <4>;",
 				"no-sdio;",
@@ -44,6 +44,7 @@
 			],
 			"status": "okay"
 		}
+
         },
 	"child": {
 		"tsemac": {
@@ -82,12 +83,15 @@
                         "label": "evsoc",
                         "compatible": "evsoc",
                         "addr": 0,
-                        "interrupts": "1",
+                        "interrupts": "16",
                         "status": "okay",
 			"private_data": [
 				"interrupt-parent = <&plic>;",
-				"interrupts = <1>;"
+				"interrupts = <16>;"
 			]
                 }
+
+
+
 	}
 }
