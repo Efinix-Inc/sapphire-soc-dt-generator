@@ -32,8 +32,8 @@
                         ]
                 },
 		"AXI_SLAVE_1": {
-                        "name": "sdmmc",
-                        "label": "sdmmc0",
+                        "name": "mmc",
+                        "label": "mmc0",
                         "compatible": "efx,sdhci",
                         "interrupts": "6",
                         "private_data": [
