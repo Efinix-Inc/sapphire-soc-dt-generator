@@ -1,7 +1,13 @@
 {
 	"overrides": {
 		"SPI_0": {
-			"interrupts": ""
+			"interrupts": "",
+			"private_data": [
+				"cmd_fifo_depth = <256>;",
+				"rsp_fifo_depth = <256>;",
+				"num-cs = <1>;",
+				"dummy-cycle;"
+			]
 		},
 		"SPI_1": {
 			"interrupts": ""
