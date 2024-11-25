@@ -522,16 +522,15 @@ APB_SLAVE_0 is the key to override specific peripherals properties.
 @new_cfg (dict): new configuration to override the peripheral in @peripheral_parent.
 """
 def override_peripherals(peripheral_parent, new_cfg):
-    for k1 in peripheral_parent['buses']:
-        for k2 in peripheral_parent['buses'][k1]['peripherals']:
-            if 'overrides' in new_cfg:
-                for u1 in new_cfg['overrides']:
-                    if k2 in u1:
-                        n_cfg = new_cfg['overrides'][u1]
-                        peripheral_node = peripheral_parent['buses'][k1]['peripherals'][k2]
-                        peripheral_node.update(n_cfg)
-                        node_header = get_node_header(peripheral_node)
-                        peripheral_node['header'] = node_header
+    if 'overrides' in new_cfg:
+        for key in new_cfg['overrides']:
+            cfg_overrides = new_cfg['overrides'][key]
+            update_dict(peripheral_parent, key, cfg_overrides)
+            node = find_key(peripheral_parent, key)
+
+            if node:
+                cfg_overrides['header'] = get_node_header(node)
+                update_dict(peripheral_parent, key, cfg_overrides)
 
 """
 get_os: get operating system
