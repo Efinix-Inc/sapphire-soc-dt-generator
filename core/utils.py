@@ -81,14 +81,14 @@ def find_key(nested_dict, target_key):
 
     return None
 
-def update_key(nested_dict, target_key, new_value):
+def update_dict(nested_dict, target_key, new_value):
     if target_key in nested_dict:
-        nested_dict[target_key] = new_value
+        nested_dict[target_key].update(new_value)
         return True
 
     for key, value in nested_dict.items():
         if isinstance(value, dict):
-            if update_key(value, target_key, new_value):
+            if update_dict(value, target_key, new_value):
                 return True
 
     return False
