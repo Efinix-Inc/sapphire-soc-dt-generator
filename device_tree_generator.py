@@ -149,7 +149,6 @@ def main():
         is_zephyr = False
 
     soc_path = args.soc
-    cfg = read_file(soc_path)
     soc_config = parse_soc_config(soc_path)
 
     conf = load_config_file()
@@ -200,9 +199,8 @@ def main():
         'board': board,
         'soc_name': soc_name
     }
-    root_node = dt_create_root_node(cfg, **metadata)
 
-    #os_data = get_os_data(is_zephyr=is_zephyr)
+    root_node = dt_create_root_node(soc_config, **metadata)
     os_data = get_os_data(root_node)
     misc_node = {
             "include_headers": os_data['include_headers'],
@@ -218,42 +216,29 @@ def main():
 
     root_node = dt_insert_child_node(root_node, misc_node)
 
-    memory_node = {"memory": {}}
-    if is_zephyr:
-        mem_node = dt_create_memory_node(cfg, root_node, False, is_zephyr)
-        memory_node['memory'].update(mem_node)
-
-    mem_node = dt_create_memory_node(cfg, root_node, True, is_zephyr)
-    memory_node['memory'].update(mem_node)
-
-    root_node = dt_insert_child_node(root_node, memory_node)
+    soc_config['root'].update(root_node['root'])
+    mem_node = dt_create_memory_node(soc_config)
+    soc_config['root'].update({'memory': mem_node})
 
     if 'reserved_memory' in os_data:
-        root_node['root']['reserved_memory'] = os_data['reserved_memory']
+        soc_config['root']['reserved_memory'] = os_data['reserved_memory']
 
     if is_zephyr :
         if args.extmemory:
-            root_node['root']['chosen']['private_data'].append("zephyr,sram = &external_ram;")
+            soc_config['root']['chosen']['private_data'].append("zephyr,sram = &external_ram;")
         else:
-            root_node['root']['chosen']['private_data'].append("zephyr,sram = &ram0;")
+            soc_config['root']['chosen']['private_data'].append("zephyr,sram = &ram0;")
 
 
     # cpu
-    cpu_node = dt_create_cpu_node(cfg, root_node)
-    if cpu_node:
-        root_node = dt_insert_child_node(root_node, cpu_node)
+    soc_config = dt_create_cpu_node(soc_config)
 
     # clock
-    clk_node = dt_create_clock_node(cfg, root_node, 'apb_clock')
-
+    clk_node = dt_create_clock_node(soc_config, 'apb_clock')
     if clk_node and not is_zephyr:
-        root_node = dt_insert_child_node(root_node, clk_node)
-
-
-    peripheral_list = get_peripherals(cfg, PERIPHERALS)
+        soc_config['root'].update(clk_node)
 
     # bus
-    soc_config.update(root_node)
     buses_node = create_bus_nodes(soc_config)
 
     slaves_node = {}
@@ -267,7 +252,7 @@ def main():
                 if 'child' in user_cfg:
                     child_node = get_child_node_header(user_cfg)
                     slaves_node = {"child": child_node['child']}
-                    root_node = dt_insert_child_node(root_node, slaves_node)
+                    soc_config['root'].update(slaves_node)
 
                 # append items into aliases or chosen node if specify
                 if 'append' in user_cfg:
@@ -275,9 +260,9 @@ def main():
                         # TODO: check if key is 'chosen', 'alias' or any peripheral name.
                         if 'aliases' in key or 'chosen' in key:
                             if 'private_data' in root_node['root'][key]:
-                                root_node['root'][key]['private_data'] += user_cfg['append'][key]
+                                soc_config['root'][key]['private_data'] += user_cfg['append'][key]
                             else:
-                                root_node['root'][key]['private_data'] = user_cfg['append'][key]
+                                soc_config['root'][key]['private_data'] = user_cfg['append'][key]
                         else:
                             print("key %s is not for chosen or aliases node" % key)
 
@@ -285,7 +270,7 @@ def main():
                 print("Error: file %s does not exists" % uc)
                 sys.exit(1)
 
-    root_node = dt_insert_child_node(root_node, buses_node)
+    soc_config['root'].update(buses_node)
 
     if args.slave:
         slaves_node = {}
@@ -301,24 +286,24 @@ def main():
         slaves_node = {'child': slaves_node}
         slaves_node = get_child_node_header(slaves_node)
 
-        if not 'child' in root_node['root']:
-            root_node = dt_insert_child_node(root_node, slaves_node)
+        if not 'child' in soc_config['root']:
+            soc_config = dt_insert_child_node(soc_config, slaves_node)
         else:
-            root_node['root']['child'].update(slaves_node['child'])
+            soc_config['root']['child'].update(slaves_node['child'])
 
-    out = dtsi_template.render(root_node)
+    out = dtsi_template.render(soc_config)
     save_file(output_filename, out)
     print("Info: SoC device tree source stored in %s" % output_filename)
 
     # create dts file
-    out = dts_template.render(root_node)
+    out = dts_template.render(soc_config)
     save_file(dts_filename, out)
     print("Info: save dts of board %s in %s" % (board, dts_filename))
 
     # save in json format
     if args.json:
         with open(output_json, 'w') as f:
-            json.dump(root_node, f, indent=4, sort_keys=False)
+            json.dump(soc_config, f, indent=4, sort_keys=False)
 
         print("Info: device tree json format stored in %s" % output_json)
 

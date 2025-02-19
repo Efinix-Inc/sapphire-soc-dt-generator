@@ -921,7 +921,7 @@ def parse_soc_config(filename):
     peripheral_groups = get_peripheral_groups(cfg, peripherals)
     bus_groups = get_bus_groups(cfg, buses)
 
-    soc_config.update(cpu_config)
+    soc_config.update({'root': cpu_config})
     soc_config.update(memory_config)
     soc_config.update(peripheral_groups)
     soc_config.update(bus_groups)

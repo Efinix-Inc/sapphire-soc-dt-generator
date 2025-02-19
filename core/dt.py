@@ -264,7 +264,7 @@ dt_create_parent_node: create parent node such as clock, apb, axi
 return: parent device tree node
 
 """
-def dt_create_parent_node(cfg, soc_config, name, addr_cell, size_cell, is_zephyr=False):
+def dt_create_parent_node(soc_config, name, addr_cell, size_cell):
     node = {
         "name": name,
         "addr_cell": addr_cell,
@@ -279,7 +279,7 @@ def dt_create_parent_node(cfg, soc_config, name, addr_cell, size_cell, is_zephyr
 
     return node
 
-def dt_create_clock_node(cfg, soc_config, label):
+def dt_create_clock_node(soc_config, label):
     name = "clock"
 
     node = {
@@ -288,10 +288,10 @@ def dt_create_clock_node(cfg, soc_config, label):
         "addr": "1",
         "reg":  "1",
         "compatible": dt_compatible(soc_config, "clock"),
-        "clock_freq": dt_get_clock_frequency(cfg)
+        "clock_freq": soc_config['root']['cpu']['frequency']
     }
 
-    parent_node = dt_create_parent_node(cfg, soc_config, name, 1, 0)
+    parent_node = dt_create_parent_node(soc_config, name, 1, 0)
     parent_node = dt_insert_child_node(parent_node, node)
 
     return parent_node
@@ -315,38 +315,9 @@ def dt_create_interrupt_controller_node(soc_config):
 
     return node
 
-def dt_create_cpu_node(cfg, soc_config):
-    cpu_count = get_cpu_count(cfg)
-    cpu_node = {
-        "cpu": {
-            "label": "cpus",
-            "name": "cpu",
-            "cores": cpu_count,
-            "arch": "riscv",
-            "isa": get_cpu_isa(cfg, 0),
-            "tlb": True,
-            "i_cache_size": get_cache_size(cfg, 0, ICACHE),
-            "i_cache_sets": get_cache_way(cfg, 0, ICACHE),
-            "i_cache_block_size": get_cache_block(cfg, 0),
-            "d_cache_size": get_cache_size(cfg, 0, ICACHE),
-            "d_cache_sets": get_cache_way(cfg, 0, ICACHE),
-            "d_cache_block_size": get_cache_block(cfg, 0),
-        }
-    }
 
-    cpu_type = get_property_value(cfg, "SYSTEM_HARD_RISCV_QC32", "SYSTEM_HARD_RISCV_QC32")
-
-    if cpu_type == str(1):
-        print("DEBUG: cpu is hard soc")
-        cpu_node["cpu"].update({"clock_frequency": 1000000000})
-    else:
-        cpu_node["cpu"].update({"clock_frequency": 0})
-
-    system_core = "SYSTEM_RISCV_ISA"
-    mmu = get_property_value(cfg, system_core, MMU)
-    if mmu:
-        cpu_node["cpu"].update({"mmu_type": "riscv,sv32"})
-
+def dt_create_cpu_node(soc_config):
+    cpu_node = soc_config['root']['cpu']
     intc = dt_create_interrupt_controller_node(soc_config)
 
     if check_is_zephyr(soc_config):
@@ -357,49 +328,25 @@ def dt_create_cpu_node(cfg, soc_config):
             "tlb": False,
             "clock_frequency": True
         }
-        cpu_node['cpu'].update(z_cpu)
+        cpu_node.update(z_cpu)
 
-    cpu_node['cpu'].update(intc)
+    cpu_node.update(intc)
 
-    return cpu_node
+    return soc_config
 
 """
 dt_create_memory_node: create memory node
-@cfg (list): raw data of soc.h
+@soc_config (dict): soc configuration after parse it
 @is_on_chip_ram (bool): enable on chip ram for zephyr setting
-@is_zephyr (bool): select if targeted os is zephyr
 
 return: a dictionary of memory node
 """
-def dt_create_memory_node(cfg, soc_config, is_on_chip_ram=True, is_zephyr=False):
-    label = ''
-    addr = ''
-    size = ''
-    name = 'memory'
-    keyword = 'SYSTEM_DDR_BMB'
-
-    size = get_property_value(cfg, keyword, 'SIZE ')
-    if is_zephyr:
-        if is_on_chip_ram:
-            label = 'ram0'
-            name = 'memory0'
-            keyword = 'RAM_A'
-            addr = get_property_value(cfg, keyword, 'CTRL ')
-            size = get_property_value(cfg, keyword, 'SIZE ')
-
-        else:
-            label = 'external_ram'
-            name = 'memory1'
-            addr = get_property_value_match(cfg, keyword, keyword)
-
+def memory_node(soc_config, label, addr, size):
+    if check_is_zephyr(soc_config):
         size = int(size, 16) // 1024
-        reg = "{0} DT_SIZE_K({1})".format(addr, size)
+        reg = "{0} DT_SIZE_K({1})".format(hex(int(addr, 16)), size)
 
     else:
-        conf = get_os_data(soc_config)
-        # addr use linux start addr
-        addr = conf['memory_mapped']['uimage']
-        size = hex(int(size,0) - int(addr, 0))
         reg = "{0} {1}".format(addr, size)
 
     mem_node = {
@@ -411,7 +358,36 @@ def dt_create_memory_node(cfg, soc_config, is_on_chip_ram=True, is_zephyr=False)
         "device_type": "memory"
     }
 
-    mem_node = {name: mem_node}
+    return mem_node
+
+def dt_create_memory_node(soc_config):
+    size = 0
+    addr = 0
+    name = 'memory'
+    label = ''
+    size = soc_config['memory']['external_memory']['size']
+    mem_node = {}
+
+    if check_is_zephyr(soc_config):
+        memory_types = ['external_memory', 'internal_memory']
+        z_labels = ['external_ram', 'ram0']
+        i = 0
+
+        for l, t in zip(z_labels, memory_types):
+            label = l
+            name = 'memory{}'.format(i)
+            size = soc_config['memory'][t]['size']
+            addr = soc_config['memory'][t]['addr']
+            mem_node[name] = memory_node(soc_config, label, addr, size)
+            i += 1
+
+    else:
+        conf = get_os_data(soc_config)
+        # addr use linux start addr
+        addr = conf['memory_mapped']['uimage']
+        size = hex(int(size, 0) - int(addr, 0))
+        mem_node = memory_node(soc_config, label, addr, size)
+        mem_node = {name: mem_node}
 
     return mem_node
 
@@ -420,13 +396,12 @@ def dt_version():
     version  = '{}\n\n'.format(conf['dt_version'])
     return version
 
-
 def dt_model():
     conf = load_config_file()
     model = 'model = "{}";'.format(conf['model'])
     return model
 
-def dt_create_root_node(cfg, **kwargs):
+def dt_create_root_node(soc_config, **kwargs):
     root_node = {
         "root": {
             "version": "/dts-v1/",
@@ -438,7 +413,7 @@ def dt_create_root_node(cfg, **kwargs):
             "device_family": kwargs['device_family'],
             "board": kwargs['board'],
             "soc_name": kwargs['soc_name'],
-            "frequency": get_frequency(cfg)
+            "frequency": soc_config['root']['cpu']['frequency']
         }
     }
 
