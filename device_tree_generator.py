@@ -115,6 +115,19 @@ def create_bus_nodes(soc_config):
 
     return buses_node
 
+def append_chosen_node(soc_config, root_node, user_cfg):
+    for key in user_cfg['append']:
+        # check if key is 'chosen', 'alias' or any peripheral name.
+        if 'aliases' in key or 'chosen' in key:
+            if 'bootargs' in root_node['root'][key]:
+                append_chosen_data(soc_config, key, 'bootargs', user_cfg['append'][key]['bootargs'])
+
+            if 'stdout_path' in root_node['root'][key]:
+                append_chosen_data(soc_config, key, 'stdout_path', user_cfg['append'][key]['stdout_path'], sep=",")
+
+            if 'private_data' in root_node['root'][key]:
+                append_chosen_data(soc_config, key, 'private_data', user_cfg['append'][key]['private_data'])
+
 def main():
 
     out = ''
@@ -241,40 +254,27 @@ def main():
     # bus
     buses_node = create_bus_nodes(soc_config)
 
-    slaves_node = {}
+    merged_child = {"child": {}}
     if args.user_config:
         for uc in args.user_config:
-            if os.path.exists(uc):
-                user_cfg = load_json_file(uc)
-                override_peripherals(buses_node, user_cfg)
-
-                # add child node if specify
-                if 'child' in user_cfg:
-                    child_node = get_child_node_header(user_cfg)
-                    slaves_node = {"child": child_node['child']}
-                    soc_config['root'].update(slaves_node)
-
-                # append items into 'aliases' or 'chosen' node if specify
-                if 'append' in user_cfg:
-                    for key in user_cfg['append']:
-                        # check if key is 'chosen', 'alias' or any peripheral name.
-                        if 'aliases' in key or 'chosen' in key:
-                            if 'bootargs' in root_node['root'][key]:
-                                append_chosen_data(soc_config, key, 'bootargs', user_cfg['append'][key]['bootargs'])
-
-                            if 'stdout_path' in root_node['root'][key]:
-                                append_chosen_data(soc_config, key, 'stdout_path', user_cfg['append'][key]['stdout_path'], sep=",")
-
-                            if 'private_data' in root_node['root'][key]:
-                                append_chosen_data(soc_config, key, 'private_data', user_cfg['append'][key]['private_data'])
-
-                        else:
-                            print("key %s is not for 'chosen' or 'aliases' node" % key)
-
-            else:
+            if not os.path.exists(uc):
                 print("Error: file %s does not exists" % uc)
                 sys.exit(1)
 
+            user_cfg = load_json_file(uc)
+            override_peripherals(buses_node, user_cfg)
+
+            # add child node
+            if 'child' in user_cfg:
+                child_node = get_child_node_header(user_cfg)
+                for k, v in child_node['child'].items():
+                    merged_child['child'][k] = v
+
+            # append items into 'aliases' or 'chosen' node if specify
+            if 'append' in user_cfg:
+                append_chosen_node(soc_config, root_node, user_cfg)
+
+    soc_config['root'].update(merged_child)
     soc_config['root'].update(buses_node)
 
     if args.slave:
