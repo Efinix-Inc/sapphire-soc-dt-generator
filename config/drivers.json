@@ -27,10 +27,8 @@
 			},
 			"chosen": {
 				"name": "chosen",
-				"private_data": [
-					"stdout-path = \"serial0:115200n8\";",
-					"bootargs = \"rootwait console=ttySL0 earlycon root=/dev/mmcblk0p2 init=/sbin/init mmc_core.use_spi_crc=0\";"
-				]
+				"bootargs": "\"rootwait console=ttySL0 earlycon root=/dev/mmcblk0p2 init=/sbin/init mmc_core.use_spi_crc=0\";",
+                                "stdout_path": "\"serial0:115200n8\";"
 			},
 			"aliases": {
 				"name": "aliases",

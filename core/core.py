@@ -3,6 +3,7 @@
 # Copyright (C) 2023 Efinix, Inc.
 
 import sys
+import re
 from core.variables import *
 from core.utils import *
 
@@ -935,3 +936,9 @@ def get_peripheral_data(config, name):
 def get_bus_data(config, name):
     if name in config['buses']:
         return config['buses'][name]
+
+def append_chosen_data(soc_config, key, k, v, sep=" "):
+    # remove tailing character such as '\";'
+    o_args = soc_config['root'][key][k]
+    n_args = re.sub(r'";', '', o_args)
+    soc_config['root'][key][k] = '{0}{1}{2}\";'.format(n_args, sep, v)

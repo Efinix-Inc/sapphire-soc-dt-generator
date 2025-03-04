@@ -17,13 +17,21 @@
         #size-cells = <1>;
 
 	{%- if root.chosen %}
+        chosen {
+        {%- if root.chosen.stdout_path %}
+                stdout-path = {{ root.chosen.stdout_path }}
+        {%- endif -%}
+
+        {% if root.chosen.bootargs %}
+                bootargs = {{ root.chosen.bootargs }}
+        {%- endif -%}
+
 	{% if root.chosen.private_data %}
-	chosen {
 		{%- for pdata in root.chosen.private_data %}
 		{{ pdata }}
 		{%- endfor %}
-	};
 	{%- endif %}
+        };
 	{%- endif %}
 
 	{%- if root.aliases %}

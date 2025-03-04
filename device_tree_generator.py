@@ -254,17 +254,22 @@ def main():
                     slaves_node = {"child": child_node['child']}
                     soc_config['root'].update(slaves_node)
 
-                # append items into aliases or chosen node if specify
+                # append items into 'aliases' or 'chosen' node if specify
                 if 'append' in user_cfg:
                     for key in user_cfg['append']:
-                        # TODO: check if key is 'chosen', 'alias' or any peripheral name.
+                        # check if key is 'chosen', 'alias' or any peripheral name.
                         if 'aliases' in key or 'chosen' in key:
+                            if 'bootargs' in root_node['root'][key]:
+                                append_chosen_data(soc_config, key, 'bootargs', user_cfg['append'][key]['bootargs'])
+
+                            if 'stdout_path' in root_node['root'][key]:
+                                append_chosen_data(soc_config, key, 'stdout_path', user_cfg['append'][key]['stdout_path'], sep=",")
+
                             if 'private_data' in root_node['root'][key]:
-                                soc_config['root'][key]['private_data'] += user_cfg['append'][key]
-                            else:
-                                soc_config['root'][key]['private_data'] = user_cfg['append'][key]
+                                append_chosen_data(soc_config, key, 'private_data', user_cfg['append'][key]['private_data'])
+
                         else:
-                            print("key %s is not for chosen or aliases node" % key)
+                            print("key %s is not for 'chosen' or 'aliases' node" % key)
 
             else:
                 print("Error: file %s does not exists" % uc)
