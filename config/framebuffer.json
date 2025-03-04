@@ -1,0 +1,61 @@
+{
+	"append": {
+		"chosen": {
+			"bootargs": "console=tty0",
+			"stdout_path": "framebuffer"
+		}
+	},
+	"overrides": {
+                "APB_SLAVE_1": {
+                        "name": "dma",
+                        "label": "dma1",
+                        "compatible": "efx,dma-controller",
+                        "interrupts": "0 1",
+                        "private_data": [
+                                "#dma-cells = <1>;",
+				"dma-channels = <2>;"
+                        ]
+                }
+        },
+	"child": {
+		"dma1_channel0": {
+			"parent_label": "dma1",
+			"name": "dma1-channel",
+			"addr": 0,
+			"reg": 0,
+			"private_data": [
+				"dma-names = \"camera\";",
+				"chan-priority = <0>;"
+			]
+		},
+		"dma1_channel1": {
+			"parent_label": "dma1",
+                        "name": "dma1-channel",
+			"addr": 1,
+                        "reg": 1,
+			"private_data": [
+				"dma-names = \"display\";",
+				"chan-priority = <2>;"
+				
+			]
+		},
+		"framebuffer": {
+			"parent_label": "root",
+			"parent_device": "gpio0",
+			"name": "framebuffer",
+			"compatible": "efx,efx-fb",
+			"addr": 8000000,
+                        "size": 800000,
+			"status": "okay",
+			"private_data": [
+				"reg = <0x8000000 0x800000>;",
+				"dmas = <&dma1 1>;",
+                        	"width = <1920>;",
+                        	"height = <1080>;",
+                        	"stride = <7680>;",
+                        	"format = \"a8b8g8r8\";",
+                        	"clocks = <&apb_clock 0>;"
+			]
+		}
+	}
+}
