@@ -20,7 +20,7 @@
 	"child": {
 		"dma1_channel0": {
 			"parent_label": "dma1",
-			"name": "dma1-channel",
+			"name": "dma-channel",
 			"addr": 0,
 			"reg": 0,
 			"private_data": [
@@ -30,7 +30,7 @@
 		},
 		"dma1_channel1": {
 			"parent_label": "dma1",
-                        "name": "dma1-channel",
+                        "name": "dma-channel",
 			"addr": 1,
                         "reg": 1,
 			"private_data": [
@@ -41,7 +41,7 @@
 		},
 		"framebuffer": {
 			"parent_label": "root",
-			"parent_device": "gpio0",
+			"parent_device": "root",
 			"name": "framebuffer",
 			"compatible": "efx,efx-fb",
 			"addr": 8000000,
