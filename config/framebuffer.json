@@ -41,7 +41,7 @@
 		},
 		"framebuffer": {
 			"parent_label": "root",
-			"parent_device": "root",
+			"parent_device": "uart",
 			"name": "framebuffer",
 			"compatible": "efx,efx-fb",
 			"addr": 8000000,
