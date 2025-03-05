@@ -1,0 +1,18 @@
+{
+	"child": {
+		"evsoc": {
+			"parent_label": "root",
+                        "parent_device": "gpio0",
+                        "label": "evsoc",
+                        "compatible": "evsoc",
+                        "addr": 0,
+                        "interrupts": "1",
+                        "status": "okay",
+                        "private_data": [
+                                "interrupt-parent = <&plic>;",
+                                "interrupts = <1>;"
+                        ]
+
+		}
+	}
+}
