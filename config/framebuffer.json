@@ -50,6 +50,7 @@
 			"private_data": [
 				"reg = <0x8000000 0x800000>;",
 				"dmas = <&dma1 1>;",
+				"dma-names = \"display\";",
                         	"width = <1920>;",
                         	"height = <1080>;",
                         	"stride = <7680>;",
