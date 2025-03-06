@@ -6,7 +6,7 @@
 		}
 	},
 	"overrides": {
-                "APB_SLAVE_1": {
+                "APB_SLAVE_0": {
                         "name": "dma",
                         "label": "dma1",
                         "compatible": "efx,dma-controller",
