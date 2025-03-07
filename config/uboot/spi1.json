@@ -1,0 +1,15 @@
+{
+	"child": {
+		"spi_flash1": {
+			"parent_label": "spi1",
+			"name": "mmc",
+			"label": "mmc0",
+			"addr": 0,
+			"reg": 0,
+			"compatible": "mmc-spi-slot",
+			"private_data": [
+				"spi-max-frequency = <10000000>;"
+			]
+		}
+	}
+}

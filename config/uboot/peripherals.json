@@ -2,6 +2,7 @@
 	"peripherals": [
 		"uart",
 		"spi",
-		"apb_slave"
+		"apb_slave",
+		"axi_slave"
 	]
 }

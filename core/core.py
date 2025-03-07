@@ -485,7 +485,7 @@ def get_supported_peripherals(soc_config):
         f = "zephyr_peripherals.json"
 
     elif 'uboot' in operating_system:
-        f = "uboot_peripherals.json"
+        f = "uboot/peripherals.json"
 
     else:
         f = "linux_peripherals.json"

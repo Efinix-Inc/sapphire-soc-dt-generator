@@ -193,10 +193,8 @@
 			},
 			"chosen": {
 				"name": "chosen",
-				"private_data": [
-					"bootargs = \"console=ttyS0,115200n8\";",
-					"stdout-path = \"serial0:115200n8\";"
-				]
+				"bootargs": "\"console=ttyS0,115200n8\";",
+				"stdout_path": "\"serial0:115200n8\";"
 			},
 			"aliases": {
 				"name": "aliases",

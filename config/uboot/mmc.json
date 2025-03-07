@@ -1,0 +1,9 @@
+{
+	"overrides": {
+		"AXI_SLAVE_1": {
+			"name": "mmc",
+			"label": "mmc0",
+			"compatible": "efx,efx-sdhost"
+		}
+	}
+}
