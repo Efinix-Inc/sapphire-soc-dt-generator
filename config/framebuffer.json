@@ -10,7 +10,7 @@
                         "name": "dma",
                         "label": "dma1",
                         "compatible": "efx,dma-controller",
-                        "interrupts": "0 1",
+                        "interrupts": "0 16",
                         "private_data": [
                                 "#dma-cells = <1>;",
 				"dma-channels = <2>;"
