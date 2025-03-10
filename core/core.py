@@ -464,8 +464,7 @@ def get_peripherals(cfg, filter_peripherals):
 get_supported_peripherals: get the list of supported peripherals
 
 @soc_config might have lot of peripherals but it may not supported by the driver.
-For example, there are 2 spi and a i2c listed in soc.h. However, i2c is not
-supported by the driver. So, the linux_peripherals.json and zephyr_peripherals.json
+For example, there are 2 spi and a i2c listed in soc.h. The peripherals.json
 only contain the whitelist of supported peripherals.
 
 @soc_config (dict): soc configuration after parse_soc_config
@@ -479,16 +478,16 @@ def get_supported_peripherals(soc_config):
 
     operating_system = get_os(soc_config)
     if 'linux' in operating_system:
-        f = "linux_peripherals.json"
+        f = "linux/peripherals.json"
 
     elif 'zephyr' in operating_system:
-        f = "zephyr_peripherals.json"
+        f = "zephyr/peripherals.json"
 
     elif 'uboot' in operating_system:
         f = "uboot/peripherals.json"
 
     else:
-        f = "linux_peripherals.json"
+        f = "linux/peripherals.json"
 
     f = os.path.join(d, "../config", f)
     cfg = load_json_file(f)
