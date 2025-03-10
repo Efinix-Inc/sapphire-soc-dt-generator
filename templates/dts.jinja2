@@ -120,7 +120,7 @@
 {%- set peri = value.peripherals %}
 
 {%- for k, v in peri.items() %}
-{%- if not 'okay' in v.status %}
+{%- if not 'okay' in v.status and v.compatible|length != 0 %}
 &{{ v.label }} {
 	{%- set child = root.child %}
 	#address-cells = <1>;
