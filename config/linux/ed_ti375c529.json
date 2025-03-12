@@ -35,7 +35,7 @@
                         "name": "mmc",
                         "label": "mmc0",
                         "compatible": "efx,sdhci",
-                        "interrupts": "6",
+                        "interrupts": "9",
                         "private_data": [
                                 "bus-width = <4>;",
                                 "no-sdio;",
