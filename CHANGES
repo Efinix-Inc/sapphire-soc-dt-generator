@@ -1,3 +1,17 @@
+v2.2,	Summary,
+	Remove node which does not has 'compatible' property
+	Add Linux framebuffer configuration
+	Move the json files to the respective owner
+
+	Features,
+	Add uboot DT configuration
+	Add functionality to append data to chosen node
+	Replace function argument of cfg with soc_config data structure
+	Add support for generating uboot.dts file
+
+	Fixed,
+	Refactor the code to append multiple 'child' nodes
+	Refactor function override_peripherals
 v2.1,
 	Summary,
 	Add user configuration for Ti375C529 example design.
