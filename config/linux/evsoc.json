@@ -6,7 +6,7 @@
                         "label": "evsoc",
                         "compatible": "evsoc",
                         "addr": 0,
-                        "interrupts": "1",
+                        "interrupts": "16",
                         "status": "okay",
                         "private_data": [
                                 "interrupt-parent = <&plic>;",
