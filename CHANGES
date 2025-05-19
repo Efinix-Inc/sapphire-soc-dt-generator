@@ -1,3 +1,14 @@
+v2.3,	Summary,
+	Bugs fixed
+
+	Features,
+	NA
+
+	Fixed,
+	Rename ed_ti375c529.json -> ti375_common.json
+	Add configuration to enable Ti375N1156 board support
+	Change interrupt number 1 -> 16 for display
+
 v2.2,	Summary,
 	Remove node which does not has 'compatible' property
 	Add Linux framebuffer configuration
