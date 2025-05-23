@@ -1,0 +1,11 @@
+{
+	"overrides": {
+		"APB_SLAVE_3": {
+			"name": "usb",
+			"label": "usb0",
+			"compatible": "generic-ohci",
+			"interrupts": "20",
+			"status": "okay"
+		}
+	}
+}
