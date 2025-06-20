@@ -1,0 +1,46 @@
+{
+	"child": {
+		"gpio_leds": {
+                        "parent_label": "root",
+                        "parent_device": "gpio0",
+                        "label": "efx_gpio_devs",
+                        "compatible": "efinix,efx-gpio",
+                        "addr": 0,
+                        "status": "okay",
+                        "child": {
+                                "switch": {
+                                        "name": "switch",
+                                        "addr": 0,
+                                        "private_data": [
+                                                "label = \"SW\";",
+                                                "efx-gpios = <&gpio0 0 GPIO_ACTIVE_LOW>;"
+                                        ]
+                                },
+                                "led1": {
+                                        "name": "led1",
+                                        "addr": 1,
+                                        "private_data": [
+                                                "label = \"LED1\";",
+                                                "efx-gpios = <&gpio0 1 GPIO_ACTIVE_LOW>;"
+                                        ]
+                                },
+                                "led2": {
+                                        "name": "led2",
+                                        "addr": 2,
+                                        "private_data": [
+                                                "label = \"LED2\";",
+                                                "efx-gpios = <&gpio0 2 GPIO_ACTIVE_LOW>;"
+                                        ]
+                                },
+                                "led3": {
+                                        "name": "led3",
+                                        "addr": 3,
+                                        "private_data": [
+                                                "label = \"LED3\";",
+                                                "efx-gpios = <&gpio0 3 GPIO_ACTIVE_LOW>;"
+                                        ]
+                                }
+                        }
+                }
+	}
+}
