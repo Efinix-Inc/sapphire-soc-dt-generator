@@ -1,0 +1,55 @@
+{
+	"overrides": {
+                "SPI_0": {
+                        "interrupts": ""
+                }
+        },
+	"child": {
+		"spi_nor": {
+                        "parent_label": "spi0",
+                        "name": "flash",
+                        "label": "flash",
+                        "addr": 0,
+                        "reg": 0,
+                        "compatible": "jedec,spi-nor",
+                        "private_data": [
+                                "spi-max-frequency = <10000000>;"
+                        ],
+                        "size_cell": 1,
+                        "child": {
+                                "partition0": {
+                                        "name": "partition",
+                                        "addr": 0,
+                                        "reg": "0x000000 0x600000",
+                                        "private_data": [
+                                                "label = \"fpga_bitstream\";"
+                                        ]
+                                },
+                                "partition1": {
+                                        "name": "partition",
+                                        "addr": 1,
+                                        "reg": "0x600000 0x080000",
+                                        "private_data": [
+                                                "label = \"opensbi\";"
+                                        ]
+                                },
+                                "partition2": {
+                                        "name": "partition",
+                                        "addr": 2,
+                                        "reg": "0x680000 0x100000",
+                                        "private_data": [
+                                                "label = \"u-boot\";"
+                                        ]
+                                },
+                                "partition3": {
+                                        "name": "partition",
+                                        "addr": 3,
+                                        "reg": "0x780000 0x300000",
+                                        "private_data": [
+                                                "label = \"user\";"
+                                        ]
+                                }
+                        }
+                }
+	}
+}
