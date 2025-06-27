@@ -126,7 +126,13 @@ def dt_create_node(soc_config, node):
 
     if is_zephyr:
         if 'interrupts' in n and n['interrupts']:
-            n['interrupts'] = "{} 1".format(n['interrupts'])
+            # Only take first interrupt number even though it has more than 1.
+            # This is due to the zephyr gpio driver only support 1 interrupt number.
+            if 'GPIO' in node['type']:
+                intp = n['interrupts'].split()[0]
+            else:
+                intp = n['interrupts']
+            n['interrupts'] = "{} 1".format(intp)
 
     private_data = dt_get_driver_private_data(soc_config, name)
     if private_data:
