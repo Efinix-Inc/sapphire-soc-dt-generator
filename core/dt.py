@@ -269,8 +269,7 @@ def dt_create_cpu_node(soc_config):
         intc['intc'].update({"label": intc_label})
 
         z_cpu = {
-            "tlb": False,
-            "clock_frequency": True
+            "tlb": False
         }
         cpu_node.update(z_cpu)
 
