@@ -1,5 +1,15 @@
+v2.4,	Summary,
+	Features,
+	Add USB configuration for linux DT
+	Add spi-nor DT configuration
+	Add gpio_led DT node
+
+	Fixed,
+	Zephyr interrupt number for gpio node
+	'clock-frequency' value for zephyr
+	Update the path to the zephyr config slaves.json
+
 v2.3,	Summary,
-	Bugs fixed
 
 	Features,
 	NA
