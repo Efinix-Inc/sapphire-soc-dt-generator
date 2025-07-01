@@ -1,0 +1,109 @@
+import re
+import json
+from collections import defaultdict
+
+class ConfigParser:
+    def __init__(self, configs):
+        self.configs = configs
+        self.pattern = re.compile(r"#define\s+(\w+)\s+(\w+)")
+        self.macros = {}
+        self.peripherals = defaultdict(lambda: defaultdict(lambda: {"interrupts": []}))
+        self.warnings = []
+        self.trace = defaultdict(list)
+
+    def _parse_macros_to_dict(self):
+        """Collect all macro key-value definitions"""
+        for macro, value in self.pattern.findall(self.configs):
+            self.macros[macro] = value
+
+    def _parse_address_size_macros(self):
+        """Handles address/size macros (e.g., *_INPUT, *_CTRL, *_IO_CTRL, *_SIZE)"""
+        suffix_map = {
+            "addr": ("IO_CTRL", "CTRL", "INPUT"),
+            "size": ("CTRL_SIZE", "INPUT_SIZE")
+        }
+
+        for macro, raw_value in self.macros.items():
+            resolved_value = self._resolved_value(raw_value)
+            dev_type, dev_num = self._get_dev_type_and_num(macro)
+            dev_key = f"{dev_type}{dev_num}"
+
+            for key, suffixes in suffix_map.items():
+                if any(macro.endswith(suffix) for suffix in suffixes):
+                    self.peripherals[dev_type][dev_key][key] = resolved_value
+                    self.trace[f"{dev_type}.{dev_key}"].append((macro, key))
+                    break
+
+    def _parse_interrupt_macros(self):
+        """Handle nested interrupt macro (e.g., SYSTEM_PLIC_SYSTEM_UART_0_IO_INTERRUPT_X)"""
+        for macro, target in self.macros.items():
+            if not macro.startswith("SYSTEM_PLIC_SYSTEM"):
+                continue
+
+            macro = macro.removeprefix("SYSTEM_PLIC_")
+
+            value = self._resolved_value(target)
+            dev_type, dev_num = self._get_dev_type_and_num(macro)
+            dev_key = f"{dev_type}{dev_num}"
+
+            self.peripherals[dev_type][dev_key]["interrupts"].append(value)
+            self.trace[f"{dev_type}.{dev_key}"].append((macro, "interrupts"))
+
+    def _get_dev_type_and_num(self, macro):
+        """Get the dev type (e.g., spi, uart, i2c) and the instance number (e.g., 0, 1)"""
+        parts = macro.split('_')
+        
+        try:
+            dev_type = parts[1].lower()
+            dev_num = parts[2]
+
+            if dev_type in ["apb", "axi"]:
+                dev_num = parts[3]
+                dev_type = f"{dev_type}_{parts[2].lower()}"
+            elif not dev_num.isdigit():
+                dev_num = 0
+
+            return dev_type, dev_num
+
+        except IndexError:
+            return None, None
+
+    def parse(self):
+        """Parse the self.configs by creating a data structure which consists of device type, address, size and interrupt number"""
+        self._parse_macros_to_dict()
+        self._parse_address_size_macros()
+        self._parse_interrupt_macros()
+
+    def _resolved_value(self, val, trail=None):
+        """Convert hex/int literals or resolve nested macro references"""
+        trail = trail or []
+
+        if val.startswith("0x") or val.isdigit():
+            return val
+        elif val in self.macros:
+            if val in trail:
+                self.warnings.append(f"Circular reference detected: {' -> '.join(trail + [val])}")
+                return val
+            return self._resolved_value(self.macros[val], trail + [val])
+        else:
+            self.warnings.append(f"Unresolvable value: {val}")
+            return val # fallback: leave as string
+
+    def report(self):
+        if self.warnings:
+            print("Warnings: ")
+            for w in self.warnings:
+                print(f" - {w}")
+        if self.trace:
+            print("\nTrace information:")
+            for key, entries in self.trace.items():
+                print(f" [{key}]")
+                for macro, field in entries:
+                    print(f"  - {field} set from macro: {macro}")
+
+    def get_parse_config(self):
+        return self.peripherals
+
+    def to_json(self, indent=2):
+        return json.dumps(self.peripherals, indent=indent)
+
