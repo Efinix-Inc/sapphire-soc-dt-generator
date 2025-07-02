@@ -74,6 +74,8 @@ class ConfigParser:
         self._parse_address_size_macros()
         self._parse_interrupt_macros()
 
+        return self.peripherals
+
     def _resolved_value(self, val, trail=None):
         """Convert hex/int literals or resolve nested macro references"""
         trail = trail or []
