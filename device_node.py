@@ -1,17 +1,19 @@
 from controller import Controller
 
 class DeviceNode:
-    def __init__(self, dev_config, dev_type, instance=0, arch=32, status="disabled"):
+    def __init__(self, dev_config, dev_type, instance=0, arch=32):
         self.dev_config = dev_config
         self.dev_type = dev_type
         self.instance = instance
         self.arch = arch # machine architecture i.e., 32 or 64
-        self.status = status
+        self.status = -1
         self.node = {}
         self.ctrl = Controller(dev_config, dev_type)
 
-    def create_node(self, dev_type=None, label=None, instance=0, addr_cells=1, size_cells=1, parent_label=None):
+    def create_node(self, dev_type=None, label=None, instance=0, addr_cells=1, size_cells=1, parent_label=None, status=0):
         """Create a device tree node of a device"""
+        self.status = status
+
         if dev_type is None:
             dev_type = self.dev_type
 
@@ -29,7 +31,7 @@ class DeviceNode:
                 "label": label,
                 "parent_label": parent_label,
                 "header": self.generate_node_header(label, dev_type, addr),
-                "status": self.status
+                "status": self._lookup_status()
         }
         if "interrupts" in self.dev_config:
             self.node.update({"interrupt-parent": "<&plic>"})
@@ -102,8 +104,11 @@ class DeviceNode:
     def get_size_cells(self):
         return self.node.get("#size-cells", -1)
 
-    def set_status(self, status):
+    def _lookup_status(self, status=-1):
         """Set the status of device node"""
+        if status == -1:
+            status = self.status
+
         if status == 0:
             dev_status = "disabled"
         elif status == 1:
@@ -112,4 +117,8 @@ class DeviceNode:
             dev_status = "reserved"
 
         dev_status = f'"{dev_status}";'
+        return dev_status
+
+    def set_status(self, status):
+        dev_status = self._lookup_status(status)
         self.node.update({"status": dev_status})
