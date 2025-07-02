@@ -19,8 +19,8 @@ class ConfigParser:
     def _parse_address_size_macros(self):
         """Handles address/size macros (e.g., *_INPUT, *_CTRL, *_IO_CTRL, *_SIZE)"""
         suffix_map = {
-            "addr": ("IO_CTRL", "CTRL", "INPUT"),
-            "size": ("CTRL_SIZE", "INPUT_SIZE")
+            "addr": ("IO_CTRL", "CTRL", "INPUT", "BMB"),
+            "size": ("CTRL_SIZE", "INPUT_SIZE", "BMB_SIZE")
         }
 
         for macro, raw_value in self.macros.items():
@@ -60,7 +60,8 @@ class ConfigParser:
             if dev_type in ["apb", "axi"]:
                 dev_num = parts[3]
                 dev_type = f"{dev_type}_{parts[2].lower()}"
-            elif not dev_num.isdigit():
+
+            if not dev_num.isdigit():
                 dev_num = 0
 
             return dev_type, dev_num
