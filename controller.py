@@ -63,3 +63,6 @@ class Controller:
         instance_name = f"{dev_type}{instance}"
         instance_data = self.configs.setdefault(dev_type, {}).setdefault(instance_name, {})
         instance_data.update(kwargs)
+
+    def get_instance_name(self, instance=0):
+        return f"{self.dev_type}{instance}"
