@@ -1,14 +1,14 @@
 from controller import Controller
 
 class DeviceNode:
-    def __init__(self, dev_config, dev_type, instance=0, arch=32):
-        self.dev_config = dev_config
+    def __init__(self, configs, dev_type, instance=0, arch=32):
+        self.configs = configs
         self.dev_type = dev_type
         self.instance = instance
         self.arch = arch # machine architecture i.e., 32 or 64
         self.status = -1
         self.node = {}
-        self.ctrl = Controller(dev_config, dev_type)
+        self.ctrl = Controller(configs, dev_type)
 
     def create_node(self, dev_type=None, label=None, instance=0, addr_cells=1, size_cells=1, parent_label=None, status=0):
         """Create a device tree node of a device"""
@@ -33,7 +33,7 @@ class DeviceNode:
                 "header": self.generate_node_header(label, dev_type, addr),
                 "status": self._lookup_status()
         }
-        if "interrupts" in self.dev_config:
+        if "interrupts" in self.configs:
             self.node.update({"interrupt-parent": "<&plic>"})
 
         self.set_node_reg(addr, size)
