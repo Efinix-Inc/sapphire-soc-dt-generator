@@ -51,10 +51,10 @@ class Controller:
         filtered = []
         dev_types = [dev_type] if dev_type else self.configs.keys()
 
-        for dytpe in dev_types:
+        for dtype in dev_types:
             for name, data in self.configs.get(dtype, {}).items():
                 addr = data.get("addr")
-                if addr is not None and start <= addr <= end:
+                if addr is not None and int(start, 16) <= int(addr, 16) < int(end):
                     filtered.append(name)
         return filtered
 
