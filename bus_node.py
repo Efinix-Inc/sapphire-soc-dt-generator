@@ -37,7 +37,7 @@ class BusNode(DeviceNode):
 
         return bus_node
 
-    def create_nodes(self, bus_instance=0):
+    def create_nodes(self, bus_instance=0, offset=True):
         """Create a bus node and controller instances"""
         bus_node = self.create_bus_node(bus_instance)
         ctrl_nodes = {}
@@ -49,7 +49,14 @@ class BusNode(DeviceNode):
                     # Instantiate a new DeviceNode for each ctrl_instance
                     num = self.ctrl.get_instance_number(ctrl_type, ctrl_instance)
                     dn = DeviceNode(self.configs, ctrl_type, instance=num, arch=self.arch)
-                    ctrl_nodes.update({ctrl_instance: dn.create_node(instance=num)})
+                    ctrl_node = dn.create_node(instance=num)
+
+                    if offset:
+                        header, reg = self.use_addr_offset(ctrl_node, bus_instance)
+                        ctrl_node.update({"header": header, "reg": reg})
+
+                    ctrl_nodes.update({ctrl_instance: ctrl_node})
+
 
         bus_node.update({"peripherals": ctrl_nodes})
         self.bus_node.update({self.bus_name: bus_node})
@@ -71,3 +78,22 @@ class BusNode(DeviceNode):
             addr_range = f"0x0 {addr} {size}"
 
         return f"<{addr_range}>;"
+
+    def get_dev_instance_addr_offset(self, dev_node, bus_instance=0):
+        """Calculate controller address offset from bus address"""
+        bus_addr = self.ctrl.get_controller_address(self.bus_name, bus_instance)
+        ctrl_addr = dev_node.get("addr", 0)
+
+        return int(ctrl_addr, 16) - int(bus_addr, 16)
+
+    def use_addr_offset(self, dev_node, bus_instance=0):
+        """Generate a node header and reg based on address offset"""
+        label = dev_node.get("label", "")
+        dev_type = dev_node.get("type", "")
+        size = dev_node.get("size", 0)
+
+        offset_addr = self.get_dev_instance_addr_offset(dev_node, bus_instance)
+        header = self.generate_node_header(label, dev_type, offset_addr)
+        reg = self.set_node_reg(offset_addr, size)
+
+        return header, reg
