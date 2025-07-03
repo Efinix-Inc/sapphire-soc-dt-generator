@@ -29,7 +29,7 @@ class Controller:
         """Return the interrupts line of the controller or 0 if not found"""
         return self._get_instance_data(dev_type, instance).get("interrupts", 0)
 
-    def get_controller_driver(self, dev_type=None, instance=0):
+    def get_controller_driver_name(self, dev_type=None, instance=0):
         """Return the controller driver name or empty string if not found"""
         return self._get_instance_data(dev_type, instance).get("compatible", "")
 
