@@ -30,6 +30,7 @@ class DeviceNode:
                 "type": dev_type,
                 "label": label,
                 "parent_label": parent_label,
+                "reg": self.set_node_reg(addr, size),
                 "header": self.generate_node_header(label, dev_type, addr),
                 "compatible": self.ctrl.get_controller_driver_name(dev_type),
                 "private_data": [],
@@ -37,8 +38,6 @@ class DeviceNode:
         }
         if "interrupts" in self.configs:
             self.node.update({"interrupt-parent": "<&plic>"})
-
-        self.set_node_reg(addr, size)
 
         dev = self.ctrl.get_controller(dev_type, instance)
         self.node.update(dev)
@@ -70,10 +69,7 @@ class DeviceNode:
         reg_addr = format_cells(address, addr_cells)
         reg_size = format_cells(size, size_cells)
 
-        reg = {
-            "reg": f"<{reg_addr} {reg_size}>;"
-        }
-        self.node.update(reg)
+        return f"<{reg_addr} {reg_size}>;"
 
     def update_node(self, node_name, **kwargs):
         """Append multiple key-value pairs to the specific device node"""
