@@ -1,0 +1,73 @@
+from controller import Controller
+from device_node import DeviceNode
+
+class BusNode(DeviceNode):
+    def __init__(self, configs, bus_name, list_ctrl, arch=32):
+        super().__init__(configs, dev_type=bus_name)
+        self.configs = configs
+        self.bus_name = bus_name
+        self.ctrl = Controller(configs)
+        self.list_ctrl = list_ctrl
+        self.arch = arch
+        self.bus_node = {}
+
+    def get_ctrl_instances_by_address_range(self, bus_instance=0):
+        """Return key-value mapping of controller and instances based on list_ctrl within address range"""
+        dev = {}
+
+        addr = self.ctrl.get_controller_address(self.bus_name, bus_instance)
+        size = self.ctrl.get_controller_address_size(self.bus_name, bus_instance)
+
+        if addr == -1 or size == -1:
+            print(f"Error: address or size of the bus '{self.bus_name}' was not found")
+            return dev
+
+        end_addr = int(addr, 16) + int(size, 16)
+        for ctrl in self.list_ctrl:
+            instances = self.ctrl.filter_instances_by_address_range(addr, end_addr, ctrl)
+            if instances:
+                dev.update({ctrl: instances})
+        return dev
+
+    def create_bus_node(self, bus_instance=0):
+        """Create a bus node"""
+        bus_node = self.create_node(instance=bus_instance)
+        addr_ranges = {"ranges": self.get_bus_ranges(bus_instance=bus_instance)}
+        self.update_node(bus_node, **addr_ranges)
+
+        return bus_node
+
+    def create_nodes(self, bus_instance=0):
+        """Create a bus node and controller instances"""
+        bus_node = self.create_bus_node(bus_instance)
+        ctrl_nodes = {}
+
+        ctrls = self.get_ctrl_instances_by_address_range(bus_instance)
+        if ctrls:
+            for ctrl_type, ctrl_instances in ctrls.items():
+                for ctrl_instance in ctrl_instances:
+                    # Instantiate a new DeviceNode for each ctrl_instance
+                    num = self.ctrl.get_instance_number(ctrl_type, ctrl_instance)
+                    dn = DeviceNode(self.configs, ctrl_type, instance=num, arch=self.arch)
+                    ctrl_nodes.update({ctrl_instance: dn.create_node(instance=num)})
+
+        bus_node.update({"peripherals": ctrl_nodes})
+        self.bus_node.update({self.bus_name: bus_node})
+
+        return self.bus_node
+
+    def get_bus_ranges(self, bus_name=None, bus_instance=0):
+        """Get the address-mapping range for a bus"""
+
+        if bus_name is None:
+            bus_name = self.bus_name
+
+        addr = self.ctrl.get_controller_address(bus_name, bus_instance)
+        size = self.ctrl.get_controller_address_size(bus_name, bus_instance)
+
+        if self.arch == 64:
+            addr_range = f"0x0 0x0 {addr} 0x0 {size}"
+        else:
+            addr_range = f"0x0 {addr} {size}"
+
+        return f"<{addr_range}>;"
