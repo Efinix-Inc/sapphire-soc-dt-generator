@@ -65,7 +65,10 @@ class Controller:
         instance_data.update(kwargs)
 
     def get_instance_name(self, instance=0):
-        return f"{self.dev_type}{instance}"
+        if not self.dev_type is None:
+            return f"{self.dev_type}{instance}"
+        else:
+            return None
 
     def get_instance_number(self, dev_type, dev_name):
         return ''.join([char for char in dev_name if char not in dev_type])
