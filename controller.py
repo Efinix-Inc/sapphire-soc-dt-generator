@@ -66,3 +66,6 @@ class Controller:
 
     def get_instance_name(self, instance=0):
         return f"{self.dev_type}{instance}"
+
+    def get_instance_number(self, dev_type, dev_name):
+        return ''.join([char for char in dev_name if char not in dev_type])
