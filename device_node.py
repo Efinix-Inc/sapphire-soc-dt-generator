@@ -32,6 +32,7 @@ class DeviceNode:
                 "parent_label": parent_label,
                 "header": self.generate_node_header(label, dev_type, addr),
                 "compatible": self.ctrl.get_controller_driver_name(dev_type),
+                "private_data": [],
                 "status": self._lookup_status()
         }
         if "interrupts" in self.configs:
