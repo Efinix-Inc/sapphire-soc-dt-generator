@@ -10,7 +10,7 @@ class DeviceNode:
         self.node = {}
         self.ctrl = Controller(configs, dev_type)
 
-    def create_node(self, dev_type=None, label=None, instance=0, addr_cells=1, size_cells=1, parent_label=None, status=0):
+    def create_node(self, dev_type=None, label=None, instance=0, addr_cells=-1, size_cells=-1, parent_label=None, status=0):
         """Create a device tree node of a device"""
         self.status = status
 
