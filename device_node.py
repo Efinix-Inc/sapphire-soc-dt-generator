@@ -45,6 +45,7 @@ class DeviceNode:
         return self.node
 
     def generate_node_header(self, label, dev_type, addr):
+        addr = self.convert_to_hex(addr)
         # handle prefix 0x in addr
         addr = str(addr)[2:]
 
@@ -56,6 +57,7 @@ class DeviceNode:
 
     def set_node_reg(self, address, size):
         def format_cells(value, cells):
+            value = self.convert_to_hex(value)
             if cells == 2:
                 return f"0x0 {value}"
             elif cells == 1:
@@ -120,3 +122,21 @@ class DeviceNode:
     def set_status(self, status):
         dev_status = self._lookup_status(status)
         self.node.update({"status": dev_status})
+
+    def convert_to_int(self, s):
+        if isinstance(s, str) and s.startswith("0x"):
+            return int(s, 16)
+        else:
+            return int(s)
+
+    def convert_to_hex(self, s):
+        if isinstance(s, str):
+            if s.startswith("0x"):
+                value = int(s, 16)
+            else:
+                value = int(s)
+        else:
+            value = s # assume it's already an int
+
+        return hex(value)
+
