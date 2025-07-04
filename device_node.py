@@ -9,10 +9,14 @@ class DeviceNode:
         self.status = -1
         self.node = {}
         self.ctrl = Controller(configs, dev_type)
+        self.addr_cells = self._set_cells(-1)
+        self.size_cells = self._set_cells(-1)
 
     def create_node(self, dev_type=None, label=None, instance=0, addr_cells=-1, size_cells=-1, parent_label=None, status=0):
         """Create a device tree node of a device"""
         self.status = status
+        self.addr_cells = self._set_cells(addr_cells)
+        self.size_cells = self._set_cells(size_cells)
 
         if dev_type is None:
             dev_type = self.dev_type
@@ -25,8 +29,8 @@ class DeviceNode:
         size = self.ctrl.get_controller_address_size(dev_type, instance)
 
         self.node = {
-                "#address-cells": self.set_address_cells(addr_cells),
-                "#size-cells": self.set_size_cells(size_cells),
+                "#address-cells": self.set_address_cells(self.addr_cells),
+                "#size-cells": self.set_size_cells(self.size_cells),
                 "type": dev_type,
                 "label": label,
                 "parent_label": parent_label,
@@ -65,11 +69,8 @@ class DeviceNode:
             else:
                 return "0x0"
 
-        addr_cells = self.get_address_cells()
-        size_cells = self.get_size_cells()
-
-        reg_addr = format_cells(address, addr_cells)
-        reg_size = format_cells(size, size_cells)
+        reg_addr = format_cells(address, self.addr_cells)
+        reg_size = format_cells(size, self.size_cells)
 
         return f"<{reg_addr} {reg_size}>;"
 
