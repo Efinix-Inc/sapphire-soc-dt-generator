@@ -31,15 +31,17 @@ class BusNode(DeviceNode):
 
     def create_bus_node(self, bus_instance=0):
         """Create a bus node"""
-        bus_node = self.create_node(instance=bus_instance)
-        addr_ranges = {"ranges": self.get_bus_ranges(bus_instance=bus_instance)}
-        self.update_node(bus_node, **addr_ranges)
+        metadata = {
+            "ranges": self.get_bus_ranges(bus_instance=bus_instance),
+            "peripherals": {}
+        }
+        self.bus_node = self.create_node(instance=bus_instance)
+        self.update_node(self.bus_node, **metadata)
 
-        return bus_node
+        return self.bus_node
 
-    def create_nodes(self, bus_instance=0, offset=True):
-        """Create a bus node and controller instances"""
-        bus_node = self.create_bus_node(bus_instance)
+    def populate_controller_instances_nodes(self, bus_instance=0, offset=True):
+        """Populate bus node with controller instances"""
         ctrl_nodes = {}
 
         ctrls = self.get_ctrl_instances_by_address_range(bus_instance)
@@ -58,8 +60,7 @@ class BusNode(DeviceNode):
                     ctrl_nodes.update({ctrl_instance: ctrl_node})
 
 
-        bus_node.update({"peripherals": ctrl_nodes})
-        self.bus_node.update({self.bus_name: bus_node})
+        self.bus_node["peripherals"] = ctrl_nodes
 
         return self.bus_node
 
