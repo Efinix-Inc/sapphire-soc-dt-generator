@@ -74,6 +74,7 @@ class ConfigParser:
         self._parse_macros_to_dict()
         self._parse_address_size_macros()
         self._parse_interrupt_macros()
+        self.parse_cpu_macros()
 
         return self.peripherals
 
@@ -109,4 +110,39 @@ class ConfigParser:
 
     def to_json(self, indent=2):
         return json.dumps(self.peripherals, indent=indent)
+
+    def parse_cpu_macros(self):
+        """Parse cpu number, ISA, and other metadata"""
+        cpu = {
+            "cores": self.get_cpu_count(),
+            "isa": self.get_cpu_isa(),
+        }
+
+        self.peripherals["cpus"] = cpu
+
+
+    def get_cpu_count(self):
+        cpus = self.peripherals.get("cores", {})
+        return len(cpus.keys()) if cpus else 0
+
+    def get_cpu_isa(self):
+        """Get cpu instruction set"""
+        pattern = re.compile(r"ISA_\w+")
+        isa = {}
+        exts = ""
+
+        for macro, value in self.macros.items():
+            for macro in pattern.findall(macro):
+                isa[macro] = value
+
+        for k, v in isa.items():
+            parts = k.split('_')
+            ext = parts[-1].lower()
+            if int(v) == 1:
+                if 'zicsr' in ext or 'zifence' in ext:
+                    exts += f"_{ext}"
+                else:
+                    exts += ext
+
+        return exts
 
