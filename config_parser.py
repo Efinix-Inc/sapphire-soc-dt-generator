@@ -155,3 +155,9 @@ class ConfigParser:
         for macro, value in self.macros.items():
             for macro in pattern.findall(macro):
                 self.parsed_configs["frequency"] = value
+
+    def get_frequency(self, parsed_configs=None):
+        """Return the peripherals frequency defined by clint_hz"""
+        if parsed_configs is None:
+            parsed_configs = self.parsed_config
+        return  parsed_configs.get("frequency", 0)
