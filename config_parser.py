@@ -7,6 +7,7 @@ class ConfigParser:
         self.configs = configs
         self.pattern = re.compile(r"#define\s+(\w+)\s+(\w+)")
         self.macros = {}
+        self.parsed_configs = defaultdict()
         self.peripherals = defaultdict(lambda: defaultdict(lambda: {"interrupts": []}))
         self.warnings = []
         self.trace = defaultdict(list)
@@ -146,3 +147,9 @@ class ConfigParser:
 
         return exts
 
+    def parse_frequency(self):
+        """get frequency defined by clint_hz"""
+        pattern = re.compile(r"HZ")
+        for macro, value in self.macros.items():
+            for macro in pattern.findall(macro):
+                self.parsed_configs["frequency"] = value
