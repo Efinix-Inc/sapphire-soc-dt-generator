@@ -112,7 +112,7 @@ class ConfigParser:
         return self.peripherals
 
     def to_json(self, indent=2):
-        return json.dumps(self.peripherals, indent=indent)
+        return json.dumps(self.parsed_configs, indent=indent)
 
     def parse_cpu_macros(self):
         """Parse cpu number, ISA, and other metadata"""
