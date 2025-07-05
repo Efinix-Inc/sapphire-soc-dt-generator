@@ -121,7 +121,7 @@ class ConfigParser:
             "isa": self.get_cpu_isa(),
         }
 
-        self.peripherals["cpus"] = cpu
+        self.parsed_configs["cpus"] = cpu
 
 
     def get_cpu_count(self):
