@@ -77,7 +77,9 @@ class ConfigParser:
         self._parse_interrupt_macros()
         self.parse_cpu_macros()
 
-        return self.peripherals
+        self.parse_frequency()
+        self.parsed_configs["peripherals"] = self.peripherals
+        return self.parsed_configs
 
     def _resolved_value(self, val, trail=None):
         """Convert hex/int literals or resolve nested macro references"""
