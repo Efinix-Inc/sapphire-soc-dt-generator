@@ -61,7 +61,7 @@ class DeviceNode:
 
     def set_node_reg(self, address, size):
         def format_cells(value, cells):
-            value = self.convert_to_hex(value)
+            value = self.convert_to_hex(abs(self.convert_to_int(value)))
             if cells == 2:
                 return f"0x0 {value}"
             elif cells == 1:
