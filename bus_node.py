@@ -97,7 +97,7 @@ class BusNode(DeviceNode):
         size = dev_node.get("size", 0)
 
         offset_addr = self.get_dev_instance_addr_offset(dev_node, bus_instance)
-        header = self.generate_node_header(label, dev_type, offset_addr)
+        header = self.generate_node_header(offset_addr, label, dev_type)
         reg = self.set_node_reg(offset_addr, size)
 
         return header, reg
