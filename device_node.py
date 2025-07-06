@@ -35,7 +35,7 @@ class DeviceNode:
                 "label": label,
                 "parent_label": parent_label,
                 "reg": self.set_node_reg(addr, size),
-                "header": self.generate_node_header(label, dev_type, addr),
+                "header": self.generate_node_header(addr, label, dev_type),
                 "compatible": self.ctrl.get_controller_driver_name(dev_type),
                 "private_data": [],
                 "status": self._lookup_status()
@@ -48,7 +48,7 @@ class DeviceNode:
 
         return self.node
 
-    def generate_node_header(self, label, dev_type, addr):
+    def generate_node_header(self, addr, label=None, dev_type=None):
         addr = self.convert_to_hex(addr)
         # handle prefix 0x in addr
         addr = str(addr)[2:]
@@ -72,7 +72,10 @@ class DeviceNode:
         reg_addr = format_cells(address, self.addr_cells)
         reg_size = format_cells(size, self.size_cells)
 
-        return f"<{reg_addr} {reg_size}>;"
+        if self.convert_to_int(reg_size):
+            return f"<{reg_addr} {reg_size}>;"
+        else:
+            return f"<{reg_addr}>"
 
     def update_node(self, node_name, **kwargs):
         """Append multiple key-value pairs to the specific device node"""
