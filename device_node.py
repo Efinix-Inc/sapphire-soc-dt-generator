@@ -49,7 +49,7 @@ class DeviceNode:
         return self.node
 
     def generate_node_header(self, addr, label=None, dev_type=None):
-        addr = self.convert_to_hex(addr)
+        addr = self.convert_to_hex(abs(self.convert_to_int(addr)))
         # handle prefix 0x in addr
         addr = str(addr)[2:]
 
