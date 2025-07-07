@@ -72,11 +72,10 @@ class DeviceNode:
         reg_addr = format_cells(address, self.addr_cells)
         reg_size = format_cells(size, self.size_cells)
 
-        reg_sizes = reg_size.split()
-        if all(self.convert_to_int(num) == 0 for num in reg_sizes):
-            return f"<{reg_addr} {reg_size}>;"
-        else:
+        if self.size_cells == 0:
             return f"<{reg_addr}>"
+        else:
+            return f"<{reg_addr} {reg_size}>;"
 
     def update_node(self, node_name, **kwargs):
         """Append multiple key-value pairs to the specific device node"""
