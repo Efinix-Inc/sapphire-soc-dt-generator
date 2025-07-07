@@ -27,9 +27,9 @@ class SocConfigs(Controller):
 
     def get_cpu_mmu_type(self):
         """Return the RISCV mmu type"""
-        if self.arch == 64:
+        if self.arch == "64":
             return "riscv,sv39"
-        elif self.arch == 32:
+        elif self.arch == "32":
             return "riscv,sv32"
         else:
             return ""
