@@ -1,5 +1,6 @@
 from config_parser import ConfigParser
 from device_node import DeviceNode
+from soc_configs import SocConfigs
 
 class RootNode(DeviceNode):
     def __init__(self, configs, arch=32):
@@ -10,6 +11,7 @@ class RootNode(DeviceNode):
         self.addr_cells = self._set_cells(-1)
         self.size_cells = self._set_cells(-1)
         self.parser = ConfigParser(configs)
+        self.soc = SocConfigs(configs)
 
     def create_root_node(self, metadata=None):
         """Create root node metadata"""
@@ -27,3 +29,25 @@ class RootNode(DeviceNode):
 
         return self.node
 
+    def create_cpu_node(self, label="cpus", instance=0, add_on=None):
+        """Create cpu node"""
+        dev_type = "cpu"
+        cpu = DeviceNode(self.configs, dev_type=dev_type, arch=self.arch)
+        self.cpu_node = self.create_node(dev_type=dev_type, label=label, instance=instance,
+                                         addr_cells=1, size_cells=0, parent_label="/",
+                                         status=1)
+        header = self.generate_node_header(instance, dev_type=dev_type)
+        reg = cpu.set_node_reg(instance,0)
+
+        metadata = {
+            "device_type": dev_type,
+            "riscv,isa": self.soc.get_cpu_isa(),
+            "header": header,
+            "reg": reg,
+        }
+        self.cpu_node.update(metadata)
+
+        if add_on:
+            self.cpu_node.upadte(add_on)
+
+        return self.cpu_node
