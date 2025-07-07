@@ -53,7 +53,7 @@ class DeviceNode:
         # handle prefix 0x in addr
         addr = str(addr)[2:]
 
-        header = f"{dev_type}@{addr} {{"
+        header = f"{dev_type}@{addr}"
         if not label is None:
             header = f"{label}: {header}"
 
@@ -73,9 +73,9 @@ class DeviceNode:
         reg_size = format_cells(size, self.size_cells)
 
         if self.size_cells == 0:
-            return f"<{reg_addr}>"
+            return f"{reg_addr}"
         else:
-            return f"<{reg_addr} {reg_size}>;"
+            return f"{reg_addr} {reg_size}"
 
     def update_node(self, node_name, **kwargs):
         """Append multiple key-value pairs to the specific device node"""
@@ -120,7 +120,7 @@ class DeviceNode:
         else:
             dev_status = "reserved"
 
-        dev_status = f'"{dev_status}";'
+        dev_status = f"{dev_status}"
         return dev_status
 
     def set_status(self, status):
