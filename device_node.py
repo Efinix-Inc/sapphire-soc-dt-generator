@@ -29,8 +29,8 @@ class DeviceNode:
         size = self.ctrl.get_controller_address_size(dev_type, instance)
 
         self.node = {
-                "#address-cells": self.set_address_cells(self.addr_cells),
-                "#size-cells": self.set_size_cells(self.size_cells),
+                "address_cells": self.set_address_cells(self.addr_cells),
+                "size_cells": self.set_size_cells(self.size_cells),
                 "type": dev_type,
                 "label": label,
                 "parent_label": parent_label,
@@ -103,10 +103,10 @@ class DeviceNode:
         return self._set_cells(value)
 
     def get_address_cells(self):
-        return self.node.get("#address-cells", -1)
+        return self.node.get("address_cells", -1)
 
     def get_size_cells(self):
-        return self.node.get("#size-cells", -1)
+        return self.node.get("size_cells", -1)
 
     def _lookup_status(self, status=-1):
         """Set the status of device node"""
