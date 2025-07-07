@@ -42,7 +42,7 @@ class RootNode(DeviceNode):
 
         metadata = {
             "device_type": dev_type,
-            "riscv,isa": self.soc.get_cpu_isa(),
+            "isa": self.soc.get_cpu_isa(),
             "mmu_type": self.soc.get_cpu_mmu_type(),
             "header": header,
             "reg": reg,
