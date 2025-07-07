@@ -18,7 +18,7 @@ class RootNode(DeviceNode):
         root = {
             "version": "/dts-v1/",
             "header": "/",
-            "frequency": self.parser.get_frequency(self.configs)
+            "frequency": self.soc.get_frequency(self.configs)
         }
 
         if metadata:
