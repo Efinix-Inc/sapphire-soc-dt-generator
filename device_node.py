@@ -72,7 +72,8 @@ class DeviceNode:
         reg_addr = format_cells(address, self.addr_cells)
         reg_size = format_cells(size, self.size_cells)
 
-        if self.convert_to_int(reg_size):
+        reg_sizes = reg_size.split()
+        if self.convert_to_int(reg_sizes[0]) and self.convert_to_int(reg_sizes[1]):
             return f"<{reg_addr} {reg_size}>;"
         else:
             return f"<{reg_addr}>"
