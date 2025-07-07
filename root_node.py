@@ -11,7 +11,7 @@ class RootNode(DeviceNode):
         self.addr_cells = self._set_cells(-1)
         self.size_cells = self._set_cells(-1)
         self.parser = ConfigParser(configs)
-        self.soc = SocConfigs(configs)
+        self.soc = SocConfigs(configs, arch)
 
     def create_root_node(self, metadata=None):
         """Create root node metadata"""
@@ -42,6 +42,7 @@ class RootNode(DeviceNode):
         metadata = {
             "device_type": dev_type,
             "riscv,isa": self.soc.get_cpu_isa(),
+            "mmu_type": self.soc.get_cpu_mmu_type(),
             "header": header,
             "reg": reg,
         }
