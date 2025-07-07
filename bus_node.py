@@ -36,7 +36,7 @@ class BusNode(DeviceNode):
             "peripherals": {}
         }
         if header:
-            metadata["header"] = f"{header} {{"
+            metadata["header"] = f"{header}"
 
         self.bus_node = self.create_node(instance=bus_instance)
         self.update_node(self.bus_node, **metadata)
@@ -81,7 +81,7 @@ class BusNode(DeviceNode):
         else:
             addr_range = f"0x0 {addr} {size}"
 
-        return f"<{addr_range}>;"
+        return f"{addr_range}"
 
     def get_dev_instance_addr_offset(self, dev_node, bus_instance=0):
         """Calculate controller address offset from bus address"""
