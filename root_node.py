@@ -33,16 +33,19 @@ class RootNode(DeviceNode):
         """Create cpu node"""
         dev_type = "cpu"
         cpu = DeviceNode(self.configs, dev_type=dev_type, arch=self.arch)
-        self.cpu_node = self.create_node(dev_type=dev_type, label=label, instance=instance,
-                                         addr_cells=1, size_cells=0, parent_label="/",
-                                         status=1)
-        header = self.generate_node_header(instance, dev_type=dev_type)
+        self.cpu_node = cpu.create_node(dev_type=dev_type, label=label, instance=instance,
+                                         size_cells=0, parent_label="/", status=1)
+                                         #addr_cells=1, size_cells=0, parent_label="/",
+                                         #status=1)
+        header = cpu.generate_node_header(instance, dev_type=dev_type)
+        reg = cpu.set_node_reg(instance, 0)
 
         metadata = {
             "device_type": dev_type,
             "riscv,isa": self.soc.get_cpu_isa(),
             "mmu_type": self.soc.get_cpu_mmu_type(),
             "header": header,
+            "reg": reg,
             "compatible": "riscv",
             "machine_type": self.arch
         }
