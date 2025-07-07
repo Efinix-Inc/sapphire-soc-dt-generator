@@ -37,14 +37,14 @@ class RootNode(DeviceNode):
                                          addr_cells=1, size_cells=0, parent_label="/",
                                          status=1)
         header = self.generate_node_header(instance, dev_type=dev_type)
-        reg = cpu.set_node_reg(instance,0)
 
         metadata = {
             "device_type": dev_type,
             "riscv,isa": self.soc.get_cpu_isa(),
             "mmu_type": self.soc.get_cpu_mmu_type(),
             "header": header,
-            "reg": reg,
+            "compatible": "riscv",
+            "machine_type": self.arch
         }
         self.cpu_node.update(metadata)
 
