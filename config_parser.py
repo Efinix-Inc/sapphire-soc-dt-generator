@@ -118,7 +118,7 @@ class ConfigParser:
         """Parse cpu number, ISA, and other metadata"""
         cpu = {
             "cores": self.get_cpu_count(),
-            "isa": self.get_cpu_isa(),
+            "isa": self._get_cpu_isa(),
         }
 
         self.parsed_configs["cpus"] = cpu
@@ -128,7 +128,7 @@ class ConfigParser:
         cpus = self.peripherals.get("cores", {})
         return len(cpus.keys()) if cpus else 0
 
-    def get_cpu_isa(self):
+    def _get_cpu_isa(self):
         """Get cpu instruction set"""
         pattern = re.compile(r"ISA_\w+")
         isa = {}
@@ -145,7 +145,7 @@ class ConfigParser:
                 if 'zicsr' in ext or 'zifence' in ext:
                     exts += f"_{ext}"
                 else:
-                    exts += ext
+                    exts += ext[-1]
 
         return exts
 
