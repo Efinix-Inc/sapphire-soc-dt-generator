@@ -76,7 +76,7 @@ class BusNode(DeviceNode):
         addr = self.ctrl.get_controller_address(bus_name, bus_instance)
         size = self.ctrl.get_controller_address_size(bus_name, bus_instance)
 
-        if self.arch == 64:
+        if self.arch == "64":
             addr_range = f"0x0 0x0 {addr} 0x0 {size}"
         else:
             addr_range = f"0x0 {addr} {size}"

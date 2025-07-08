@@ -89,9 +89,9 @@ class DeviceNode:
     def _set_cells(self, value):
         if value != -1:
             return value
-        elif self.arch == 32:
+        elif self.arch == "32":
             return 1
-        elif self.arch == 64:
+        elif self.arch == "64":
             return 2
         else:
             return 0
