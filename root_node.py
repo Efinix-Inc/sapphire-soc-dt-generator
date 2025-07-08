@@ -53,3 +53,13 @@ class RootNode(DeviceNode):
             self.cpu_node.upadte(add_on)
 
         return self.cpu_node
+
+    def create_memory_node(self, label="memory"):
+        """Create memory node"""
+        dev_type = "ddr"
+        peripherals_config = self.configs.get("peripherals", {})
+        mem = DeviceNode(peripherals_config, dev_type=dev_type, arch=self.arch)
+        self.mem = mem.create_node(label=label, parent_label="/", status=1)
+        self.mem["device_type"] = "memory"
+
+        return self.mem
