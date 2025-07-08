@@ -144,3 +144,15 @@ class DeviceNode:
 
         return hex(value)
 
+    def apply_user_configs(self, user_configs):
+        """Modify the value of device node with user configs"""
+        drivers = user_configs.get("drivers", {})
+        overrides = user_configs.get("overrides", {})
+
+        for k, v in drivers.items():
+            if self.dev_type == k:
+                self.update_node(**v)
+
+        for k, v in overrides.items():
+            if k == self.ctrl.get_instance_name(self.instance):
+                self.update_node(**v)
