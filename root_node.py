@@ -35,8 +35,6 @@ class RootNode(DeviceNode):
         cpu = DeviceNode(self.configs, dev_type=dev_type, arch=self.arch)
         self.cpu_node = cpu.create_node(dev_type=dev_type, label=label, instance=instance,
                                          size_cells=0, parent_label="/", status=1)
-                                         #addr_cells=1, size_cells=0, parent_label="/",
-                                         #status=1)
         header = cpu.generate_node_header(instance, dev_type=dev_type)
         reg = cpu.set_node_reg(instance, 0)
 
