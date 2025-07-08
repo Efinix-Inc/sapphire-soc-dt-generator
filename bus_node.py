@@ -101,3 +101,6 @@ class BusNode(DeviceNode):
         reg = self.set_node_reg(offset_addr, size)
 
         return header, reg
+
+    def list_bus_instances(self):
+        return self.ctrl.list_instances(self.bus_name)
