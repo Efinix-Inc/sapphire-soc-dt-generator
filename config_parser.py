@@ -58,9 +58,16 @@ class ConfigParser:
             dev_type = parts[1].lower()
             dev_num = parts[2]
 
-            if dev_type in ["apb", "axi"]:
+            if "apb" in dev_type:
                 dev_num = parts[3]
                 dev_type = f"{dev_type}_{parts[2].lower()}"
+
+            if "axi" in dev_type:
+                if "slave" in parts[2].lower():
+                    dev_num = parts[3]
+                    dev_type = f"{dev_type}_{parts[2].lower()}"
+                else:
+                    dev_num = str(self.to_num(parts[2]))
 
             if not dev_num.isdigit():
                 dev_num = 0
@@ -156,3 +163,9 @@ class ConfigParser:
             for macro in pattern.findall(macro):
                 self.parsed_configs["frequency"] = value
 
+    def to_num(self, char):
+        """Convert a character to its corresponding number. 'a' or 'A' -> 1, 'b' or 'B' -> 2 and so on"""
+        if char.isalpha() and len(char) == 1:
+            return ord(char.lower()) - ord('a')
+        else:
+            return 0
