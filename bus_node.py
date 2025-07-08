@@ -29,7 +29,7 @@ class BusNode(DeviceNode):
                 dev.update({ctrl: instances})
         return dev
 
-    def create_bus_node(self, bus_instance=0, header=None, label=None):
+    def create_bus_node(self, bus_instance=0, header=None, label=None, user_configs=None):
         """Create a bus node"""
         metadata = {
             "ranges": self.get_bus_ranges(bus_instance=bus_instance),
@@ -40,6 +40,9 @@ class BusNode(DeviceNode):
 
         self.bus_node = self.create_node(instance=bus_instance, label=label)
         self.update_node(**metadata)
+
+        if user_configs:
+            self.apply_user_configs(user_configs)
 
         return self.bus_node
 
