@@ -43,7 +43,7 @@ class BusNode(DeviceNode):
 
         return self.bus_node
 
-    def populate_controller_instances_nodes(self, bus_instance=0, offset=True):
+    def populate_controller_instances_nodes(self, bus_instance=0, user_configs=None, offset=True):
         """Populate bus node with controller instances"""
         ctrl_nodes = {}
 
@@ -56,13 +56,15 @@ class BusNode(DeviceNode):
                     dn = DeviceNode(self.configs, ctrl_type, instance=num, arch=self.arch)
                     ctrl_node = dn.create_node(instance=num)
 
+                    if user_configs:
+                        dn.apply_user_configs(user_configs)
+
                     if offset:
                         header, reg = self.use_addr_offset(ctrl_node, bus_instance)
                         metadata = {"header": header, "reg": reg}
                         dn.update_node(**metadata)
 
                     ctrl_nodes.update({ctrl_instance: ctrl_node})
-
 
         self.bus_node["peripherals"] = ctrl_nodes
 
