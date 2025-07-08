@@ -77,7 +77,7 @@ class DeviceNode:
         else:
             return f"{reg_addr} {reg_size}"
 
-    def update_node(self, node_name, **kwargs):
+    def update_node(self, **kwargs):
         """Append multiple key-value pairs to the specific device node"""
         self.node.update(kwargs)
         return self.node

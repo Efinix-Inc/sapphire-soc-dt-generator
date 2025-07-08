@@ -39,7 +39,7 @@ class BusNode(DeviceNode):
             metadata["header"] = f"{header}"
 
         self.bus_node = self.create_node(instance=bus_instance, label=label)
-        self.update_node(self.bus_node, **metadata)
+        self.update_node(**metadata)
 
         return self.bus_node
 
@@ -58,7 +58,8 @@ class BusNode(DeviceNode):
 
                     if offset:
                         header, reg = self.use_addr_offset(ctrl_node, bus_instance)
-                        ctrl_node.update({"header": header, "reg": reg})
+                        metadata = {"header": header, "reg": reg}
+                        dn.update_node(**metadata)
 
                     ctrl_nodes.update({ctrl_instance: ctrl_node})
 
