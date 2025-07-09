@@ -29,7 +29,7 @@ class RootNode(DeviceNode):
 
         return self.node
 
-    def create_cpu_node(self, label="cpus", instance=0, add_on=None):
+    def create_cpu_node(self, label="cpus", instance=0, user_configs=None):
         """Create cpu node"""
         dev_type = "cpu"
         cpu = DeviceNode(self.configs, dev_type=dev_type, arch=self.arch)
@@ -49,8 +49,8 @@ class RootNode(DeviceNode):
         }
         self.cpu_node.update(metadata)
 
-        if add_on:
-            self.cpu_node.upadte(add_on)
+        if user_configs:
+            cpu.apply_user_configs(user_configs)
 
         return self.cpu_node
 
