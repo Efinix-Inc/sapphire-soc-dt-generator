@@ -1,0 +1,31 @@
+{% macro render_device(device) %}
+{{ device.header }} {
+	{%- if device.address_cells %}
+	#address-cells = <{{ device.address_cells }}>;
+	{%- endif %}
+	{%- if device.size_cells or device.size_cells == 0 %}
+	#size-cells = <{{ device.size_cells }}>;
+	{%- endif %}
+	{%- if device.reg %}
+	reg = <{{ device.reg }}>;
+	{%- endif %}
+	{%- if device.compatible %}
+	compatible = "{{ device.compatible }}";
+	{%- endif %}
+	{%- if device.private_data %}
+	{%- for priv_data in device.private_data %}
+	{{ priv_data }}
+	{%- endfor %}
+	{%- endif %}
+	{%- if device.status %}
+	status = "{{ device.status }}";
+	{%- endif %}
+
+	{%- if device.child %}
+        {%- for subdevice in device.child.values() %}
+		{{ render_device(subdevice) | indent(8, False)}}
+        {%- endfor %}
+	{%- endif %}
+};
+{%- endmacro %}
+

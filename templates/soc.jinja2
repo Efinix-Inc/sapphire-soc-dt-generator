@@ -1,143 +1,68 @@
-{%- if root.version -%}
 {{ root.version }};
-{%- endif %}
 
-{%- if 'dtsi' in root.include_headers %}
-{%- if 'include' in root.include_headers.dtsi %}
-{% for inc in root.include_headers.dtsi.include %}
-{{ inc }}
-{%- endfor %}
-{%- endif %}
-{%- endif %}
-
-{{ root.name }} {
-	{%- set cpu = root.cpu %}
-	model = "{{ root.model }}";
-	#address-cells = <1>;
-	#size-cells = <1>;
-
-	{{ cpu.label }} {
-		#address-cells = <1>;
-		#size-cells = <0>;
+{{ root.header }} {
+	#address-cells = <{{ root.address_cells }}>;
+	#size-cells = <{{ root.size_cells }}>;
+	
+	cpus {
+		#address-cells = <{{ root.cpus.cpu0.address_cells }}>;
+		#size-cells = <{{ root.cpus.cpu0.size_cells }}>;
 		timebase-frequency = <{{ root.frequency }}>;
 
-		{% for core in range(cpu.cores) %}
-		{{ cpu.name }}@{{ core }} {
-			reg = <{{ core }}>;
-			device_type = "cpu";
-			compatible = "{{ cpu.arch }}";
-			riscv,isa = "{{ cpu.isa }}";
-			cpu-name = "{{ root.soc_name }}";
-			board = "Efinix {{ root.device_family }} {{ root.board }} Development Kit";
-			mmu_type = "{{ cpu.mmu_type }}";
-			{%- if cpu.clock_frequency %}
-			clock-frequency = <{{ cpu.clock_frequency }}>;
-			{%- endif %}
-			i-cache-size = <{{ cpu.i_cache_size }}>;
-			i-cache-sets = <{{ cpu.i_cache_sets }}>;
-			i-cache-block-size = <{{ cpu.i_cache_block_size }}>;
-			d-cache-size = <{{ cpu.d_cache_size }}>;
-			d-cache-sets = <{{ cpu.d_cache_sets }}>;
-			d-cache-block-size = <{{ cpu.d_cache_block_size }}>;
-			{%- if cpu.tlb %}
-			tlb-split;
-			{%- endif %}
-			status = "okay";
-
-			{% if cpu.intc %}
-			{{ cpu.intc.label }}{{ core }}: {{ cpu.intc.name }} {
-				#interrupt-cells = <1>;
-				interrupt-controller;
-				compatible = "riscv,cpu-intc";
-			};
-			{%- endif %}
+		{% for k, v in root.cpus.items() %}
+		{{ v.header }} {
+			reg = <{{ v.reg }}>;
+			compatible = "{{ v.compatible }}";
+			device_type = "{{ v.type }}";
+			riscv,isa = "{{ v.isa }}";
+			mmu_type = "{{ v.mmu_type }}";
+			status = "{{ v.status }}";
+			
 		};
 		{% endfor %}
 	};
 
-	{%- set clock = root.clock %}
-	{%- if clock %}
-	{{ clock.name }} {
-		#address-cells = <1>;
-		#size-cells = <0>;
-		compatible = "simple-bus";
+	{% for bus_type, bus_val in buses.items() %}
+	{%- if bus_val.peripherals %}
+	{{ bus_val.header }} {
+		#address-cells = <{{ bus_val.address_cells }}>;
+		#size-cells = <{{ bus_val.size_cells }}>;
+		compatible = "{{ ' '.join(bus_val.compatible) }}";
+		ranges = <{{ bus_val.ranges }}>;
 
-		{{ clock.label }}: {{ clock.name }}@1 {
-			reg = <{{ clock.reg }}>;
-			compatible = "{{ clock.compatible }}";
-			#clock-cells = <0>;
-			clock-frequency = <{{ root.frequency }}>;
-		};	
-	};
-	{%- endif %}
+		{% set peripherals = bus_val.peripherals %}
+		{%- for pk, pv in peripherals.items() %}
+		{{ pv.header }} {
+			#address-cells = <{{ pv.address_cells }}>;
+			#size-cells = <{{ pv.size_cells }}>;
+			reg = <{{ pv.reg }}>;
+			{%- if pv.compatible %}
+			{%- if pv.compatible | length == 1 %}
+			{%- set compatible = '"' ~ pv.compatible[0] ~ '"' %}
+			{%- else %}
+			{%- set quoted_items = [] %}
+			{%- for item in pv.compatible %}
+			{%- set _ = quoted_items.append('"' ~ item ~ '"') %}
+			{%- endfor %}
+			{%- set compatible = quoted_items | join(', ') %}
+			{%- endif %} 
+			compatible = {{ compatible }};
+			{%- endif -%}
 
-	{%- set buses = root.buses %}
-	{%- if buses %}
-	{% for key, value in buses.items() recursive %}
+			{%- if pv.interrupts %}
+			interrupts = <{{ ' '.join(pv.interrupts) }}>;
+			{%- endif -%}
 
-	{{ value.header }}
-
-		#address-cells = <1>;
-		{%- if 'size_cell' in value %}
-		#size-cells = <{{ value.size_cell }}>;
-		{%- else %}
-		#size-cells = <0>;
-		{%- endif %}
-		compatible = "{{ value.compatible }}";
-		{%- if value.ranges %}
-		ranges = <{{ value.ranges }}>;
-		{%- else %}
-		ranges;
-		{%- endif %}
-
-		{%- if 'peripherals' in value %}
-		{% set peri = value.peripherals %}
-
-		{%- for k, v in peri.items() recursive %}
-		{{ v.header }}
-			reg = {{ v.reg }};
-			{%- if v.compatible %}
-			compatible = "{{ v.compatible }}";
-			{%- endif %}
-
-			{%- if 'interrupts' in v and v.interrupts %}
-			{%- if 'interrupt_cells' in v %}
-			#interrupt-cells = <{{ v.interrupt_cells }}>;
-			{%- endif %}
-			interrupt-parent = <&plic>;
-			interrupts = <{{ v.interrupts }}>;
-			{%- endif %}
-
-			{%- if v.clocks %}
-			clocks = {{ v.clocks }};
-			{%- endif %}
-
-			{%- if v.clock_freq %}
-                        clock-frequency = <{{ root.frequency }}>;
-                        {%- endif %}
-
-			{%- if 'okay' in v.status %}
-			{%- if 'private_data' in v %}
-			{%- for pdata in v.private_data %}
-			{{ pdata }}
+			{%- if pv.private_data %}
+			{%- for priv_data in pv.private_data %}
+			{{ priv_data }}
 			{%- endfor %}
 			{%- endif %}
-			{%- endif %}
 
-			{%- if 'interrupts_extended' in v %}
-                        interrupts-extended = <
-                        {%- for ext in v.interrupts_extended %}
-                                {{ ext }}
-                        {%- endfor %}
-                        >;
-                        {%- endif %}
-			status = "{{ v.status }}";
-
+			status = "{{ pv.status }}";
 		};
 		{% endfor %}
-		{%- endif %}
 	};
-	{% endfor %}
-
 	{%- endif %}
+	{%- endfor %}
 };
