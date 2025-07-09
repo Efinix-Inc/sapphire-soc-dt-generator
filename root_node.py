@@ -13,7 +13,7 @@ class RootNode(DeviceNode):
         self.parser = ConfigParser(configs)
         self.soc = SocConfigs(configs, arch)
 
-    def create_root_node(self, metadata=None):
+    def create_root_node(self, **metadata):
         """Create root node metadata"""
         root = {
             "version": "/dts-v1/",
