@@ -7,5 +7,9 @@
 		"gpio",
 		"apb_slave",
 		"axi_slave"
+	],
+	"bus_types": [
+		"bmb",
+		"axi"
 	]
 }
