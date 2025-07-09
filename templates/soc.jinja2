@@ -51,14 +51,7 @@
 
 			{%- if pv.interrupts %}
 			interrupts = <{{ ' '.join(pv.interrupts) }}>;
-			{%- endif -%}
-
-			{%- if pv.private_data %}
-			{%- for priv_data in pv.private_data %}
-			{{ priv_data }}
-			{%- endfor %}
 			{%- endif %}
-
 			status = "{{ pv.status }}";
 		};
 		{% endfor %}

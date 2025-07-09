@@ -27,6 +27,11 @@
 {%- for pk, pv in peripherals.items() %}
 {%- if pv.status != "okay" %}
 &{{ pv.label }} {
+	{%- if pv.private_data %}
+	{%- for priv_data in pv.private_data %}
+	{{ priv_data }}
+	{%- endfor %}
+	{%- endif %}
 	status = "okay";
 
 	{%- if child %}
@@ -35,9 +40,9 @@
 	{{ macros.render_device(cv) | indent(8, False) }}
 	{%- endif %}
 	{%- endfor %}
-	{% endif %}
+	{%- endif %}
 };
 {% endif %}
-{% endfor %}
+{%- endfor %}
 {%- endif %}
 {% endfor %}
