@@ -155,4 +155,33 @@ class DeviceNode:
 
         for k, v in overrides.items():
             if k == self.ctrl.get_instance_name(self.instance):
+                v = self._regenerate(v)
                 self.update_node(**v)
+
+    def _regenerate(self, new_values):
+        """Regenerate 'reg' and 'header' property"""
+
+        # addr reg header regenerate
+        #  0    0    0     no
+        #  0    0    1     no
+        #  0    1    0     no
+        #  0    1    1     no
+        #  1    0    0     yes (reg & header)
+        #  1    1    0     yes (header)
+        #  1    1    1     no
+
+        nheader = new_values.get("header")
+        nreg = new_values.get("reg")
+        naddr = new_values.get("addr")
+        nsize = new_values.get("size")
+        nlabel = new_values.get("label")
+        dev_type = new_values.get("type", self.dev_type)
+
+        size = nsize if nsize else self.ctrl.get_controller_address_size(dev_type=dev_type)
+        label = nlabel if nlabel else self.node.get("label", None)
+
+        if naddr:
+            new_values.setdefault("header", self.generate_node_header(naddr, label, dev_type))
+            new_values.setdefault("reg", self.set_node_reg(naddr, size))
+
+        return new_values
