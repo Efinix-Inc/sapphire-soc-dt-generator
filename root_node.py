@@ -54,12 +54,15 @@ class RootNode(DeviceNode):
 
         return self.cpu_node
 
-    def create_memory_node(self, label="memory"):
+    def create_memory_node(self, label="memory", user_configs=None):
         """Create memory node"""
         dev_type = "ddr"
         peripherals_config = self.configs.get("peripherals", {})
         mem = DeviceNode(peripherals_config, dev_type=dev_type, arch=self.arch)
-        self.mem = mem.create_node(label=label, parent_label="/", status=1)
-        self.mem["device_type"] = "memory"
+        self.mem_node = mem.create_node(label=label, parent_label="/", status=1)
+        self.mem_node["device_type"] = "memory"
+        if user_configs:
+            print("create_memory_node: apply user configs")
+            mem.apply_user_configs(user_configs)
 
-        return self.mem
+        return self.mem_node
