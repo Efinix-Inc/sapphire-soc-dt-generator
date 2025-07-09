@@ -1,10 +1,17 @@
-{% import 'node.jinja2' as macros %}
+{%- import 'node.jinja2' as macros -%}
 {{ root.version }};
+{%- if root.includes %}
+{%- for inc in root.includes %}
+{{ inc }}
+{%- endfor %}
+{%- endif %}
 
 {{ root.header }} {
 	#address-cells = <{{ root.address_cells }}>;
 	#size-cells = <{{ root.size_cells }}>;
+	{%- if root.model %}
 	model = "{{ root.model }}";
+	{%- endif %}
 
 	{% set mem = root.memory %}
 	{{ mem.header }} {
