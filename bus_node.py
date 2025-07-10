@@ -1,4 +1,3 @@
-from controller import Controller
 from device_node import DeviceNode
 
 class BusNode(DeviceNode):
@@ -6,7 +5,6 @@ class BusNode(DeviceNode):
         super().__init__(configs, dev_type=bus_name)
         self.configs = configs
         self.bus_name = bus_name
-        self.ctrl = Controller(configs)
         self.list_ctrl = list_ctrl
         self.arch = arch
         self.bus_node = {}
