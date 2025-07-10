@@ -29,6 +29,7 @@ class DeviceNode:
         size = self.ctrl.get_controller_address_size(dev_type, instance)
 
         self.node = {
+                "device_instance": self.ctrl.get_instance_name(instance),
                 "address_cells": self.set_address_cells(self.addr_cells),
                 "size_cells": self.set_size_cells(self.size_cells),
                 "type": dev_type,
@@ -154,7 +155,8 @@ class DeviceNode:
                 self.update_node(**v)
 
         for k, v in overrides.items():
-            if k == self.ctrl.get_instance_name(self.instance):
+            device_instance = overrides.get(k, {}).get("device_instance")
+            if device_instance == self.ctrl.get_instance_name(self.instance):
                 v = self._regenerate(v)
                 self.update_node(**v)
 
