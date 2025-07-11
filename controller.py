@@ -37,23 +37,23 @@ class Controller:
     def list_instances(self, dev_type=None):
         """Return a list of available instance names for the given device type"""
         self._check_dev_type(dev_type)
-        return list(self.configs.get(dev_type, {}).keys())
+        return list(self.ctrl_configs.get(dev_type, {}).keys())
 
     def list_all_instances(self):
         """Return a flat list of all instance names across all device types"""
-        return [name for instances in self.configs.values() for name in instances]
+        return [name for instances in self.ctrl_configs.values() for name in instances]
 
     def list_all_controllers(self):
         """Return a list of all controller types (device types)"""
-        return list(self.configs.keys())
+        return list(self.ctrl_configs.keys())
 
     def filter_instances_by_address_range(self, start, end, dev_type=None):
         """Return instances whose address falls within the given range"""
         filtered = []
-        dev_types = [dev_type] if dev_type else self.configs.keys()
+        dev_types = [dev_type] if dev_type else self.ctrl_configs.keys()
 
         for dtype in dev_types:
-            for name, data in self.configs.get(dtype, {}).items():
+            for name, data in self.ctrl_configs.get(dtype, {}).items():
                 addr = data.get("addr")
                 if addr is not None and int(start, 16) <= int(addr, 16) < int(end):
                     filtered.append(name)
@@ -62,7 +62,7 @@ class Controller:
     def update_controller(self, dev_type, instance, **kwargs):
         """Append multiple key-value pairs to a specific controller instance"""
         instance_name = f"{dev_type}{instance}"
-        instance_data = self.configs.setdefault(dev_type, {}).setdefault(instance_name, {})
+        instance_data = self.ctrl_configs.setdefault(dev_type, {}).setdefault(instance_name, {})
         instance_data.update(kwargs)
 
     def get_instance_name(self, instance=0):
