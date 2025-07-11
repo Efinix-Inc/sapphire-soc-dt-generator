@@ -11,7 +11,8 @@ class RootNode(DeviceNode):
         self.addr_cells = self._set_cells(-1)
         self.size_cells = self._set_cells(-1)
         self.parser = ConfigParser(configs)
-        self.soc = SocConfigs(configs, arch)
+        self.dev_type = "soc"
+        self.soc = SocConfigs(configs, self.dev_type, arch)
 
     def create_root_node(self, **metadata):
         """Create root node metadata"""
