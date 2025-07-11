@@ -43,8 +43,8 @@ class DeviceNode:
                 "private_data": [],
                 "status": self._lookup_status()
         }
-        if "interrupts" in self.configs:
-            self.node.update({"interrupt-parent": "<&plic>"})
+        if self.ctrl.get_controller_interrupts_line(dev_type=dev_type, instance=instance):
+            self.node.update({"interrupt_parent": "&plic0"})
 
         dev = self.ctrl.get_controller(dev_type, instance)
         self.node.update(dev)
