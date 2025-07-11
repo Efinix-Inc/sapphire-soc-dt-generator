@@ -2,6 +2,7 @@ class Controller:
     def __init__(self, configs, dev_type=None):
         self.configs = configs
         self.dev_type = dev_type
+        self.ctrl_configs = configs.get("peripherals", {})
 
     def _check_dev_type(self, dev_type):
         dev_type = dev_type or self.dev_type
@@ -11,7 +12,7 @@ class Controller:
     def _get_instance_data(self, dev_type=None, instance=0):
         """Retrive the configuraton data for a specific device type and instance"""
         self._check_dev_type(dev_type)
-        return self.configs.get(dev_type, {}).get(f"{dev_type}{instance}", {})
+        return self.ctrl_configs.get(dev_type, {}).get(f"{dev_type}{instance}", {})
 
     def get_controller(self, dev_type=None, instance=0):
         """Return the full controller configuration for the given device type and instance"""
