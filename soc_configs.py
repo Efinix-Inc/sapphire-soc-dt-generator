@@ -1,9 +1,10 @@
 from controller import Controller
 
 class SocConfigs(Controller):
-    def __init__(self, configs, arch=32):
-        super().__init__(configs, dev_type="soc")
+    def __init__(self, configs, dev_type=None, arch=32):
+        super().__init__(configs, dev_type)
         self.configs = configs
+        self.dev_type = dev_type
         self.arch = arch
 
     def get_frequency(self):
