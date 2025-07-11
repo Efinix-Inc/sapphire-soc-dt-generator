@@ -39,12 +39,12 @@ class DeviceNode:
                 "reg": self.set_node_reg(addr, size),
                 "header": self.generate_node_header(addr, label, dev_type),
                 "compatible": self.ctrl.get_controller_driver_name(dev_type),
+                "interrupt_parent": "&plic0",
+                "clocks": "&clock0",
                 "clock_frequency": self.ctrl.get_frequency(),
                 "private_data": [],
                 "status": self._lookup_status()
         }
-        if self.ctrl.get_controller_interrupts_line(dev_type=dev_type, instance=instance):
-            self.node.update({"interrupt_parent": "&plic0"})
 
         dev = self.ctrl.get_controller(dev_type, instance)
         self.node.update(dev)
