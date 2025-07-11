@@ -54,7 +54,7 @@
 
 			{%- if pv.interrupts %}
 			interrupts = <{{ ' '.join(pv.interrupts) }}>;
-			interrupt-parent = "{{ pv.interrupt_parent }}";
+			interrupt-parent = <{{ pv.interrupt_parent }}>;
 			{%- endif %}
                         {%- if pv.status == "okay" %}
                         {%- for priv_data in pv.private_data %}
