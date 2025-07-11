@@ -56,6 +56,10 @@
 			interrupts = <{{ ' '.join(pv.interrupts) }}>;
 			interrupt-parent = <{{ pv.interrupt_parent }}>;
 			{%- endif %}
+			{%- if pv.clocks %}
+			clocks = <{{ pv.clocks }}>;
+			clock-frequency = <{{ root.frequency }}>;
+			{%- endif %}
                         {%- if pv.status == "okay" %}
                         {%- for priv_data in pv.private_data %}
                         {{ priv_data }}
