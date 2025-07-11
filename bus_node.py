@@ -44,7 +44,7 @@ class BusNode(DeviceNode):
 
         return self.bus_node
 
-    def populate_controller_instances_nodes(self, bus_instance=0, user_configs=None, offset=True, frequency=0):
+    def populate_controller_instances_nodes(self, bus_instance=0, user_configs=None, offset=True):
         """Populate bus node with controller instances"""
         ctrl_nodes = {}
 
@@ -55,7 +55,7 @@ class BusNode(DeviceNode):
                     # Instantiate a new DeviceNode for each ctrl_instance
                     num = self.ctrl.get_instance_number(ctrl_type, ctrl_instance)
                     dn = DeviceNode(self.configs, ctrl_type, instance=num, arch=self.arch)
-                    ctrl_node = dn.create_node(instance=num, frequency=frequency)
+                    ctrl_node = dn.create_node(instance=num)
 
                     if user_configs:
                         dn.apply_user_configs(user_configs)

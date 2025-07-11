@@ -13,7 +13,7 @@ class DeviceNode:
         self.size_cells = self._set_cells(-1)
 
     def create_node(self, dev_type=None, label=None, instance=0, addr_cells=-1, size_cells=-1,
-                    parent_label=None, frequency=0, status=0):
+                    parent_label=None, status=0):
         """Create a device tree node of a device"""
         self.status = status
         self.addr_cells = self._set_cells(addr_cells)
@@ -39,7 +39,7 @@ class DeviceNode:
                 "reg": self.set_node_reg(addr, size),
                 "header": self.generate_node_header(addr, label, dev_type),
                 "compatible": self.ctrl.get_controller_driver_name(dev_type),
-                "clock_frequency": frequency,
+                "clock_frequency": self.ctrl.get_frequency(),
                 "private_data": [],
                 "status": self._lookup_status()
         }
