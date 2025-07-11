@@ -1,4 +1,4 @@
-from controller import Controller
+from soc_configs import SocConfigs
 
 class DeviceNode:
     def __init__(self, configs, dev_type, instance=0, arch=32):
@@ -8,7 +8,7 @@ class DeviceNode:
         self.arch = arch # machine architecture i.e., 32 or 64
         self.status = -1
         self.node = {}
-        self.ctrl = Controller(configs, dev_type)
+        self.ctrl = SocConfigs(configs, dev_type)
         self.addr_cells = self._set_cells(-1)
         self.size_cells = self._set_cells(-1)
 
