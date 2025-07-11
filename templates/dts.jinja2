@@ -34,6 +34,12 @@
 {%- for pk, pv in peripherals.items() %}
 {%- if pv.status != "okay" %}
 &{{ pv.label }} {
+	{%- if pv.address_cells %}
+	#address-cells = <{{ pv.address_cells }}>;
+	{%- endif %}
+	{%- if pv.size_cells or pv.size_cells == 0 %}
+	#size-cells = <{{ pv.size_cells }}>;
+	{%- endif %}
 	{%- if pv.private_data %}
 	{%- for priv_data in pv.private_data %}
 	{{ priv_data }}
