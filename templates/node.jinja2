@@ -1,4 +1,4 @@
-{% macro render_device(device) %}
+{% macro render_device(device, node=none) %}
 {{ device.header }} {
 	{%- if device.address_cells %}
 	#address-cells = <{{ device.address_cells }}>;
@@ -11,6 +11,11 @@
 	{%- endif %}
 	{%- if device.compatible %}
 	compatible = "{{ device.compatible }}";
+	{%- endif %}
+	{%- if node and node.frequency %}
+	{%- if device.type == "clock" %}
+	clock-frequency = <{{ node.frequency }}>;
+	{%- endif %}
 	{%- endif %}
 	{%- if device.private_data %}
 	{%- for priv_data in device.private_data %}

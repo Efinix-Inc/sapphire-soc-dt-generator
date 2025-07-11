@@ -22,7 +22,7 @@
 	{%- if child %}
 	{%- for ck, cv in child.items() %}
 	{%- if cv.parent_label == "/" %}
-	{{ macros.render_device(cv) | indent(8, False) }}
+	{{ macros.render_device(cv, node=root) | indent(8, False) }}
 	{%- endif %}
 	{%- endfor %}
 	{% endif %}
