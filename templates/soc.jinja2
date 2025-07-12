@@ -12,7 +12,7 @@
 		{{ v.header }} {
 			reg = <{{ v.reg }}>;
 			compatible = "{{ v.compatible }}";
-			device_type = "{{ v.type }}";
+			device_type = "{{ v.device_type }}";
 			riscv,isa = "{{ v.isa }}";
 			mmu_type = "{{ v.mmu_type }}";
 			{%- if v.private_data %}

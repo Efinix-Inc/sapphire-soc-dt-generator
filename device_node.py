@@ -33,7 +33,8 @@ class DeviceNode:
                 "device_instance": self.ctrl.get_instance_name(instance),
                 "address_cells": self.set_address_cells(self.addr_cells),
                 "size_cells": self.set_size_cells(self.size_cells),
-                "type": dev_type,
+                "interface": dev_type,
+                "device_type": None,
                 "label": label,
                 "parent_label": parent_label,
                 "reg": self.set_node_reg(addr, size),
@@ -179,7 +180,7 @@ class DeviceNode:
         naddr = new_values.get("addr")
         nsize = new_values.get("size")
         nlabel = new_values.get("label")
-        dev_type = new_values.get("type", self.dev_type)
+        dev_type = new_values.get("interface", self.dev_type)
 
         size = nsize if nsize else self.ctrl.get_controller_address_size(dev_type=dev_type)
         label = nlabel if nlabel else self.node.get("label", None)

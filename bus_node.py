@@ -97,7 +97,7 @@ class BusNode(DeviceNode):
     def use_addr_offset(self, dev_node, bus_instance=0):
         """Generate a node header and reg based on address offset"""
         label = dev_node.get("label", "")
-        dev_type = dev_node.get("type", "")
+        dev_type = dev_node.get("interface", "")
         size = dev_node.get("size", 0)
 
         offset_addr = self.get_dev_instance_addr_offset(dev_node, bus_instance)
