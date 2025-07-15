@@ -13,7 +13,7 @@
 	compatible = "{{ device.compatible }}";
 	{%- endif %}
 	{%- if node and node.frequency %}
-	{%- if device.type == "clock" %}
+	{%- if device.device_type == "clock" %}
 	clock-frequency = <{{ node.frequency }}>;
 	{%- endif %}
 	{%- endif %}
