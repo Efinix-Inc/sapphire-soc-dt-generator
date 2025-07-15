@@ -8,7 +8,16 @@
     },
     "drivers": {
 	"cpu": {
-	    "compatible": "riscv"
+	    "compatible": "riscv",
+	    "private_data": [
+	        "tlb-split;"
+	    ],
+	    "child": {
+		"device_type": "interrupt_controller",
+	        "interrupt_controller": true,
+		"interrupt_cells": 1,
+		"compatible": "riscv,cpu-intc"
+	    }
 	},
         "spi": {
 	    "compatible": ["spinal-lib,spi-1.0"],
@@ -26,9 +35,9 @@
 	},
 	"gpio": {
 	    "compatible": ["spinal-lib,gpio-1.0"],
+	    "interrupt_cells": 2,
 	    "private_data": [
 		"#gpio-cells = <2>;",
-		"#interrupt-cells = <2>;",
 	    	"ngpio = <4>;",
 		"gpio-controller;"
 	    ]
@@ -43,8 +52,8 @@
 	    "label": "plic",
 	    "interrupt_controller": true,
 	    "device_type": "interrupt-controller",
+	    "interrupt_cells": 1,
 	    "private_data": [
-	    	"#interrupt-cells = <1>;",
 		"riscv,ndev = <32>;"
 	    ],
 	    "status": "okay"
@@ -92,14 +101,17 @@
 	},
 	"clock": {
 	    "address_cells": "1",
-	    "size_cells": "0",
+	    "size_cells": "1",
 	    "parent_label": "/",
 	    "header": "clock0: clock@0",
 	    "device_instance": "clock0",
 	    "device_type": "clock",
 	    "label": "clock0",
-	    "reg": "0",
-	    "compatible": "fixed-clock"
+	    "reg": "0x0 0x0",
+	    "compatible": "fixed-clock",
+	    "private_data": [
+	        "#clock-cells = <0>;"
+	    ]
 	}
     }
 }
