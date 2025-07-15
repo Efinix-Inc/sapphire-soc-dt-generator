@@ -28,11 +28,23 @@ class RootNode(DeviceNode):
     def create_cpu_node(self, label="cpus", instance=0):
         """Create cpu node"""
         dev_type = "cpu"
-        cpu = DeviceNode(self.configs, dev_type, user_configs=self.user_configs, arch=self.arch)
-        self.cpu_node = cpu.create_node(dev_type=dev_type, label=label, instance=instance,
-                                         size_cells=0, parent_label="/", status=1)
+        cpu = DeviceNode(self.configs, dev_type, instance=instance,
+                         user_configs=self.user_configs, arch=self.arch)
+        cpu_node = cpu.create_node(dev_type=dev_type, label=label, instance=instance,
+                                   size_cells=0, parent_label="/", status=1)
         header = cpu.generate_node_header(instance, dev_type=dev_type)
         reg = cpu.set_node_reg(instance, 0)
+        child_node = cpu_node.get("child", {})
+
+        irq_label = f"L{instance}"
+        irq_ctrl = {
+            "label": irq_label,
+            "header": cpu.generate_node_header(dev_type="interrupt-controller",
+                                               label=irq_label, reg=False)
+        }
+        # create a copy of child node, else it keep reference to the same child node
+        child_node = child_node.copy()
+        child_node.update(irq_ctrl)
 
         properties = {
             "device_type": dev_type,
@@ -40,12 +52,13 @@ class RootNode(DeviceNode):
             "mmu_type": self.soc.get_cpu_mmu_type(),
             "header": header,
             "reg": reg,
-            "machine_type": self.arch
+            "machine_type": self.arch,
+            "child": child_node
         }
 
-        cpu.update_node(**properties)
+        cpu_node.update(properties)
 
-        return self.cpu_node
+        return cpu_node
 
     def create_memory_node(self, label="memory"):
         """Create memory node"""
