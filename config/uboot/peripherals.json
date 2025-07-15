@@ -3,6 +3,7 @@
 		"uart",
 		"spi",
 		"apb_slave",
-		"axi_slave"
+		"axi_slave",
+		"plic"
 	]
 }
