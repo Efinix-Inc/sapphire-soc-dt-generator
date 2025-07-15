@@ -50,8 +50,7 @@ class RootNode(DeviceNode):
     def create_memory_node(self, label="memory"):
         """Create memory node"""
         dev_type = "ddr"
-        peripherals_config = self.configs.get("peripherals", {})
-        mem = DeviceNode(peripherals_config, dev_type, user_configs=self.user_configs, arch=self.arch)
+        mem = DeviceNode(self.configs, dev_type, user_configs=self.user_configs, arch=self.arch)
         self.mem_node = mem.create_node(label=label, parent_label="/", status=1)
         self.mem_node["device_type"] = "memory"
 
