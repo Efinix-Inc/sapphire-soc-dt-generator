@@ -1,29 +1,27 @@
 from soc_configs import SocConfigs
 
 class DeviceNode:
-    def __init__(self, configs, dev_type, instance=0, arch=32):
+    def __init__(self, configs, dev_type, instance=0, user_configs=None, arch=32):
         self.configs = configs
         self.dev_type = dev_type
         self.instance = instance
+        self.user_configs = user_configs
         self.arch = arch # machine architecture i.e., 32 or 64
         self.status = -1
         self.node = {}
-        self.ctrl = SocConfigs(configs, dev_type)
+        self.ctrl = SocConfigs(configs, dev_type, arch=arch)
         self.addr_cells = self._set_cells(-1)
         self.size_cells = self._set_cells(-1)
 
-    def create_node(self, dev_type=None, label=None, instance=0, addr_cells=-1, size_cells=-1,
-                    parent_label=None, status=0):
+    def create_node(self, dev_type=None, instance=0, addr_cells=-1, size_cells=-1,
+                    parent_label=None, status=0, label=None):
         """Create a device tree node of a device"""
         self.status = status
         self.addr_cells = self._set_cells(addr_cells)
         self.size_cells = self._set_cells(size_cells)
 
-        if dev_type is None:
-            dev_type = self.dev_type
-
-        if label is None:
-            label = self.ctrl.get_instance_name(self.instance)
+        dev_type = dev_type or self.dev_type
+        label = label or self.ctrl.get_instance_name(self.instance)
 
         # get the address mapping and size of the device
         addr = self.ctrl.get_controller_address(dev_type, instance)
@@ -31,24 +29,28 @@ class DeviceNode:
 
         self.node = {
                 "device_instance": self.ctrl.get_instance_name(instance),
-                "address_cells": self.set_address_cells(self.addr_cells),
-                "size_cells": self.set_size_cells(self.size_cells),
                 "interface": dev_type,
                 "device_type": None,
                 "label": label,
                 "parent_label": parent_label,
+                # device tree specific properties
+                "address_cells": self.set_address_cells(self.addr_cells),
+                "size_cells": self.set_size_cells(self.size_cells),
+                "addr": addr,
+                "size": size,
                 "reg": self.set_node_reg(addr, size),
                 "header": self.generate_node_header(addr, label, dev_type),
-                "compatible": self.ctrl.get_controller_driver_name(dev_type),
-                "interrupt_parent": "&plic0",
-                "clocks": "&clock0",
+                "compatible": self.ctrl.get_controller_driver_name(dev_type, instance),
+                "interrupts": self.ctrl.get_controller_interrupts_line(dev_type, instance),
+                "interrupt_parent": None,
+                "clocks": None,
                 "clock_frequency": self.ctrl.get_frequency(),
                 "private_data": [],
                 "status": self._lookup_status()
         }
 
-        dev = self.ctrl.get_controller(dev_type, instance)
-        self.node.update(dev)
+        if self.user_configs:
+            self.apply_user_configs()
 
         return self.node
 
@@ -91,11 +93,12 @@ class DeviceNode:
         return self.node
 
     def _set_cells(self, value):
+        self.arch = int(self.arch)
         if value != -1:
             return value
-        elif self.arch == "32":
+        elif self.arch == 32:
             return 1
-        elif self.arch == "64":
+        elif self.arch == 64:
             return 2
         else:
             return 0
@@ -148,32 +151,28 @@ class DeviceNode:
 
         return hex(value)
 
-    def apply_user_configs(self, user_configs):
+    def apply_user_configs(self):
         """Modify the value of device node with user configs"""
-        drivers = user_configs.get("drivers", {})
-        overrides = user_configs.get("overrides", {})
+        if self.user_configs is None:
+            return
+
+        drivers = self.user_configs.get("drivers", {})
+        overrides = self.user_configs.get("overrides", {})
 
         for k, v in drivers.items():
             if self.dev_type == k:
                 self.update_node(**v)
+                break
 
         for k, v in overrides.items():
             device_instance = overrides.get(k, {}).get("device_instance")
             if device_instance == self.ctrl.get_instance_name(self.instance):
                 v = self._regenerate(v)
                 self.update_node(**v)
+                break
 
     def _regenerate(self, new_values):
         """Regenerate 'reg' and 'header' property"""
-
-        # addr reg header regenerate
-        #  0    0    0     no
-        #  0    0    1     no
-        #  0    1    0     no
-        #  0    1    1     no
-        #  1    0    0     yes (reg & header)
-        #  1    1    0     yes (header)
-        #  1    1    1     no
 
         nheader = new_values.get("header")
         nreg = new_values.get("reg")
@@ -184,9 +183,13 @@ class DeviceNode:
 
         size = nsize if nsize else self.ctrl.get_controller_address_size(dev_type=dev_type)
         label = nlabel if nlabel else self.node.get("label", None)
+        addr = naddr if naddr else self.node.get("addr", None)
 
         if naddr:
-            new_values.setdefault("header", self.generate_node_header(naddr, label, dev_type))
-            new_values.setdefault("reg", self.set_node_reg(naddr, size))
+            new_values.setdefault("header", self.generate_node_header(addr, label, dev_type))
+            new_values.setdefault("reg", self.set_node_reg(addr, size))
+
+        if nlabel:
+            new_values.setdefault("header", self.generate_node_header(addr, label, dev_type))
 
         return new_values
