@@ -1,23 +1,22 @@
 from device_node import DeviceNode
+from util import *
 
 class BusNode(DeviceNode):
-    def __init__(self, configs, bus_name, list_ctrl, arch=32):
-        super().__init__(configs, dev_type=bus_name)
-        self.configs = configs
-        self.bus_name = bus_name
+    def __init__(self, configs, bus_type, list_ctrl, bus_instance=0,
+                 user_configs=None, arch=32):
+        super().__init__(configs, bus_type, instance=bus_instance,
+                         user_configs=user_configs, arch=arch)
         self.list_ctrl = list_ctrl
-        self.arch = arch
-        self.bus_node = {}
 
-    def get_ctrl_instances_by_address_range(self, bus_instance=0):
+    def get_bus_devices(self, bus_instance=0):
         """Return key-value mapping of controller and instances based on list_ctrl within address range"""
         dev = {}
 
-        addr = self.ctrl.get_controller_address(self.bus_name, bus_instance)
-        size = self.ctrl.get_controller_address_size(self.bus_name, bus_instance)
+        addr = self.ctrl.get_controller_address(self.dev_type, bus_instance)
+        size = self.ctrl.get_controller_address_size(self.dev_type, bus_instance)
 
         if addr == -1 or size == -1:
-            print(f"Error: address or size of the bus '{self.bus_name}' was not found")
+            print(f"Error: address or size of the bus '{self.dev_type}' was not found")
             return dev
 
         end_addr = int(addr, 16) + int(size, 16)
@@ -27,60 +26,64 @@ class BusNode(DeviceNode):
                 dev.update({ctrl: instances})
         return dev
 
-    def create_bus_node(self, bus_instance=0, header=None, label=None, user_configs=None):
+    def create_bus_node(self, bus_instance=0, header=None, label=None):
         """Create a bus node"""
-        metadata = {
+        properties = {
             "ranges": self.get_bus_ranges(bus_instance=bus_instance),
             "peripherals": {}
         }
         if header:
-            metadata["header"] = f"{header}"
+            properties["header"] = f"{header}"
 
-        self.bus_node = self.create_node(instance=bus_instance, label=label)
-        self.update_node(**metadata)
+        self.node = self.create_node(instance=bus_instance, label=label)
+        self.update_node(**properties)
 
-        if user_configs:
-            self.apply_user_configs(user_configs)
+        return self.node
 
-        return self.bus_node
-
-    def populate_controller_instances_nodes(self, bus_instance=0, user_configs=None, offset=True):
+    def populate_controller_instances_nodes(self, bus_instance=0, addr_offset=True):
         """Populate bus node with controller instances"""
         ctrl_nodes = {}
 
-        ctrls = self.get_ctrl_instances_by_address_range(bus_instance)
+        ctrls = self.get_bus_devices(bus_instance)
         if ctrls:
             for ctrl_type, ctrl_instances in ctrls.items():
                 for ctrl_instance in ctrl_instances:
                     # Instantiate a new DeviceNode for each ctrl_instance
                     num = self.ctrl.get_instance_number(ctrl_type, ctrl_instance)
-                    dn = DeviceNode(self.configs, ctrl_type, instance=num, arch=self.arch)
-                    ctrl_node = dn.create_node(instance=num)
+                    dn = DeviceNode(self.configs, ctrl_type, instance=num,
+                                    user_configs=self.user_configs, arch=self.arch)
+                    parent_label = self.ctrl.get_instance_name(num)
+                    ctrl_node = dn.create_node(instance=num, parent_label=parent_label)
 
-                    if user_configs:
-                        dn.apply_user_configs(user_configs)
+                    if addr_offset:
+                        header, reg = self._use_addr_offset(ctrl_node, bus_instance)
+                        properties = {"header": header, "reg": reg}
+                        dn.update_node(**properties)
 
-                    if offset:
-                        header, reg = self.use_addr_offset(ctrl_node, bus_instance)
-                        metadata = {"header": header, "reg": reg}
-                        dn.update_node(**metadata)
+                    # find phandle of interrupt-controller and clock
+                    phandle_irq = self.get_interrupt_controller_phandle()
+                    phandle_clk = self.get_clock_phandle()
+                    properties = {
+                        "interrupt_parent": phandle_irq,
+                        "clocks": phandle_clk
+                    }
+                    dn.update_node(**properties)
 
                     ctrl_nodes.update({ctrl_instance: ctrl_node})
 
-        self.bus_node["peripherals"] = ctrl_nodes
+        self.node["peripherals"] = ctrl_nodes
 
-        return self.bus_node
+        return self.node
 
-    def get_bus_ranges(self, bus_name=None, bus_instance=0):
+    def get_bus_ranges(self, bus_type=None, bus_instance=0):
         """Get the address-mapping range for a bus"""
 
-        if bus_name is None:
-            bus_name = self.bus_name
+        bus_type = bus_type or self.dev_type
 
-        addr = self.ctrl.get_controller_address(bus_name, bus_instance)
-        size = self.ctrl.get_controller_address_size(bus_name, bus_instance)
+        addr = self.ctrl.get_controller_address(bus_type, bus_instance)
+        size = self.ctrl.get_controller_address_size(bus_type, bus_instance)
 
-        if self.arch == "64":
+        if self.arch == 64:
             addr_range = f"0x0 0x0 {addr} 0x0 {size}"
         else:
             addr_range = f"0x0 {addr} {size}"
@@ -89,12 +92,12 @@ class BusNode(DeviceNode):
 
     def get_dev_instance_addr_offset(self, dev_node, bus_instance=0):
         """Calculate controller address offset from bus address"""
-        bus_addr = self.ctrl.get_controller_address(self.bus_name, bus_instance)
+        bus_addr = self.ctrl.get_controller_address(self.dev_type, bus_instance)
         ctrl_addr = dev_node.get("addr", 0)
 
         return int(ctrl_addr, 16) - int(bus_addr, 16)
 
-    def use_addr_offset(self, dev_node, bus_instance=0):
+    def _use_addr_offset(self, dev_node, bus_instance=0):
         """Generate a node header and reg based on address offset"""
         label = dev_node.get("label", "")
         dev_type = dev_node.get("interface", "")
@@ -107,4 +110,22 @@ class BusNode(DeviceNode):
         return header, reg
 
     def list_bus_instances(self):
-        return self.ctrl.list_instances(self.bus_name)
+        return self.ctrl.list_instances(self.dev_type)
+
+    def get_interrupt_controller_phandle(self):
+        """Get phandle of interrupt controller node"""
+
+        d = find_dict_with_key_value(self.user_configs, "device_type", "interrupt-controller")
+        return self._get_phandle(d)
+
+    def get_clock_phandle(self):
+        """Get phandle of clock node"""
+        d = find_dict_with_key_value(self.user_configs, "device_type", "clock")
+        return self._get_phandle(d)
+
+    def _get_phandle(self, d):
+        if isinstance(d, dict):
+            label = d.get("label", None)
+            return f"&{label}" if label else None
+
+        return None
