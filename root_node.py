@@ -1,6 +1,7 @@
 from config_parser import ConfigParser
 from device_node import DeviceNode
 from soc_configs import SocConfigs
+from util import *
 
 class RootNode(DeviceNode):
     def __init__(self, configs, user_configs=None, arch=32):
@@ -8,6 +9,7 @@ class RootNode(DeviceNode):
         self.parser = ConfigParser(configs)
         self.dev_type = "soc"
         self.soc = SocConfigs(configs, self.dev_type, arch)
+        self.irqs_exts = ""
 
     def create_root_node(self, **metadata):
         """Create root node metadata"""
@@ -57,8 +59,18 @@ class RootNode(DeviceNode):
         }
 
         cpu_node.update(properties)
+        self._update_interrupt_extended(irq_label)
 
         return cpu_node
+
+    def _update_interrupt_extended(self, irq_label):
+        """update interrupt-extended properties"""
+        irq_exts = find_key_value(self.user_configs, "interrupts_extended")
+        for irq in irq_exts:
+            self.irqs_exts += f"&{irq_label} {irq} "
+
+        update_or_insert_key(self.user_configs, "interrupts_extended",
+                             "irq_extended", self.irqs_exts)
 
     def create_memory_node(self, label="memory"):
         """Create memory node"""
