@@ -54,14 +54,27 @@ class DeviceNode:
 
         return self.node
 
-    def generate_node_header(self, addr, label=None, dev_type=None):
-        addr = self.convert_to_hex(abs(self.convert_to_int(addr)))
-        # handle prefix 0x in addr
-        addr = str(addr)[2:]
+    def generate_node_header(self, addr=None, label=None, dev_type=None, reg=True):
+        addr = addr if addr else self.node.get("addr", None)
+        if addr:
+            addr = self.convert_to_hex(abs(self.convert_to_int(addr)))
+            # handle prefix 0x in addr
+            addr = str(addr)[2:]
 
-        header = f"{dev_type}@{addr}"
-        if not label is None:
-            header = f"{label}: {header}"
+        label = label if label else self.node.get("label", None)
+        dev_type = dev_type if dev_type else self.node.get("interface", None)
+
+        if label:
+            header = f"{label}"
+            if dev_type:
+                header += f": {dev_type}"
+                if reg:
+                    header += f"@{addr}"
+
+        elif dev_type:
+            header = f"{dev_type}"
+            if reg:
+                header += f"@{addr}"
 
         return header
 
