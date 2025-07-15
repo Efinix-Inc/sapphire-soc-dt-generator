@@ -51,10 +51,17 @@
 			{%- endif %} 
 			compatible = {{ compatible }};
 			{%- endif -%}
-
+			{%- if pv.device_type %}
+			device_type = "{{ pv.device_type }}";
+			{%- endif %}
+			{%- if pv.interrupt_controller %}
+			interrupt-controller;
+			{%- endif %}
 			{%- if pv.interrupts %}
 			interrupts = <{{ ' '.join(pv.interrupts) }}>;
+			{%- if pv.interrupt_parent %}
 			interrupt-parent = <{{ pv.interrupt_parent }}>;
+			{%- endif %}
 			{%- endif %}
 			{%- if pv.clocks %}
 			clocks = <{{ pv.clocks }}>;
