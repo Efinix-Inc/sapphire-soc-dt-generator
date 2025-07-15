@@ -1,0 +1,59 @@
+{
+    "root": {
+        "model": "efinix,sapphire",
+        "includes": [
+            "#include <config.h>",
+            "/include/ \"sapphire.dtsi\""
+        ]
+    },
+    "drivers": {
+        "cpu": {
+            "compatible": "riscv"
+        },
+        "spi": {
+            "compatible": ["vexriscv,spi"]
+        },
+        "uart": {
+            "compatible": ["riscv_sbi,uart"],
+            "device_type": "serial"
+        },
+        "plic": {
+	    "addr_cells": 0,
+	    "label": "plic",
+	    "device_type": "interrupt-controller",
+	    "compatible": ["sifive,plic-1.0.0"],
+	    "interrupts_extended": [11],
+	    "interrupt_controller": true,
+	    "private_data": [
+	        "reg-names = \"prio\", \"irq_en\", \"reg\";",
+		"#interrupt-cells = <2>;",
+		"riscv,max-priority = <3>;",
+		"riscv,ndev = <32>;"
+	    ],
+	    "status": "okay"
+        },
+	"axi": {
+	    "compatible": ["simple-bus"]
+	},
+	"bmb": {
+	    "compatible": ["simple-bus"]
+	}
+    },
+    "child": {
+        "chosen": {
+	    "parent_label": "/",
+	    "header": "chosen",
+	    "private_data": [
+	        "stdout_path = \"serial0:115200n8\";",
+		"bootargs = \"console=ttyS0,115200n8\";"
+	    ]
+	},
+	"aliases": {
+	    "parent_label": "/",
+	    "header": "aliases",
+	    "private_data": [
+	        "serial0 = &uart0;"
+	    ]
+	}
+    }
+}
