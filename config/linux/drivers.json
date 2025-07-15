@@ -1,0 +1,106 @@
+{
+    "root": {
+	"model": "efinix,sapphire",
+        "includes": [
+	    "/include/ \"sapphire.dtsi\"",
+	    "#include <dt-bindings/gpio/gpio.h>"
+	]
+    },
+    "drivers": {
+	"cpu": {
+	    "compatible": "riscv"
+	},
+        "spi": {
+	    "compatible": ["spinal-lib,spi-1.0"],
+	    "private_data": [
+	        "cmd_fifo_depth = <256>;",
+		"rsp_fifo_depth = <256>;",
+		"num-cs = <1>;"
+	    ]
+	},
+	"uart": {
+	    "compatible": ["spinal-lib,uart-2.0"],
+	    "private_data": [
+	        "current-speed = <115200>;"
+	    ]
+	},
+	"gpio": {
+	    "compatible": ["spinal-lib,gpio-1.0"],
+	    "private_data": [
+		"#gpio-cells = <2>;",
+		"#interrupt-cells = <2>;",
+	    	"ngpio = <4>;",
+		"gpio-controller;"
+	    ]
+	},
+	"i2c": {
+	    "compatible": ["efinix,efx-i2c"],
+	    "clock_frequency": "100000"
+	},
+	"plic": {
+	    "compatible": ["sifive,plic-1.0.0", "sifive,fu540-c000-plic"],
+	    "interrupts_extended": [11, 9],
+	    "label": "plic",
+	    "interrupt_controller": true,
+	    "device_type": "interrupt-controller",
+	    "private_data": [
+	    	"#interrupt-cells = <1>;",
+		"riscv,ndev = <32>;"
+	    ],
+	    "status": "okay"
+	},
+	"axi": {
+	    "compatible": ["simple-bus"]
+	},
+	"bmb": {
+	    "compatible": ["simple-bus"]
+	}
+    },
+    "child": {
+        "chosen": {
+            "parent_label": "/",
+            "header": "chosen",
+            "private_data": [
+                "stdout-path = \"serial0:115200n8,framebuffer\";",
+                "bootargs = \"rootwait console=ttySL0 earlycon root=/dev/mmcblk0p2 init=/sbin/init mmc_core.use_spi_crc=0 console=tty0\";"
+             ]
+        },
+	"aliases": {
+	    "parent_label": "/",
+	    "header": "aliases",
+	    "private_data": [
+	        "serial0 = &uart0;"
+	    ]
+	},
+        "reserved_memory": {
+	    "address_cells": "1",
+	    "size_cells": "1",
+	    "parent_label": "/",
+	    "header": "reserved-memory",
+	    "private_data": [
+                "ranges;"
+	    ],
+	    "child": {
+                "opensbi": {
+	            "header": "opensbi: sbi@1000000",
+		    "label": "opensbi",
+		    "addr": "0x1000000",
+		    "size": "0x80000",
+		    "reg": "0x1000000 0x80000"
+		}
+	    }
+	},
+	"clock": {
+	    "address_cells": "1",
+	    "size_cells": "0",
+	    "parent_label": "/",
+	    "header": "clock0: clock@0",
+	    "device_instance": "clock0",
+	    "device_type": "clock",
+	    "label": "clock0",
+	    "reg": "0",
+	    "compatible": "fixed-clock"
+	}
+    }
+}
+
