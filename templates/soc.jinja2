@@ -76,6 +76,9 @@
 			interrupt-parent = <{{ pv.interrupt_parent }}>;
 			{%- endif %}
 			{%- endif %}
+			{%- if pv.irq_extended %}
+			interrupts-extended = <{{ pv.irq_extended }}>;
+			{%- endif %}
 			{%- if pv.clocks %}
 			clocks = <{{ pv.clocks }}>;
 			clock-frequency = <{{ root.frequency }}>;
