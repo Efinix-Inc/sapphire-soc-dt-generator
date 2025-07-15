@@ -21,6 +21,16 @@
 			{%- endfor %}
 			{%- endif %}
 			status = "{{ v.status }}";
+			{% if v.child %}
+			{%- set irq_ctrl = v.child %}
+			{{ irq_ctrl.header }} {
+				#interrupt-cells = <{{ irq_ctrl.interrupt_cells }}>;
+				{%- if irq_ctrl.interrupt_controller %}
+				interrupt-controller;
+				{%- endif %}
+				compatible = "{{ irq_ctrl.compatible }}";
+			};
+			{%- endif %}
 		};
 		{% endfor %}
 	};
@@ -38,6 +48,9 @@
 		{{ pv.header }} {
 			#address-cells = <{{ pv.address_cells }}>;
 			#size-cells = <{{ pv.size_cells }}>;
+			{%- if pv.interrupt_cells or pv.interrupt_cells == 0 %}
+			#interrupt-cells = <{{ pv.interrupt_cells }}>;
+			{%- endif %}
 			reg = <{{ pv.reg }}>;
 			{%- if pv.compatible %}
 			{%- if pv.compatible | length == 1 %}
