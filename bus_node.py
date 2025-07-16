@@ -47,6 +47,7 @@ class BusNode(DeviceNode):
         ctrls = self.get_bus_devices(bus_instance)
         if ctrls:
             for ctrl_type, ctrl_instances in ctrls.items():
+                ctrl_instances = self._filter_controller_instances(ctrl_instances)
                 for ctrl_instance in ctrl_instances:
                     # Instantiate a new DeviceNode for each ctrl_instance
                     num = self.ctrl.get_instance_number(ctrl_type, ctrl_instance)
@@ -129,3 +130,10 @@ class BusNode(DeviceNode):
             return f"&{label}" if label else None
 
         return None
+
+    def _filter_controller_instances(self, instances):
+        """Remove the controller instances"""
+        blacklist_instances = self.user_configs.get("blacklist_instances", [])
+
+        if blacklist_instances:
+            return [item for item in instances if item not in blacklist_instances]
