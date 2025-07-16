@@ -149,8 +149,10 @@ class ConfigParser:
             parts = k.split('_')
             ext = parts[-1].lower()
             if int(v) == 1:
-                if 'zicsr' in ext or 'zifence' in ext:
+                if 'zicsr' in ext:
                     exts += f"_{ext}"
+                elif 'zifence' in ext:
+                    exts += f"_{ext}i"
                 else:
                     exts += ext[-1]
 
