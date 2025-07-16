@@ -115,7 +115,7 @@ class BusNode(DeviceNode):
     def get_interrupt_controller_phandle(self):
         """Get phandle of interrupt controller node"""
 
-        d = find_dict_with_key_value(self.user_configs, "device_type", "interrupt-controller")
+        d = find_dict_with_key_value(self.user_configs, "_device_type_", "interrupt-controller")
         return self._get_phandle(d)
 
     def get_clock_phandle(self):

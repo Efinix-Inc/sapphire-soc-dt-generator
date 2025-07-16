@@ -51,7 +51,7 @@
 	    "interrupts_extended": [11, 9],
 	    "label": "plic",
 	    "interrupt_controller": true,
-	    "device_type": "interrupt-controller",
+	    "_device_type_": "interrupt-controller",
 	    "interrupt_cells": 1,
 	    "private_data": [
 		"riscv,ndev = <32>;"
