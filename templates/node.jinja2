@@ -22,6 +22,12 @@
 	{{ priv_data }}
 	{%- endfor %}
 	{%- endif %}
+	{%- if device.stdout_path %}
+	stdout-path = "{{ device.stdout_path }}";
+	{%- endif %}
+	{%- if device.bootargs %}
+	bootargs = "{{ device.bootargs }}";
+	{%- endif %}
 	{%- if device.status %}
 	status = "{{ device.status }}";
 	{%- endif %}
