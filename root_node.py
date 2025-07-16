@@ -66,11 +66,12 @@ class RootNode(DeviceNode):
     def _update_interrupt_extended(self, irq_label):
         """update interrupt-extended properties"""
         irq_exts = find_key_value(self.user_configs, "interrupts_extended")
-        for irq in irq_exts:
-            self.irqs_exts += f"&{irq_label} {irq} "
+        if irq_exts:
+            for irq in irq_exts:
+                self.irqs_exts += f"&{irq_label} {irq} "
 
-        update_or_insert_key(self.user_configs, "interrupts_extended",
-                             "irq_extended", self.irqs_exts)
+            update_or_insert_key(self.user_configs, "interrupts_extended",
+                                 "irq_extended", self.irqs_exts)
 
     def create_memory_node(self, label="memory"):
         """Create memory node"""
