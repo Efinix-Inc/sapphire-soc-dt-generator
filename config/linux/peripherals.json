@@ -11,5 +11,8 @@
 	"bus_types": [
 		"bmb",
 		"axi"
+	],
+	"blacklist_instances": [
+		"axi_slave0"
 	]
 }
