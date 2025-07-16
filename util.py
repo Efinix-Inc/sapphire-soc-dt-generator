@@ -48,3 +48,32 @@ def update_or_insert_key(d, target_key, new_key, new_value):
                             return True
     return False  # Target key not found
 
+def merge_dicts(d1, d2):
+    """Merge two dictionaries.
+    If a key exists in both and the values are dicts, merge them resursively.
+    If a key exists in both and the values are not dicts, replace the value from the second dictionary.
+    If a key ends with "_append" in one dictionary, append the values (assuming they are lists or strings).
+    """
+    result = dict(d1)  # Start with a copy of d1
+
+    for key, value in d2.items():
+        if key.endswith("_append"):
+            base_key = key[:-7]
+            if base_key in result:
+                if isinstance(result[base_key], list) and isinstance(value, list):
+                    result[base_key] += value
+                elif isinstance(result[base_key], str) and isinstance(value, str):
+                    result[base_key] += value
+                else:
+                    result[base_key] = value  # fallback: replace
+            else:
+                result[base_key] = value
+        elif key in result:
+            if isinstance(result[key], dict) and isinstance(value, dict):
+                result[key] = merge_dicts(result[key], value)
+            else:
+                result[key] = value  # replace non-dict values
+        else:
+            result[key] = value  # new key
+
+    return result
