@@ -48,6 +48,8 @@ class BusNode(DeviceNode):
         if ctrls:
             for ctrl_type, ctrl_instances in ctrls.items():
                 ctrl_instances = self._filter_controller_instances(ctrl_instances)
+                if ctrl_instances is None:
+                    continue
                 for ctrl_instance in ctrl_instances:
                     # Instantiate a new DeviceNode for each ctrl_instance
                     num = self.ctrl.get_instance_number(ctrl_type, ctrl_instance)
