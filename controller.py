@@ -19,12 +19,12 @@ class Controller:
         return self._get_instance_data(dev_type, instance)
 
     def get_controller_address(self, dev_type=None, instance=0):
-        """Return the address of the controller or -1 if not found"""
-        return self._get_instance_data(dev_type, instance).get("addr", -1)
+        """Return the address of the controller or 0 if not found"""
+        return self._get_instance_data(dev_type, instance).get("addr", 0)
 
     def get_controller_address_size(self, dev_type=None, instance=0):
-        """Return the address size of the controller or -1 if not found"""
-        return self._get_instance_data(dev_type, instance).get("size", -1)
+        """Return the address size of the controller or 0 if not found"""
+        return self._get_instance_data(dev_type, instance).get("size", 0)
 
     def get_controller_interrupts_line(self, dev_type=None, instance=0):
         """Return the interrupts line of the controller or 0 if not found"""
