@@ -6,7 +6,7 @@
 	{%- if device.size_cells or device.size_cells == 0 %}
 	#size-cells = <{{ device.size_cells }}>;
 	{%- endif %}
-	{%- if device.reg %}
+	{%- if device.reg or device.reg == 0 %}
 	reg = <{{ device.reg }}>;
 	{%- endif %}
 	{%- if device.compatible %}
