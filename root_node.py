@@ -34,11 +34,11 @@ class RootNode(DeviceNode):
                          user_configs=self.user_configs, arch=self.arch)
         cpu_node = cpu.create_node(dev_type=dev_type, label=label, instance=instance,
                                    size_cells=0, parent_label="/", status=1)
-        header = cpu.generate_node_header(instance, dev_type=dev_type)
+        header = cpu.generate_node_header(addr=instance, dev_type=dev_type)
         reg = cpu.set_node_reg(instance, 0)
         child_node = cpu_node.get("child", {})
 
-        irq_label = f"L{instance}"
+        irq_label = f"intc{instance}"
         irq_ctrl = {
             "label": irq_label,
             "header": cpu.generate_node_header(dev_type="interrupt-controller",
