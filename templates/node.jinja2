@@ -9,8 +9,8 @@
 	{%- if device.reg %}
 	reg = <{{ device.reg }}>;
 	{%- endif %}
-	{%- if device.compatible_str %}
-	compatible = {{ device.compatible_str }};
+	{%- if device.compatible %}
+	compatible = "{{ device.compatible }}";
 	{%- endif %}
 	{%- if node and node.frequency %}
 	{%- if device.device_type == "clock" %}
