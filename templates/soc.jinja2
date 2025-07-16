@@ -11,7 +11,9 @@
 		{% for k, v in root.cpus.items() %}
 		{{ v.header }} {
 			reg = <{{ v.reg }}>;
-			compatible = "{{ v.compatible }}";
+			{%- if v.compatible_str %}
+			compatible = {{ v.compatible_str }};
+			{%- endif %}
 			device_type = "{{ v.device_type }}";
 			riscv,isa = "{{ v.isa }}";
 			mmu_type = "{{ v.mmu_type }}";
@@ -40,7 +42,9 @@
 	{{ bus_val.header }} {
 		#address-cells = <{{ bus_val.address_cells }}>;
 		#size-cells = <{{ bus_val.size_cells }}>;
-		compatible = "{{ ' '.join(bus_val.compatible) }}";
+		{%- if bus_val.compatible_str %}
+		compatible = {{ bus_val.compatible_str }};
+		{%- endif %}
 		ranges = <{{ bus_val.ranges }}>;
 
 		{%- set peripherals = bus_val.peripherals %}
@@ -52,17 +56,8 @@
 			#interrupt-cells = <{{ pv.interrupt_cells }}>;
 			{%- endif %}
 			reg = <{{ pv.reg }}>;
-			{%- if pv.compatible %}
-			{%- if pv.compatible | length == 1 %}
-			{%- set compatible = '"' ~ pv.compatible[0] ~ '"' %}
-			{%- else %}
-			{%- set quoted_items = [] %}
-			{%- for item in pv.compatible %}
-			{%- set _ = quoted_items.append('"' ~ item ~ '"') %}
-			{%- endfor %}
-			{%- set compatible = quoted_items | join(', ') %}
-			{%- endif %} 
-			compatible = {{ compatible }};
+			{%- if pv.compatible_str %}
+			compatible = {{ pv.compatible_str }};
 			{%- endif -%}
 			{%- if pv.device_type %}
 			device_type = "{{ pv.device_type }}";

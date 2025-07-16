@@ -27,6 +27,7 @@ class DeviceNode:
         addr = self.ctrl.get_controller_address(dev_type, instance)
         size = self.ctrl.get_controller_address_size(dev_type, instance)
 
+        compatible = self.ctrl.get_controller_driver_name(dev_type, instance)
         self.node = {
                 "device_instance": self.ctrl.get_instance_name(instance),
                 "interface": dev_type,
@@ -174,6 +175,7 @@ class DeviceNode:
 
         for k, v in drivers.items():
             if self.dev_type == k:
+                v = self._regenerate(v)
                 self.update_node(**v)
                 break
 
@@ -193,6 +195,11 @@ class DeviceNode:
         nsize = new_values.get("size")
         nlabel = new_values.get("label")
         dev_type = new_values.get("interface", self.dev_type)
+        compatible = new_values.get("compatible")
+        if isinstance(compatible, list):
+            new_values["compatible_str"] = self.get_compatible_string(compatible)
+        else:
+            new_values["compatible_str"] = f"\"{compatible}\""
 
         size = nsize if nsize else self.ctrl.get_controller_address_size(dev_type=dev_type)
         label = nlabel if nlabel else self.node.get("label", None)
@@ -206,3 +213,7 @@ class DeviceNode:
             new_values.setdefault("header", self.generate_node_header(addr, label, dev_type))
 
         return new_values
+
+    def get_compatible_string(self, compatibles_list):
+        if isinstance(compatibles_list, list):
+            return ', '.join(f'"{compatible}"' for compatible in compatibles_list)
