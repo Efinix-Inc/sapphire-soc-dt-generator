@@ -117,3 +117,22 @@ def merge_dicts(d1, d2):
             result[key] = value  # new key
 
     return result
+
+def convert_to_int(s):
+    """Convert string to integer"""
+    if isinstance(s, str) and s.startswith("0x"):
+        return int(s, 16)
+    else:
+        return int(s)
+
+def convert_to_hex(s):
+    """Convert string to hex"""
+    if isinstance(s, str):
+        if s.startswith("0x"):
+            value = int(s, 16)
+        else:
+            value = int(s)
+    else:
+        value = s # assume it's already an int
+
+    return hex(value)
