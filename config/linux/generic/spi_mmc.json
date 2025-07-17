@@ -1,0 +1,12 @@
+{
+    "child": {
+        "spi_mmc": {
+	    "label": "mmc-slot",
+	    "compatible": "mmc-spi-slot",
+	    "private_data": [
+	        "voltage-ranges = <3300 3300>;",
+		"spi-max-frequency = <10000000>;"
+	    ]
+	}
+    }
+}

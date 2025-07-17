@@ -1,0 +1,63 @@
+{
+	"child": {
+		"spi_nor": {
+                        "parent_label": "spi0",
+                        "label": "flash",
+                        "compatible": "jedec,spi-nor",
+                        "private_data": [
+                                "spi-max-frequency = <10000000>;"
+                        ],
+			"status": "okay",
+                        "child": {
+                                "partition0": {
+					"address_cells": 1,
+					"size_cells": 0,
+					"header": "partition@0",
+                                        "name": "partition",
+                                        "addr": 0,
+                                        "reg": "0x000000 0x600000",
+                                        "private_data": [
+                                                "label = \"fpga_bitstream\";"
+                                        ],
+					"status": "okay"
+                                },
+                                "partition1": {
+					"address_cells": 1,
+					"size_cells": 0,
+					"header": "partition@1",
+                                        "name": "partition",
+                                        "addr": 1,
+                                        "reg": "0x600000 0x080000",
+                                        "private_data": [
+                                                "label = \"opensbi\";"
+                                        ],
+					"status": "okay"
+                                },
+                                "partition2": {
+					"address_cells": 1,
+					"size_cells": 0,
+					"header": "partition@2",
+                                        "name": "partition",
+                                        "addr": 2,
+                                        "reg": "0x680000 0x100000",
+                                        "private_data": [
+                                                "label = \"u-boot\";"
+                                        ],
+					"status": "okay"
+                                },
+                                "partition3": {
+					"address_cells": 1,
+					"size_cells": 0,
+					"header": "partition@3",
+                                        "name": "partition",
+                                        "addr": 3,
+                                        "reg": "0x780000 0x300000",
+                                        "private_data": [
+                                                "label = \"user\";"
+                                        ],
+					"status": "okay"
+                                }
+                        }
+                }
+	}
+}

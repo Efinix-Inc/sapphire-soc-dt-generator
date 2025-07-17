@@ -1,0 +1,9 @@
+{
+    "overrides": {
+        "usb0": {
+	    "interface": "apb_slave",
+	    "label": "usb0",
+	    "compatible": "generic-ohci"
+	}
+    }
+}

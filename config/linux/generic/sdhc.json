@@ -1,0 +1,15 @@
+{
+    "overrides": {
+        "sdhc": {
+	    "interface": "mmc",
+	    "label": "mmc0",
+	    "compatible": ["efx,sdhci"],
+            "private_data": [
+                "bus-width = <4>;",
+                "no-sdio;",
+                "no-mmc;",
+                "max-frequency = <100000000>;"
+            ]
+	}
+    }
+}

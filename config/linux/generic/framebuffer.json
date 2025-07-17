@@ -1,0 +1,54 @@
+{
+    "overrides": {
+        "dma1": {
+	    "address_size": 1,
+	    "size_cells": 0,
+	    "interface": "apb_slave",
+	    "label": "dma1",
+	    "compatible": ["efx,dma-controller"],
+	    "private_data": [
+	        "#dma-cells = <1>;",
+		"dma-channels = <2>;"
+	    ]
+	}
+    },
+    "child": {
+	"chosen": {
+	    "bootargs_append": " console=tty0",
+	    "stdout_path_append": ",framebuffer"
+	},
+	"framebuffer": {
+	    "parent_label": "root",
+	    "header": "framebuffer",
+	    "addr": 8000000,
+	    "size": 800000,
+	    "reg": "0x8000000 0x800000",
+	    "compatible": "efx,efx-fb",
+	    "private_data": [
+	        "dmas = <&dma1 1>;",
+		"dma-names = \"display\";",
+		"width = <1920>;",
+		"height = <1080>;",
+		"stride = <7680>;",
+		"format = \"a8b8g8r8\";"
+	    ],
+	    "status": "okay"
+	},
+        "dma1_channel0": {
+	    "interface": "dma-channel",
+	    "addr": 0,
+	    "private_data": [
+		"dma-names = \"camera\";",
+		"chan-priority = <0>;"
+	    ]
+	},
+	"dma1_channel1": {
+	    "interface": "dma-channel",
+	    "addr": 1,
+	    "private_data": [
+	        "dma-names = \"display\";",
+		"chan-priority = <2>;"
+	    ]
+	}
+    }
+}
