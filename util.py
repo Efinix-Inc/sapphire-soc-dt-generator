@@ -1,7 +1,42 @@
+import os
 import json
 
 def print_node(node):
     print(json.dumps(node, indent=2, sort_keys=False))
+
+def read_file(filename):
+    raw_configs = {}
+    if not os.path.exists(filename):
+        print(f"Error: No such file '{filename}'")
+        sys.exit(1)
+
+    with open(filename, "r") as f:
+        raw_configs = f.read()
+
+    return raw_configs
+
+def read_json_file(filename):
+    if not os.path.exists(filename):
+        print(f"Error: No such file '{filename}'")
+        sys.exit(1)
+
+    with open(filename, "r") as f:
+        return json.load(f)
+
+def save(filename, content, json_format=True):
+    with open(filename, "w") as f:
+        if json_format:
+            json.dump(content, f, indent=4, sort_keys=False)
+        else:
+            f.write(content)
+
+def merge_json_files(file_paths):
+    merge_data = {}
+    for file_path in file_paths:
+        content = read_json_file(file_path)
+        merge_data = merge_dicts(merge_data, content)
+
+    return merge_data
 
 def find_dict_with_key_value(nested_dict, target_key, target_value):
     """Get the dictionary when supply key and value match within nested dictionary"""
