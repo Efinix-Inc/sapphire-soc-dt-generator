@@ -12,6 +12,11 @@ class SocConfigs(Controller):
     def _get_cpus_configs(self):
         return self.configs.get("cpus", {})
 
+    def get_cpu_caches(self):
+        """Return the cpu caches metadata"""
+        cpu_configs = self._get_cpus_configs()
+        return cpu_configs.get("caches", {})
+
     def get_cpu_isa(self):
         """Return the cpu RISCV ISA"""
         cpu_configs = self._get_cpus_configs()
