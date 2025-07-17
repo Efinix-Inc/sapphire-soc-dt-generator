@@ -67,13 +67,13 @@
     },
     "child": {
         "chosen": {
-            "parent_label": "/",
+            "parent_label": "root",
             "header": "chosen",
 	    "stdout_path": "serial0:115200n8",
 	    "bootargs": "rootwait console=ttySL0 earlycon root=/dev/mmcblk0p2 init=/sbin/init mmc_core.use_spi_crc=0"
         },
 	"aliases": {
-	    "parent_label": "/",
+	    "parent_label": "root",
 	    "header": "aliases",
 	    "private_data": [
 	        "serial0 = &uart0;"
@@ -82,7 +82,7 @@
         "reserved_memory": {
 	    "address_cells": "1",
 	    "size_cells": "1",
-	    "parent_label": "/",
+	    "parent_label": "root",
 	    "header": "reserved-memory",
 	    "private_data": [
                 "ranges;"
@@ -98,14 +98,10 @@
 	    }
 	},
 	"clock": {
-	    "address_cells": "1",
-	    "size_cells": "1",
-	    "parent_label": "/",
-	    "header": "clock0: clock@0",
+	    "parent_label": "root",
 	    "device_instance": "clock0",
 	    "device_type": "clock",
-	    "label": "clock0",
-	    "reg": "0x0 0x0",
+	    "label": "clock",
 	    "compatible": "fixed-clock",
 	    "private_data": [
 	        "#clock-cells = <0>;"
