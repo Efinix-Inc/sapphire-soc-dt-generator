@@ -134,8 +134,7 @@ class BusNode(DeviceNode):
         return None
 
     def _filter_controller_instances(self, instances):
-        """Remove the controller instances"""
-        blacklist_instances = self.user_configs.get("blacklist_instances", [])
+        """Remove the controller instances based on blacklist."""
+        blacklist = set(self.user_configs.get("blacklist_instances", []))
+        return [item for item in instances if item not in blacklist]
 
-        if blacklist_instances:
-            return [item for item in instances if item not in blacklist_instances]
