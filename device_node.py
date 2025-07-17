@@ -14,23 +14,24 @@ class DeviceNode:
         self.addr_cells = self._set_cells(-1)
         self.size_cells = self._set_cells(-1)
 
-    def create_node(self, dev_type=None, instance=0, addr_cells=-1, size_cells=-1,
+    def create_node(self, dev_type=None, instance=None, addr_cells=-1, size_cells=-1,
                     parent_label=None, status=0, label=None):
         """Create a device tree node of a device"""
         self.status = status
         self.addr_cells = self._set_cells(addr_cells)
         self.size_cells = self._set_cells(size_cells)
+        self.instance = instance or self.instance
 
         dev_type = dev_type or self.dev_type
         label = label or self.ctrl.get_instance_name(self.instance)
 
         # get the address mapping and size of the device
-        addr = self.ctrl.get_controller_address(dev_type, instance)
-        size = self.ctrl.get_controller_address_size(dev_type, instance)
+        addr = self.ctrl.get_controller_address(dev_type, self.instance)
+        size = self.ctrl.get_controller_address_size(dev_type, self.instance)
 
-        compatible = self.ctrl.get_controller_driver_name(dev_type, instance)
+        compatible = self.ctrl.get_controller_driver_name(dev_type, self.instance)
         self.node = {
-                "device_instance": self.ctrl.get_instance_name(instance),
+                "device_instance": self.ctrl.get_instance_name(self.instance),
                 "interface": dev_type,
                 "device_type": None,
                 "label": label,
@@ -42,8 +43,8 @@ class DeviceNode:
                 "size": size,
                 "reg": self.set_node_reg(addr, size),
                 "header": self.generate_node_header(addr, label, dev_type),
-                "compatible": self.ctrl.get_controller_driver_name(dev_type, instance),
-                "interrupts": self.ctrl.get_controller_interrupts_line(dev_type, instance),
+                "compatible": self.ctrl.get_controller_driver_name(dev_type, self.instance),
+                "interrupts": self.ctrl.get_controller_interrupts_line(dev_type, self.instance),
                 "interrupt_parent": None,
                 "clocks": None,
                 "clock_frequency": self.ctrl.get_frequency(),
