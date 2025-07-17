@@ -47,7 +47,8 @@ class DeviceNode:
                 "clocks": None,
                 "clock_frequency": self.ctrl.get_frequency(),
                 "private_data": [],
-                "status": self._lookup_status()
+                "status": self._lookup_status(),
+                "child": {}
         }
 
         if self.user_configs:
@@ -65,6 +66,10 @@ class DeviceNode:
         label = label if label else self.node.get("label", None)
         dev_type = dev_type if dev_type else self.node.get("interface", None)
 
+        return self._generate_node_header(label, dev_type, addr, reg)
+
+    def _generate_node_header(self, label, dev_type, addr, reg=True):
+        header = ""
         if label:
             header = f"{label}"
             if dev_type:
@@ -172,6 +177,7 @@ class DeviceNode:
 
         drivers = self.user_configs.get("drivers", {})
         overrides = self.user_configs.get("overrides", {})
+        children = self.user_configs.get("child", {})
 
         for k, v in drivers.items():
             if self.dev_type == k:
@@ -185,6 +191,13 @@ class DeviceNode:
                 v = self._regenerate(v)
                 self.update_node(**v)
                 break
+
+        for k, v in children.items():
+            parent_label = v.get("parent_label")
+            device_instance = self.ctrl.get_instance_name(self.instance)
+            if parent_label == device_instance:
+                child_node = self._create_child_node(v)
+                self.node['child'].update({k: child_node})
 
     def _regenerate(self, new_values):
         """Regenerate 'reg' and 'header' property"""
@@ -217,3 +230,30 @@ class DeviceNode:
     def get_compatible_string(self, compatibles_list):
         if isinstance(compatibles_list, list):
             return ', '.join(f'"{compatible}"' for compatible in compatibles_list)
+
+    def _create_child_node(self, child_config):
+        """Create a template of child node"""
+
+        label = child_config.get("label")
+        dev_type = child_config.get("interface")
+        addr = child_config.get("addr", 0)
+        size = child_config.get("size", 0)
+        reg = child_config.get("reg") or self.set_node_reg(addr, 0)
+
+        header = child_config.get("header") or self._generate_node_header(label, dev_type, addr, reg=True)
+        node = {
+            "header": header,
+            "label": label,
+            "parent_label": child_config.get("parent_label"),
+            "address_cells": child_config.get("address_cells", 1),
+            "size_cells": child_config.get("size_cells", 0),
+            "addr": addr,
+            "size": size,
+            "reg": reg,
+            "compatible": child_config.get("compatible"),
+            "private_data": child_config.get("private_data", []),
+            "status": child_config.get("status", "okay"),
+            "child": child_config.get("child", {})
+        }
+
+        return node
