@@ -248,4 +248,9 @@ class DeviceNode:
             "child": child_config.get("child", {})
         }
 
+        # append additionals key value pairs to the node
+        for k, v in child_config.items():
+            if k not in node:
+                node[k] = v
+
         return node
