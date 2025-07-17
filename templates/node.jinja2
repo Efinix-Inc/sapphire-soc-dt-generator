@@ -1,14 +1,20 @@
 {% macro render_device(device, node=none) %}
 {{ device.header }} {
+	{%- if not device.header in ["chosen", "aliases"] %}
 	{%- if device.address_cells %}
 	#address-cells = <{{ device.address_cells }}>;
 	{%- endif %}
 	{%- if device.size_cells or device.size_cells == 0 %}
 	#size-cells = <{{ device.size_cells }}>;
 	{%- endif %}
+	{%- if device.status %}
+        status = "{{ device.status }}";
+        {%- endif %}
 	{%- if device.reg or device.reg == 0 %}
 	reg = <{{ device.reg }}>;
 	{%- endif %}
+	{%- endif %}
+
 	{%- if device.compatible %}
 	compatible = "{{ device.compatible }}";
 	{%- endif %}
@@ -27,9 +33,6 @@
 	{%- endif %}
 	{%- if device.bootargs %}
 	bootargs = "{{ device.bootargs }}";
-	{%- endif %}
-	{%- if device.status %}
-	status = "{{ device.status }}";
 	{%- endif %}
 
 	{%- if device.child %}
