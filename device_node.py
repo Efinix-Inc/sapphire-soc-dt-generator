@@ -1,4 +1,5 @@
 from soc_configs import SocConfigs
+from util import *
 
 class DeviceNode:
     def __init__(self, configs, dev_type, instance=0, user_configs=None, arch=32):
@@ -59,7 +60,7 @@ class DeviceNode:
     def generate_node_header(self, addr=None, label=None, dev_type=None, reg=True):
         addr = addr if addr else self.node.get("addr", 0)
         if addr:
-            addr = self.convert_to_hex(abs(self.convert_to_int(addr)))
+            addr = convert_to_hex(abs(convert_to_int(addr)))
             # handle prefix 0x in addr
             addr = str(addr)[2:]
 
@@ -86,7 +87,7 @@ class DeviceNode:
 
     def set_node_reg(self, address, size, addr_cells=-1, size_cells=-1):
         def format_cells(value, cells):
-            value = self.convert_to_hex(abs(self.convert_to_int(value)))
+            value = convert_to_hex(abs(convert_to_int(value)))
             if cells == 2:
                 return f"0x0 {value}"
             elif cells == 1:
@@ -157,23 +158,6 @@ class DeviceNode:
     def set_status(self, status):
         dev_status = self._lookup_status(status)
         self.node.update({"status": dev_status})
-
-    def convert_to_int(self, s):
-        if isinstance(s, str) and s.startswith("0x"):
-            return int(s, 16)
-        else:
-            return int(s)
-
-    def convert_to_hex(self, s):
-        if isinstance(s, str):
-            if s.startswith("0x"):
-                value = int(s, 16)
-            else:
-                value = int(s)
-        else:
-            value = s # assume it's already an int
-
-        return hex(value)
 
     def apply_user_configs(self):
         """Modify the value of device node with user configs"""
