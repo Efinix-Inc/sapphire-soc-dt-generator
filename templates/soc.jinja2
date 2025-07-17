@@ -52,8 +52,7 @@
 		compatible = {{ bus_val.compatible_str }};
 		{%- endif %}
 		ranges = <{{ bus_val.ranges }}>;
-
-		{%- set peripherals = bus_val.peripherals %}
+		{% set peripherals = bus_val.peripherals %}
 		{%- for pk, pv in peripherals.items() %}
 		{{ pv.header }} {
 			#address-cells = <{{ pv.address_cells }}>;
