@@ -5,7 +5,7 @@ from util import *
 
 class RootNode(DeviceNode):
     def __init__(self, configs, user_configs=None, arch=32):
-        super().__init__(configs, "root", user_configs=user_configs, arch=arch)
+        super().__init__(configs, "root", instance="", user_configs=user_configs, arch=arch)
         self.parser = ConfigParser(configs)
         self.dev_type = "soc"
         self.soc = SocConfigs(configs, self.dev_type, arch)
