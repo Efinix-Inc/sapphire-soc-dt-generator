@@ -56,7 +56,7 @@ class BusNode(DeviceNode):
                     dn = DeviceNode(self.configs, ctrl_type, instance=num,
                                     user_configs=self.user_configs, arch=self.arch)
                     parent_label = self.ctrl.get_instance_name(num)
-                    ctrl_node = dn.create_node(instance=num, parent_label=parent_label)
+                    ctrl_node = dn.create_node(instance=num, parent_label=parent_label, size_cells=0)
 
                     if addr_offset:
                         header, reg = self._use_addr_offset(ctrl_node, bus_instance)
