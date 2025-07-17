@@ -84,7 +84,7 @@ class DeviceNode:
 
         return header
 
-    def set_node_reg(self, address, size):
+    def set_node_reg(self, address, size, addr_cells=-1, size_cells=-1):
         def format_cells(value, cells):
             value = self.convert_to_hex(abs(self.convert_to_int(value)))
             if cells == 2:
@@ -94,10 +94,15 @@ class DeviceNode:
             else:
                 return "0x0"
 
-        reg_addr = format_cells(address, self.addr_cells)
-        reg_size = format_cells(size, self.size_cells)
+        if addr_cells == -1:
+            addr_cells = self.addr_cells
+        if size_cells == -1:
+            size_cells = self.size_cells
 
-        if self.size_cells == 0:
+        reg_addr = format_cells(address, addr_cells)
+        reg_size = format_cells(size, size_cells)
+
+        if size_cells == 0:
             return f"{reg_addr}"
         else:
             return f"{reg_addr} {reg_size}"
@@ -238,15 +243,17 @@ class DeviceNode:
         dev_type = child_config.get("interface")
         addr = child_config.get("addr", 0)
         size = child_config.get("size", 0)
-        reg = child_config.get("reg") or self.set_node_reg(addr, 0)
+        addr_cells = child_config.get("address_cells", 1)
+        size_cells = child_config.get("size_cells", 0)
+        reg = child_config.get("reg") or self.set_node_reg(addr, 0, addr_cells, size_cells)
 
         header = child_config.get("header") or self._generate_node_header(label, dev_type, addr, reg=True)
         node = {
             "header": header,
             "label": label,
             "parent_label": child_config.get("parent_label"),
-            "address_cells": child_config.get("address_cells", 1),
-            "size_cells": child_config.get("size_cells", 0),
+            "address_cells": addr_cells,
+            "size_cells": size_cells,
             "addr": addr,
             "size": size,
             "reg": reg,
