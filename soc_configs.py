@@ -9,9 +9,13 @@ class SocConfigs(Controller):
         """Return the peripherals frequency"""
         return self.configs.get("frequency", 0)
 
+    def _get_cpus_configs(self):
+        return self.configs.get("cpus", {})
+
     def get_cpu_isa(self):
         """Return the cpu RISCV ISA"""
-        isa = self.configs.get("cpus", {}).get("isa", "")
+        cpu_configs = self._get_cpus_configs()
+        isa = cpu_configs.get("isa", "")
         if self.arch == "64":
             return f"rv64{isa}"
         elif self.arch == "32":
@@ -19,10 +23,10 @@ class SocConfigs(Controller):
         else:
             return ""
 
-
     def get_cpu_count(self):
         """Return number of cpu cores"""
-        return self.configs.get("cpus", {}).get("cores", 0)
+        cpu_configs = self._get_cpus_configs()
+        return cpu_configs.get("cores", 0)
 
     def get_cpu_mmu_type(self):
         """Return the RISCV mmu type"""
