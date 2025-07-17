@@ -1,3 +1,8 @@
+import json
+
+def print_node(node):
+    print(json.dumps(node, indent=2, sort_keys=False))
+
 def find_dict_with_key_value(nested_dict, target_key, target_value):
     """Get the dictionary when supply key and value match within nested dictionary"""
     for key, value in nested_dict.items():
