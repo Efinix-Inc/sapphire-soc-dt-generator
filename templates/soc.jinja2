@@ -78,12 +78,7 @@
 			clocks = <{{ pv.clocks }}>;
 			clock-frequency = <{{ root.frequency }}>;
 			{%- endif %}
-                        {%- if pv.status == "okay" %}
-                        {%- for priv_data in pv.private_data %}
-                        {{ priv_data }}
-                        {%- endfor %}
-                        {%- endif %}
-			status = "{{ pv.status }}";
+			status = "disabled";
 		};
 		{% endfor %}
 	};

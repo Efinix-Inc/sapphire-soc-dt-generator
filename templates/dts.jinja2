@@ -30,7 +30,7 @@
 {%- if bus_val.peripherals %}
 {%- set peripherals = bus_val.peripherals %}
 {%- for pk, pv in peripherals.items() %}
-{%- if pv.status != "okay" and pv.compatible %}
+{%- if pv.compatible %}
 &{{ pv.label }} {
 	{%- if pv.address_cells %}
 	#address-cells = <{{ pv.address_cells }}>;
@@ -43,7 +43,7 @@
 	{{ priv_data }}
 	{%- endfor %}
 	{%- endif %}
-	status = "okay";
+	status = "{{ pv.status }}";
 
 	{%- if pv.child %}
 	{%- for ck, cv in pv.child.items() %}
