@@ -17,6 +17,12 @@
 			device_type = "{{ v.device_type }}";
 			riscv,isa = "{{ v.isa }}";
 			mmu_type = "{{ v.mmu_type }}";
+			i-cache-size = <{{ v.icache_size }}>;
+			i-cache-sets = <{{ v.icache_ways }}>;
+			i-cache-block-size = <{{ v.bytes_per_line }}>;
+			d-cache-size = <{{ v.dcache_size }}>;
+			d-cache-sets = <{{ v.dcache_ways }}>;
+			d-cache-block-size = <{{ v.bytes_per_line }}>;
 			{%- if v.private_data %}
 			{%- for priv_data in v.private_data %}
 			{{ priv_data }}

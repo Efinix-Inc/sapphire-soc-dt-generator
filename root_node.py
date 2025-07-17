@@ -44,6 +44,7 @@ class RootNode(DeviceNode):
             "header": cpu.generate_node_header(dev_type="interrupt-controller",
                                                label=irq_label, reg=False)
         }
+        caches = self.soc.get_cpu_caches()
         # create a copy of child node, else it keep reference to the same child node
         child_node = child_node.copy()
         child_node.update(irq_ctrl)
@@ -55,6 +56,7 @@ class RootNode(DeviceNode):
             "header": header,
             "reg": reg,
             "machine_type": self.arch,
+            **caches,
             "child": child_node
         }
 
