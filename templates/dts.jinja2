@@ -19,11 +19,9 @@
 		reg = <{{ mem.reg }}>;
 	};
 
-	{%- if child %}
-	{%- for ck, cv in child.items() %}
-	{%- if cv.parent_label == "/" %}
+	{%- if root.child %}
+	{%- for ck, cv in root.child.items() %}
 	{{ macros.render_device(cv, node=root) | indent(8, False) }}
-	{%- endif %}
 	{%- endfor %}
 	{% endif %}
 };
@@ -49,9 +47,7 @@
 
 	{%- if pv.child %}
 	{%- for ck, cv in pv.child.items() %}
-	{%- if cv.parent_label == pk %}
 	{{ macros.render_device(cv) | indent(8, False) }}
-	{%- endif %}
 	{%- endfor %}
 	{%- endif %}
 };
