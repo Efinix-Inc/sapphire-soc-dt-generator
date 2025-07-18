@@ -228,7 +228,7 @@ class DeviceNode:
         dev_type = child_config.get("interface")
         addr = child_config.get("addr", 0)
         size = child_config.get("size", 0)
-        addr_cells = child_config.get("address_cells", 1)
+        addr_cells = child_config.get("address_cells", self._set_cells(-1))
         size_cells = child_config.get("size_cells", 0)
         reg = child_config.get("reg") or self.set_node_reg(addr, 0, addr_cells, size_cells)
 
