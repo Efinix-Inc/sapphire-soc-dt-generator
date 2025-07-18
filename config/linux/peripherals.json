@@ -7,12 +7,5 @@
 		"gpio",
 		"apb_slave",
 		"axi_slave"
-	],
-	"bus_types": [
-		"bmb",
-		"axi"
-	],
-	"blacklist_instances": [
-		"axi_slave0"
 	]
 }
