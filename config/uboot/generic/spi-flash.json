@@ -1,0 +1,12 @@
+{
+	"child": {
+		"spi_flash": {
+			"parent_label": "spi0",
+			"label": "flash",
+			"compatible": "jedec,spi-nor",
+			"private_data": [
+				"spi-max-frequency = <6000000>;"
+			]
+		}
+	}
+}

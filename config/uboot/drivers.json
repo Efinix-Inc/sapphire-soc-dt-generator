@@ -8,7 +8,16 @@
     },
     "drivers": {
         "cpu": {
-            "compatible": "riscv"
+            "compatible": "riscv",
+	    "private_data": [
+	        "tlb-split;"
+	    ],
+	    "child": {
+	        "device_type": "interrupt_controller",
+		"interrupt_controller": true,
+		"interrupt_cells": 1,
+		"compatible": "riscv,cpu-intc"
+	    }
         },
         "spi": {
             "compatible": ["vexriscv,spi"]
