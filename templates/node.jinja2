@@ -1,7 +1,7 @@
 {% macro render_device(device, node=none) %}
 {{ device.header }} {
 	{%- if not device.header in ["chosen", "aliases"] %}
-	{%- if device.address_cells %}
+	{%- if device.address_cells or device.address_cells == 0 %}
 	#address-cells = <{{ device.address_cells }}>;
 	{%- endif %}
 	{%- if device.size_cells or device.size_cells == 0 %}
