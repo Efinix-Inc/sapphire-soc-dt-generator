@@ -1,0 +1,16 @@
+{
+    "overrides": {
+        "dma1": {
+	    "device_instance": "apb_slave0",
+	    "interrupts": ["0", "16"]
+	}
+    },
+    "child": {
+        "dma1_channel0": {
+	    "parent_label": "apb_slave0"
+	},
+	"dma1_channel1": {
+	    "parent_label": "apb_slave0"
+	}
+    }
+}

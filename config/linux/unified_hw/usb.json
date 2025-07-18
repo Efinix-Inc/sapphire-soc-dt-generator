@@ -1,0 +1,8 @@
+{
+    "overrides": {
+        "usb0": {
+	    "device_instance": "apb_slave3",
+	    "interrupts": ["20"]
+	}
+    }
+}

@@ -1,0 +1,7 @@
+{
+    "child": {
+        "spi_mmc": {
+	    "parent_label": "spi1"
+	}
+    }
+}
