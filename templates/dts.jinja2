@@ -38,6 +38,9 @@
 	{%- if pv.size_cells or pv.size_cells == 0 %}
 	#size-cells = <{{ pv.size_cells }}>;
 	{%- endif %}
+	{%- if "uboot" in root.os_name %}
+	compatible = {{ pv.compatible_str }};
+	{%- endif %}
 	{%- if pv.private_data %}
 	{%- for priv_data in pv.private_data %}
 	{{ priv_data }}
