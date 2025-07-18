@@ -1,0 +1,23 @@
+{
+    "supported_os": [
+        "linux",
+	"uboot",
+	"zephyr"
+    ],
+    "bus_types": [
+        "bmb",
+	"axi"
+    ],
+    "peripherals": [
+        "uart",
+	"spi",
+	"gpio",
+	"i2c",
+	"clint",
+	"plic",
+	"watchdog"
+    ],
+    "blacklist_instances": [
+        "axi_slave0"
+    ]
+}
