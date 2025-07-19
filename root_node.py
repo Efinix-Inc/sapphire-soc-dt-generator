@@ -35,7 +35,6 @@ class RootNode(DeviceNode):
         cpu_node = cpu.create_node(dev_type=dev_type, label=label, instance=instance,
                                    size_cells=0, parent_label="/", status=1)
         header = cpu.generate_node_header(addr=instance, dev_type=dev_type)
-        reg = cpu.set_node_reg(instance, 0)
         child_node = cpu_node.get("child", {})
 
         irq_label = f"intc{instance}"
@@ -54,7 +53,7 @@ class RootNode(DeviceNode):
             "isa": self.soc.get_cpu_isa(),
             "mmu_type": self.soc.get_cpu_mmu_type(),
             "header": header,
-            "reg": reg,
+            "reg": cpu.set_node_reg(instance, 0, addr_cells=1),
             "machine_type": self.arch,
             **caches,
             "child": child_node
