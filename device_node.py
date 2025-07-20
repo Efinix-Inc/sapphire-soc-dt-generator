@@ -199,10 +199,11 @@ class DeviceNode:
         nlabel = new_values.get("label")
         dev_type = new_values.get("interface", self.dev_type)
         compatible = new_values.get("compatible")
-        if isinstance(compatible, list):
-            new_values["compatible_str"] = self.get_compatible_string(compatible)
-        else:
-            new_values["compatible_str"] = f"\"{compatible}\""
+        if compatible:
+            if isinstance(compatible, list):
+                new_values["compatible_str"] = self.get_compatible_string(compatible)
+            else:
+                new_values["compatible_str"] = f"\"{compatible}\""
 
         size = nsize if nsize else self.ctrl.get_controller_address_size(dev_type=dev_type)
         label = nlabel if nlabel else self.node.get("label", None)
