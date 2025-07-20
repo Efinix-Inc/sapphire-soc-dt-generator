@@ -55,8 +55,6 @@
 		{% set peripherals = bus_val.peripherals %}
 		{%- for pk, pv in peripherals.items() %}
 		{{ pv.header }} {
-			#address-cells = <{{ pv.address_cells }}>;
-			#size-cells = <{{ pv.size_cells }}>;
 			{%- if pv.interrupt_cells or pv.interrupt_cells == 0 %}
 			#interrupt-cells = <{{ pv.interrupt_cells }}>;
 			{%- endif %}
