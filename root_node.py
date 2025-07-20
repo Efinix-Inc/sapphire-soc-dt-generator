@@ -30,10 +30,12 @@ class RootNode(DeviceNode):
     def create_cpu_node(self, label="cpus", instance=0):
         """Create cpu node"""
         dev_type = "cpu"
+        addr_cells = 1
         cpu = DeviceNode(self.configs, dev_type, instance=instance,
                          user_configs=self.user_configs, arch=self.arch)
         cpu_node = cpu.create_node(dev_type=dev_type, label=label, instance=instance,
-                                   size_cells=0, parent_label="/", status=1)
+                                   parent_label="/", status=1, addr_cells=addr_cells,
+                                   size_cells=0)
         header = cpu.generate_node_header(addr=instance, dev_type=dev_type)
         child_node = cpu_node.get("child", {})
 
@@ -53,7 +55,7 @@ class RootNode(DeviceNode):
             "isa": self.soc.get_cpu_isa(),
             "mmu_type": self.soc.get_cpu_mmu_type(),
             "header": header,
-            "reg": cpu.set_node_reg(instance, 0, addr_cells=1),
+            "reg": cpu.set_node_reg(instance, 0, addr_cells=addr_cells),
             "machine_type": self.arch,
             **caches,
             "child": child_node
