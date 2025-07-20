@@ -86,10 +86,11 @@ class BusNode(DeviceNode):
         addr = self.ctrl.get_controller_address(bus_type, bus_instance)
         size = self.ctrl.get_controller_address_size(bus_type, bus_instance)
 
+        reg = self.set_node_reg(addr, size, addr_cells=self.addr_cells)
         if self.arch == 64:
-            addr_range = f"0x0 0x0 0x0 {addr} 0x0 {size}"
+            addr_range = f"0x0 0x0 {reg}"
         else:
-            addr_range = f"0x0 {addr} {size}"
+            addr_range = f"0x0 {reg}"
 
         return f"{addr_range}"
 
