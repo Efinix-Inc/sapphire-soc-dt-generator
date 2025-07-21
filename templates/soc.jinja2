@@ -43,6 +43,29 @@
 		{% endfor %}
 	};
 
+	{% for custom_key, custom_val in custom.items() %}
+	{{ custom_val.header }} {
+		#address-cells = <{{ custom_val.address_cells }}>;
+		#size-cells = <{{ custom_val.size_cells }}>;
+		reg = <{{ custom_val.reg }}>;
+		{%- if custom_val.compatible_str %}
+		compatible = {{ custom_val.compatible_str }};
+		{%- endif %}
+		{%- if custom_val.device_type %}
+		device_type = "{{ custom_val.device_type }}";
+		{%- endif %}
+		clock-frequency = <{{ root.frequency }}>;
+		{%- if custom_val.status %}
+		{%- if custom_val.private_data %}
+		{%- for priv_data in custom_val.private_data %}
+		{{ priv_data }}
+		{%- endfor %}
+		{%- endif %}
+		status = "{{ custom_val.status }}";
+		{%- endif %}
+	};
+	{% endfor %}
+
 	{% for bus_type, bus_val in buses.items() %}
 	{%- if bus_val.peripherals %}
 	{{ bus_val.header }} {
