@@ -54,7 +54,7 @@ class DeviceNode:
         }
 
         if self.user_configs:
-            self.apply_user_configs()
+            self.apply_user_configs(self.instance)
 
         return self.node
 
@@ -160,7 +160,7 @@ class DeviceNode:
         dev_status = self._lookup_status(status)
         self.node.update({"status": dev_status})
 
-    def apply_user_configs(self):
+    def apply_user_configs(self, instance):
         """Modify the value of device node with user configs"""
         if self.user_configs is None:
             return
@@ -168,6 +168,7 @@ class DeviceNode:
         drivers = self.user_configs.get("drivers", {})
         overrides = self.user_configs.get("overrides", {})
         children = self.user_configs.get("child", {})
+        custom = self.user_configs.get("custom", {})
 
         for k, v in drivers.items():
             if self.dev_type == k:
@@ -177,17 +178,25 @@ class DeviceNode:
 
         for k, v in overrides.items():
             device_instance = overrides.get(k, {}).get("device_instance")
-            if device_instance == self.ctrl.get_instance_name(self.instance):
+            if device_instance == self.ctrl.get_instance_name(instance):
                 v = self._regenerate(v)
                 self.update_node(**v)
                 break
 
         for k, v in children.items():
             parent_label = v.get("parent_label")
-            device_instance = self.ctrl.get_instance_name(self.instance)
+            device_instance = self.ctrl.get_instance_name(instance)
             if parent_label == device_instance:
                 child_node = self._create_child_node(v)
                 self.node['child'].update({k: child_node})
+
+        for k, v in custom.items():
+            if self.dev_type == "custom":
+                device_instance = v.get("device_instance")
+                if device_instance == self.ctrl.get_instance_name(instance):
+                    v = self._regenerate(v)
+                    self.update_node(**v)
+                    break
 
     def _regenerate(self, new_values):
         """Regenerate 'reg' and 'header' property"""
