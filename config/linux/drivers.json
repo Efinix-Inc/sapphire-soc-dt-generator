@@ -96,12 +96,15 @@
 		    "reg": "0x1000000 0x80000"
 		}
 	    }
-	},
+	}
+    },
+    "custom": {
 	"clock": {
-	    "parent_label": "root",
-	    "device_instance": "clock0",
+	    "device_instance": "custom0",
 	    "device_type": "clock",
 	    "label": "clock",
+	    "interface": "clock",
+	    "reg": "0x0",
 	    "compatible": "fixed-clock",
 	    "private_data": [
 	        "#clock-cells = <0>;"
