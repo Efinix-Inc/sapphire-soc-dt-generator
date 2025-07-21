@@ -98,6 +98,7 @@ def create_device_tree(config_file, merged_user_configs, bus_types, list_ctrl, a
     dt = {}
     bus_nodes = {}
     cpu_nodes = {}
+    custom_nodes = {}
     raw_configs = read_file(config_file)
 
     c = ConfigParser(raw_configs)
@@ -124,6 +125,8 @@ def create_device_tree(config_file, merged_user_configs, bus_types, list_ctrl, a
     root_node["cpus"] = cpu_nodes
     root_node["memory"] = root.create_memory_node()
 
+    custom_nodes = root.create_custom_nodes()
+
     for bus in bus_types:
         num = 0
         bn = BusNode(parsed_configs, bus, list_ctrl, user_configs=merged_user_configs, arch=arch)
@@ -136,6 +139,7 @@ def create_device_tree(config_file, merged_user_configs, bus_types, list_ctrl, a
             num = num + 1
 
     dt["root"] = root_node
+    dt["custom"] = custom_nodes
     dt["buses"] = bus_nodes
 
     save("soc_configs.json", dt)
