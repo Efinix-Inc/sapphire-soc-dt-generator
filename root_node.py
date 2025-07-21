@@ -84,3 +84,16 @@ class RootNode(DeviceNode):
         self.mem_node["device_type"] = "memory"
 
         return self.mem_node
+
+    def create_custom_nodes(self):
+        """Create custom nodes which place in the root"""
+        custom_nodes = {}
+        dev_type = "custom"
+        cstm_nodes = self.user_configs.get("custom", {})
+        num = 0
+        for k in cstm_nodes.keys():
+            cstm = DeviceNode(self.configs, dev_type, instance=num, user_configs=self.user_configs, arch=self.arch)
+            custom_nodes[k] = cstm.create_node(parent_label="root", label=k, status=1)
+            num += 1
+
+        return custom_nodes
