@@ -40,6 +40,9 @@
 	#size-cells = <{{ pv.size_cells }}>;
 	{%- endif %}
 	{%- endif %}
+	{%- if pv.device_type %}
+	device_type = "{{ pv.device_type }}";
+	{%- endif %}
 	{%- if "uboot" in root.os_name %}
 	compatible = {{ pv.compatible_str }};
 	{%- endif %}
