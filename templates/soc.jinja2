@@ -49,7 +49,9 @@
 		#address-cells = <{{ custom_val.address_cells }}>;
 		#size-cells = <{{ custom_val.size_cells }}>;
 		{%- endif %}
+		{%- if custom_val.reg or custom_val.reg == 0 %}
 		reg = <{{ custom_val.reg }}>;
+		{%- endif %}
 		{%- if custom_val.compatible_str %}
 		compatible = {{ custom_val.compatible_str }};
 		{%- endif %}
