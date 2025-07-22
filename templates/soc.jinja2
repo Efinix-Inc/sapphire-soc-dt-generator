@@ -56,7 +56,7 @@
 		{%- if custom_val.device_type %}
 		device_type = "{{ custom_val.device_type }}";
 		{%- endif %}
-		clock-frequency = <{{ root.frequency }}>;
+		clock-frequency = <{{ custom_val.clock_frequency }}>;
 		{%- if custom_val.status %}
 		{%- if custom_val.private_data %}
 		{%- for priv_data in custom_val.private_data %}
@@ -104,7 +104,7 @@
 			{%- endif %}
 			{%- if pv.clocks %}
 			clocks = <{{ pv.clocks }}>;
-			clock-frequency = <{{ root.frequency }}>;
+			clock-frequency = <{{ pv.clock_frequency }}>;
 			{%- endif %}
 			status = "disabled";
 		};
