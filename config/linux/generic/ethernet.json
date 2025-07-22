@@ -39,7 +39,7 @@
 		    "header": "phy0: ethernet-phy@0",
 		    "label": "phy0",
 		    "interface": "ethernet-phy",
-		    "reg": "0",
+		    "reg": 0,
 		    "compatible": "ethernet-phy-id001c.c916",
 		    "device_type": "ethernet-phy",
 		    "private_data": [
@@ -51,11 +51,11 @@
 	},
 	"dma_channel0": {
 	    "interface": "dma-channel",
-	    "addr": "0"
+	    "reg": 0
 	},
 	"dma_channel1": {
 	    "interface": "dma-channel",
-	    "addr": "1"
+	    "reg": 1
 	}
     }
 }

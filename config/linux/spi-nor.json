@@ -6,11 +6,12 @@
         },
 	"child": {
 		"spi_nor": {
+			"address_cells": 1,
+			"size_cells": 1,
                         "parent_label": "spi0",
                         "name": "flash",
                         "label": "flash",
-                        "addr": 0,
-                        "reg": 0,
+                        "reg": 1,
                         "compatible": "jedec,spi-nor",
                         "private_data": [
                                 "spi-max-frequency = <10000000>;"

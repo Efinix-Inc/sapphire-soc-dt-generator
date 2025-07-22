@@ -1,7 +1,10 @@
 {
     "child": {
         "spi_mmc": {
-	    "label": "mmc-slot",
+	    "interface": "mmc-slot",
+	    "addr": 0,
+	    "address_cells": 1,
+	    "size_cells": 0,
 	    "compatible": "mmc-spi-slot",
 	    "private_data": [
 	        "voltage-ranges = <3300 3300>;",

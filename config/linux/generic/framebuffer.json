@@ -36,7 +36,7 @@
 	},
         "dma1_channel0": {
 	    "interface": "dma-channel",
-	    "addr": 0,
+	    "reg": 0,
 	    "private_data": [
 		"dma-names = \"camera\";",
 		"chan-priority = <0>;"
@@ -44,7 +44,7 @@
 	},
 	"dma1_channel1": {
 	    "interface": "dma-channel",
-	    "addr": 1,
+	    "reg": 1,
 	    "private_data": [
 	        "dma-names = \"display\";",
 		"chan-priority = <2>;"

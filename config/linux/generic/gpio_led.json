@@ -4,12 +4,11 @@
 	    "parent_label": "root",
             "header": "efx_gpio_devs",
             "compatible": "efinix,efx-gpio",
-            "addr": 0,
+            "reg": 0,
             "status": "okay",
             "child": {
                 "switch": {
                     "header": "switch",
-                    "addr": 0,
 		    "reg": 0,
                     "private_data": [
                         "label = \"SW\";",
@@ -18,7 +17,6 @@
                  },
                  "led1": {
                      "header": "led1",
-                     "addr": 1,
 		     "reg": 1,
                      "private_data": [
                          "label = \"LED1\";",
@@ -27,7 +25,6 @@
                  },
                  "led2": {
                      "header": "led2",
-                     "addr": 2,
 		     "reg": 2,
                      "private_data": [
                          "label = \"LED2\";",
@@ -36,7 +33,6 @@
                  },
                  "led3": {
                      "header": "led3",
-                     "addr": 3,
 		     "reg": 3,
                      "private_data": [
                          "label = \"LED3\";",

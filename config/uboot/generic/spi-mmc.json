@@ -2,7 +2,8 @@
     "child": {
         "spi_mmc": {
             "parent_label": "spi1",
-            "label": "spi-mmc",
+            "label": "mmc0: mmc@0",
+	    "reg": 0,
             "compatible": "mmc-spi-slot",
             "private_data": [
                 "spi-max-frequency = <10000000>;"

@@ -50,15 +50,13 @@
     },
     "child": {
         "chosen": {
-	    "parent_label": "/",
+	    "parent_label": "root",
 	    "header": "chosen",
-	    "private_data": [
-	        "stdout_path = \"serial0:115200n8\";",
-		"bootargs = \"console=ttyS0,115200n8\";"
-	    ]
+	    "stdout_path": "serial0:115200n8",
+	    "bootargs": "console=ttyS0,115200n8"
 	},
 	"aliases": {
-	    "parent_label": "/",
+	    "parent_label": "root",
 	    "header": "aliases",
 	    "private_data": [
 	        "serial0 = &uart0;"

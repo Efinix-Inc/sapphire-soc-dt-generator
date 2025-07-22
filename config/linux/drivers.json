@@ -80,20 +80,21 @@
 	    ]
 	},
         "reserved_memory": {
-	    "address_cells": "1",
-	    "size_cells": "1",
+	    "address_cells1": 1,
+	    "size_cells1": 1,
 	    "parent_label": "root",
 	    "header": "reserved-memory",
 	    "private_data": [
-                "ranges;"
+	        "ranges;"
 	    ],
+	    "reg": null,
 	    "child": {
                 "opensbi": {
 	            "header": "opensbi: sbi@1000000",
 		    "label": "opensbi",
 		    "addr": "0x1000000",
 		    "size": "0x80000",
-		    "reg": "0x1000000 0x80000"
+		    "reg1": "0x1000000 0x80000"
 		}
 	    }
 	}
@@ -104,7 +105,7 @@
 	    "device_type": "clock",
 	    "label": "clock",
 	    "interface": "clock",
-	    "reg": "0x0",
+	    "reg1": null,
 	    "compatible": "fixed-clock",
 	    "private_data": [
 	        "#clock-cells = <0>;"
