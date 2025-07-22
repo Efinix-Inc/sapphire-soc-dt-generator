@@ -74,7 +74,7 @@ def main():
         list_ctrl = merged_user_configs.get("peripherals", list_ctrl)
         bus_types = merged_user_configs.get("bus_types", bus_types)
 
-    merged_user_configs.setdefault("root", {"os_name": os_name})
+    merged_user_configs.setdefault("root", {})["os_name"] = os_name
     save("merged_user_configs.json", merged_user_configs)
 
     arch = args.machine
