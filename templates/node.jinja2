@@ -12,11 +12,12 @@
 	{%- if device.status %}
         status = "{{ device.status }}";
         {%- endif %}
+	{%- endif %}
+	{%- if not device.header in ["chosen", "aliases", "reserved-memory"] %}
 	{%- if device.reg or device.reg == 0 %}
 	reg = <{{ device.reg }}>;
 	{%- endif %}
 	{%- endif %}
-
 	{%- if device.compatible %}
 	compatible = "{{ device.compatible }}";
 	{%- endif %}
