@@ -1,11 +1,13 @@
 {% macro render_device(device, node=none) %}
 {{ device.header }} {
 	{%- if not device.header in ["chosen", "aliases"] %}
+	{%- if device.child %}
 	{%- if device.address_cells or device.address_cells == 0 %}
 	#address-cells = <{{ device.address_cells }}>;
 	{%- endif %}
 	{%- if device.size_cells or device.size_cells == 0 %}
 	#size-cells = <{{ device.size_cells }}>;
+	{%- endif %}
 	{%- endif %}
 	{%- if device.status %}
         status = "{{ device.status }}";

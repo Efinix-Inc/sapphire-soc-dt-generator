@@ -32,11 +32,13 @@
 {%- for pk, pv in peripherals.items() %}
 {%- if pv.compatible %}
 &{{ pv.label }} {
+	{%- if pv.child %}
 	{%- if pv.address_cells %}
 	#address-cells = <{{ pv.address_cells }}>;
 	{%- endif %}
 	{%- if pv.size_cells or pv.size_cells == 0 %}
 	#size-cells = <{{ pv.size_cells }}>;
+	{%- endif %}
 	{%- endif %}
 	{%- if "uboot" in root.os_name %}
 	compatible = {{ pv.compatible_str }};

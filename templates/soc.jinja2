@@ -45,8 +45,10 @@
 
 	{% for custom_key, custom_val in custom.items() %}
 	{{ custom_val.header }} {
+		{%- if custom_val.child %}
 		#address-cells = <{{ custom_val.address_cells }}>;
 		#size-cells = <{{ custom_val.size_cells }}>;
+		{%- endif %}
 		reg = <{{ custom_val.reg }}>;
 		{%- if custom_val.compatible_str %}
 		compatible = {{ custom_val.compatible_str }};
