@@ -89,9 +89,6 @@
 			{%- if pv.compatible_str %}
 			compatible = {{ pv.compatible_str }};
 			{%- endif -%}
-			{%- if pv.device_type %}
-			device_type = "{{ pv.device_type }}";
-			{%- endif %}
 			{%- if pv.interrupt_controller %}
 			interrupt-controller;
 			{%- endif %}
