@@ -251,7 +251,7 @@ class DeviceNode:
         addr = child_config.get("addr", 0)
         size = child_config.get("size", 0)
         addr_cells = child_config.get("address_cells", self._set_cells(-1))
-        size_cells = child_config.get("size_cells", 0)
+        size_cells = child_config.get("size_cells", self._set_cells(-1))
         reg = child_config.get("reg", self.set_node_reg(addr, size, addr_cells, size_cells))
         header = child_config.get("header", self._generate_node_header(label, dev_type, addr, reg=True))
         node = {
