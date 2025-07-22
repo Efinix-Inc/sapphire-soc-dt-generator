@@ -25,6 +25,8 @@ class DeviceNode:
         dev_type = dev_type or self.dev_type
         label = label or self.ctrl.get_instance_name(self.instance)
 
+        address_cells = self.set_address_cells(self.addr_cells)
+        size_cells = self.set_size_cells(self.size_cells)
         # get the address mapping and size of the device
         addr = self.ctrl.get_controller_address(dev_type, self.instance)
         size = self.ctrl.get_controller_address_size(dev_type, self.instance)
@@ -37,11 +39,11 @@ class DeviceNode:
                 "label": label,
                 "parent_label": parent_label,
                 # device tree specific properties
-                "address_cells": self.set_address_cells(self.addr_cells),
-                "size_cells": self.set_size_cells(self.size_cells),
+                "address_cells": address_cells,
+                "size_cells": size_cells,
                 "addr": addr,
                 "size": size,
-                "reg": self.set_node_reg(addr, size),
+                "reg": self.set_node_reg(addr, size, address_cells, size_cells),
                 "header": self.generate_node_header(addr, label, dev_type),
                 "compatible": self.ctrl.get_controller_driver_name(dev_type, self.instance),
                 "interrupts": self.ctrl.get_controller_interrupts_line(dev_type, self.instance),
@@ -284,9 +286,8 @@ class DeviceNode:
         size = child_config.get("size", 0)
         addr_cells = child_config.get("address_cells", self._set_cells(-1))
         size_cells = child_config.get("size_cells", 0)
-        reg = child_config.get("reg") or self.set_node_reg(addr, size, addr_cells, size_cells)
-
-        header = child_config.get("header") or self._generate_node_header(label, dev_type, addr, reg=True)
+        reg = child_config.get("reg", self.set_node_reg(addr, size, addr_cells, size_cells))
+        header = child_config.get("header", self._generate_node_header(label, dev_type, addr, reg=True))
         node = {
             "header": header,
             "label": label,
