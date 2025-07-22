@@ -210,40 +210,6 @@ class DeviceNode:
                         cchild_node = self._create_child_node(vc)
                         node["child"][k]["child"][kc] = cchild_node
 
-    def _create_child_node(self, child_config):
-        """Create a template of child node"""
-
-        label = child_config.get("label")
-        dev_type = child_config.get("interface")
-        addr = child_config.get("addr", 0)
-        size = child_config.get("size", 0)
-        addr_cells = child_config.get("address_cells", 1)
-        size_cells = child_config.get("size_cells", 0)
-        reg = child_config.get("reg") or self.set_node_reg(addr, size, addr_cells, size_cells)
-
-        header = child_config.get("header") or self._generate_node_header(label, dev_type, addr, reg=True)
-        node = {
-            "header": header,
-            "label": label,
-            "parent_label": child_config.get("parent_label"),
-            "address_cells": addr_cells,
-            "size_cells": size_cells,
-            "addr": addr,
-            "size": size,
-            "reg": reg,
-            "compatible": child_config.get("compatible"),
-            "private_data": child_config.get("private_data", []),
-            "status": child_config.get("status", "okay"),
-            "child": child_config.get("child", {})
-        }
-
-        # append additionals key value pairs to the node
-        for k, v in child_config.items():
-            if k not in node:
-                node[k] = v
-
-        return node
-
     def _regenerate(self, new_values):
         """Regenerate 'reg' and 'header' property"""
 
