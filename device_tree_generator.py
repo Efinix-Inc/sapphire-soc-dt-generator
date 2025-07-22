@@ -84,7 +84,7 @@ def main():
     dtsi = dtsi_template.render(dt)
     dts = dts_template.render(dt)
 
-    output_dir = args.dir or os.path.join("output", os_name)
+    output_dir = args.dir or os.path.join("output", os_name, arch)
     os.makedirs(output_dir, exist_ok=True)
 
     outfile_dtsi = args.outfile or "sapphire.dtsi"
