@@ -1,7 +1,7 @@
 {
     "overrides": {
         "sdhc": {
-	    "label": "mmc",
+	    "label": "mmc0",
 	    "compatible": "efx,efx-sdhost"
 	}
     }
