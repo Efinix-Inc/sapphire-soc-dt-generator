@@ -34,9 +34,7 @@
 	    "interrupts_extended": [11],
 	    "interrupt_controller": true,
 	    "private_data": [
-	        "reg-names = \"prio\", \"irq_en\", \"reg\";",
 		"#interrupt-cells = <2>;",
-		"riscv,max-priority = <3>;",
 		"riscv,ndev = <32>;"
 	    ],
 	    "status": "okay"

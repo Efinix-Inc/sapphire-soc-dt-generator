@@ -1,10 +1,12 @@
 {
     "child": {
         "gpio_leds": {
+	    "address_cells": 1,
+	    "size_cells": 0,
 	    "parent_label": "root",
             "header": "efx_gpio_devs",
             "compatible": "efinix,efx-gpio",
-            "reg": 0,
+            "reg1": 0,
             "status": "okay",
             "child": {
                 "switch": {
