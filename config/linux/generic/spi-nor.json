@@ -1,4 +1,10 @@
 {
+	"overrides": {
+		"spi0": {
+			"device_instance": "spi0",
+			"interrupts": []
+		}
+        },
 	"child": {
 		"spi_nor": {
 			"address_cells": 1,
