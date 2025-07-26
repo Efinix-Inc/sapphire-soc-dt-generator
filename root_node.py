@@ -16,7 +16,8 @@ class RootNode(DeviceNode):
         root = {
             "version": "/dts-v1/",
             "header": "/",
-            "frequency": self.soc.get_frequency()
+            "frequency": self.soc.get_frequency(),
+            "cpu_name": self.get_cpu_name()
         }
 
         if metadata:
@@ -26,6 +27,17 @@ class RootNode(DeviceNode):
         self.node.update(root)
 
         return self.node
+
+    def get_cpu_name(self):
+        """Return cpu name by lookup from self.user_configs"""
+        if "cpu_name" in self.user_configs:
+            if isinstance(self.user_configs["cpu_name"], dict):
+                if str(self.arch) in self.user_configs["cpu_name"]:
+                    cpu_type = self.soc.get_cpu_type()
+                    return self.user_configs["cpu_name"][str(self.arch)][cpu_type]
+            elif isinstance(self.user_configs["cpu_name"], str):
+                return self.user_configs["cpu_name"]
+        return None
 
     def create_cpu_node(self, label="cpus", instance=0):
         """Create cpu node"""

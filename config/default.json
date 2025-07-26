@@ -1,4 +1,25 @@
 {
+    "cpu_name": {
+        "32": {
+	    "soft": "Efinix Sapphire RISC-V SoC",
+	    "hard": "Efinix Sapphire High Performance RISC-V SoC"
+	},
+	"64": {
+	    "soft": "",
+	    "hard": ""
+	}
+    },
+    "devkits": {
+	"Trion": [
+	    "T120F324"
+        ],
+        "Titanium": [
+            "Ti60F225",
+            "Ti180J484",
+            "Ti375C529",
+            "Ti375N1156"
+        ]
+    },
     "supported_os": [
         "linux",
 	"uboot",

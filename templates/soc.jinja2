@@ -16,6 +16,12 @@
 			{%- endif %}
 			device_type = "{{ v.device_type }}";
 			riscv,isa = "{{ v.isa }}";
+			{%- if root.cpu_name %}
+			cpu-name = "{{ root.cpu_name }}";
+			{%- endif %}
+			{%- if root.board_name %}
+			board = "{{ root.board_name }}";
+			{%- endif %}
 			mmu_type = "{{ v.mmu_type }}";
 			i-cache-size = <{{ v.icache_size }}>;
 			i-cache-sets = <{{ v.icache_ways }}>;
