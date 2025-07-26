@@ -18,6 +18,8 @@ def dt_argparser():
     dt_parse = argparse.ArgumentParser(description="Device Tree Generator")
     dt_parse.add_argument("soc_configs", type=str,
                           help="path to soc.h")
+    dt_parse.add_argument("board", type=str,
+                          help="Provide the board name such as Ti375N1156, Ti375C529, Ti180J484, Ti60F225, T120F324")
     dt_parse.add_argument("-c", "--user-configs", action="append", type=str,
                           help="Provide the path to a user configuration JSON file to override default device properties. For example, /path/to/user-config.json.")
     dt_parse.add_argument("-d", "--dir", type=str,
@@ -40,9 +42,17 @@ def dt_argparser():
 
     return dt_parse.parse_args()
 
+def get_devkits(default_config):
+    devkits = []
+    for value in default_config["devkits"].values():
+        if isinstance(value, list):
+            devkits.extend(value)
+    return devkits
+
 def main():
     args = dt_argparser()
     merged_user_configs = {}
+    board_name = "Development Board"
 
     pwd = os.path.dirname(os.path.realpath(__file__))
     env = Environment(loader=FileSystemLoader(os.path.join(pwd, "templates")))
@@ -54,6 +64,11 @@ def main():
     bus_types = default_config.get("bus_types", [])
     list_ctrl = default_config.get("peripherals", [])
     supported_oses = default_config.get("supported_os", [])
+    devkits = get_devkits(default_config)
+
+    for devkit in devkits:
+        if args.board in devkit.lower():
+            board_name = f"{devkit} {board_name}"
 
     if args.os in supported_oses:
         os_name = args.os
@@ -75,6 +90,7 @@ def main():
         bus_types = merged_user_configs.get("bus_types", bus_types)
 
     merged_user_configs.setdefault("root", {})["os_name"] = os_name
+    merged_user_configs.setdefault("root", {})["board_name"] = board_name
     save("merged_user_configs.json", merged_user_configs)
 
     arch = args.machine
