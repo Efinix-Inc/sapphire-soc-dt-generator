@@ -17,6 +17,11 @@ class SocConfigs(Controller):
         cpu_configs = self._get_cpus_configs()
         return cpu_configs.get("caches", {})
 
+    def get_cpu_type(self):
+        """Return 1 for hardcore or 0 for softcore soc"""
+        cpu_type = self._get_cpus_configs().get("cpu_type", 0)
+        return "hard" if cpu_type == "1" else "soft"
+
     def get_cpu_isa(self):
         """Return the cpu RISCV ISA"""
         cpu_configs = self._get_cpus_configs()
