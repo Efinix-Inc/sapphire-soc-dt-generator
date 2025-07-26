@@ -126,7 +126,8 @@ class ConfigParser:
         cpu = {
             "cores": self.get_cpu_count(),
             "isa": self._get_cpu_isa(),
-            "caches": self._parse_cpu_caches()
+            "caches": self._parse_cpu_caches(),
+            "cpu_type": self._parse_cpu_type()
         }
 
         self.parsed_configs["cpus"] = cpu
@@ -184,3 +185,11 @@ class ConfigParser:
                 cores[field.lower()] = value
 
         return cores
+
+    def _parse_cpu_type(self):
+        """Parse cpu type like softcore or hardcore. Return 1 for hardcore, 0 for softcore"""
+        pattern = re.compile(r"SYSTEM_HARD_RISCV_QC32")
+
+        for key, value in self.macros.items():
+            for key in pattern.findall(key):
+                return value
