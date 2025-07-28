@@ -97,15 +97,15 @@ def main():
     dt = create_device_tree(config_file, merged_user_configs, bus_types, list_ctrl, arch, args.debug)
 
     if args.debug:
-        save("merged_user_configs.json", merged_user_configs)
-        f_configs = f"soc_configs_{os_name}.json"
+        save(os.path.join(pwd, "merged_user_configs.json"), merged_user_configs)
+        f_configs = os.path.join(pwd, f"soc_configs_{os_name}.json")
         save(f_configs, dt)
         print(f"Save as '{f_configs}'")
 
     dtsi = dtsi_template.render(dt)
     dts = dts_template.render(dt)
 
-    output_dir = args.dir or os.path.join("output", os_name, arch)
+    output_dir = args.dir or os.path.join(pwd, "output", os_name, arch)
     os.makedirs(output_dir, exist_ok=True)
 
     outfile_dtsi = args.outfile or "sapphire.dtsi"
