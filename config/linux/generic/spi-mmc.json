@@ -1,6 +1,7 @@
 {
     "child": {
         "spi_mmc": {
+	    "parent_label": "spi1",
 	    "interface": "mmc-slot",
 	    "addr": 0,
 	    "address_cells": 1,
