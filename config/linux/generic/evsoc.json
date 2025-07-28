@@ -1,0 +1,16 @@
+{
+    "child": {
+        "evsoc": {
+            "parent_label": "root",
+	    "label": "evsoc",
+	    "compatible": "evsoc",
+            "addr": 0,
+	    "reg": 0,
+	    "private_data": [
+            	"interrupts = <16>;",
+		"interrupt-parent = <&plic>"
+	    ],
+            "status": "okay"
+        }
+    }
+}
