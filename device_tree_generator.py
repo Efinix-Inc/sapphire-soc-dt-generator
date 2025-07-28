@@ -91,14 +91,16 @@ def main():
 
     merged_user_configs.setdefault("root", {})["os_name"] = os_name
     merged_user_configs.setdefault("root", {})["board_name"] = board_name
-    save("merged_user_configs.json", merged_user_configs)
 
     arch = args.machine
 
     dt = create_device_tree(config_file, merged_user_configs, bus_types, list_ctrl, arch, args.debug)
-    f_configs = f"soc_configs_{os_name}.json"
-    save(f_configs, dt)
-    print(f"Save as '{f_configs}'")
+
+    if args.debug:
+        save("merged_user_configs.json", merged_user_configs)
+        f_configs = f"soc_configs_{os_name}.json"
+        save(f_configs, dt)
+        print(f"Save as '{f_configs}'")
 
     dtsi = dtsi_template.render(dt)
     dts = dts_template.render(dt)
@@ -127,9 +129,9 @@ def create_device_tree(config_file, merged_user_configs, bus_types, list_ctrl, a
     c = ConfigParser(raw_configs)
     parsed_configs = c.parse()
     soc = SocConfigs(parsed_configs)
-    save("parsed_configs.json", parsed_configs)
 
     if debug:
+        save("parsed_configs.json", parsed_configs)
         c.report()
 
     root = RootNode(parsed_configs, user_configs=merged_user_configs, arch=arch)
