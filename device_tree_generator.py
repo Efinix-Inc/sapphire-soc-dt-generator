@@ -96,6 +96,9 @@ def main():
     arch = args.machine
 
     dt = create_device_tree(config_file, merged_user_configs, bus_types, list_ctrl, arch, args.debug)
+    f_configs = f"soc_configs_{os_name}.json"
+    save(f_configs, dt)
+    print(f"Save as '{f_configs}'")
 
     dtsi = dtsi_template.render(dt)
     dts = dts_template.render(dt)
@@ -106,9 +109,13 @@ def main():
     outfile_dtsi = args.outfile or "sapphire.dtsi"
     outfile_dts = f"{os_name}.dts"
 
-    print(f"Saving generated '{os_name}' device tree in '{output_dir}'")
-    save(os.path.join(output_dir, outfile_dtsi), dtsi, False)
-    save(os.path.join(output_dir, outfile_dts), dts, False)
+    print(f"Saving the generated '{os_name}' device tree in '{output_dir}'")
+    f_dtsi = os.path.join(output_dir, outfile_dtsi)
+    f_dts = os.path.join(output_dir, outfile_dts)
+    save(f_dtsi, dtsi, False)
+    save(f_dts, dts, False)
+    print(f"dtsi: {f_dtsi}")
+    print(f"dts: {f_dts}")
 
 def create_device_tree(config_file, merged_user_configs, bus_types, list_ctrl, arch, debug=False):
     dt = {}
@@ -157,9 +164,6 @@ def create_device_tree(config_file, merged_user_configs, bus_types, list_ctrl, a
     dt["root"] = root_node
     dt["custom"] = custom_nodes
     dt["buses"] = bus_nodes
-
-    save("soc_configs.json", dt)
-    print("Save as 'soc_configs.json'")
 
     return dt
 
