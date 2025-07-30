@@ -1,4 +1,10 @@
 {
+    "overrides": {
+        "spi1": {
+            "device_instance": "spi1",
+            "interrupts": []
+        }
+    },
     "child": {
         "spi_mmc": {
 	    "parent_label": "spi1",
