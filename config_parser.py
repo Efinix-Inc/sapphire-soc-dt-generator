@@ -175,7 +175,7 @@ class ConfigParser:
 
     def _parse_cpu_caches(self):
         """Parse all cpu caches"""
-        pattern = re.compile(r"SYSTEM_CORES_(\d+)_(ICACHE_WAYS|ICACHE_SIZE|DCACHE_WAYS|DCACHE_SIZE|BYTES_PER_LINE)")
+        pattern = re.compile(r"SYSTEM_CORES_(\d+)_(ICACHE_WAYS|ICACHE_SIZE|DCACHE_WAYS|DCACHE_SIZE|BYTES_PER_LINE|L2_CACHE_WAYS|L2_CACHE_SIZE)")
 
         cores = {}
         for key, value in self.macros.items():
