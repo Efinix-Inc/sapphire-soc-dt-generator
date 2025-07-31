@@ -29,6 +29,12 @@
 			d-cache-size = <{{ v.dcache_size }}>;
 			d-cache-sets = <{{ v.dcache_ways }}>;
 			d-cache-block-size = <{{ v.bytes_per_line }}>;
+			{%- if v.l2_cache_ways %}
+			l2-cache-ways = <{{ v.l2_cache_ways }}>;
+			{%- endif %}
+			{%- if v.l2_cache_size %}
+			l2-cache-size = <{{ v.l2_cache_size }}>;
+			{%- endif %}
 			{%- if v.private_data %}
 			{%- for priv_data in v.private_data %}
 			{{ priv_data }}
