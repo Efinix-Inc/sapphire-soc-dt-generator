@@ -94,7 +94,7 @@ def main():
 
     arch = args.machine
 
-    dt = create_device_tree(config_file, merged_user_configs, bus_types, list_ctrl, arch, args.debug)
+    dt = create_device_tree(config_file, merged_user_configs, bus_types, list_ctrl, arch, args.debug, pwd)
 
     if args.debug:
         save(os.path.join(pwd, "merged_user_configs.json"), merged_user_configs)
@@ -119,7 +119,7 @@ def main():
     print(f"dtsi: {f_dtsi}")
     print(f"dts: {f_dts}")
 
-def create_device_tree(config_file, merged_user_configs, bus_types, list_ctrl, arch, debug=False):
+def create_device_tree(config_file, merged_user_configs, bus_types, list_ctrl, arch, debug=False, pwd=""):
     dt = {}
     bus_nodes = {}
     cpu_nodes = {}
@@ -131,7 +131,7 @@ def create_device_tree(config_file, merged_user_configs, bus_types, list_ctrl, a
     soc = SocConfigs(parsed_configs)
 
     if debug:
-        save("parsed_configs.json", parsed_configs)
+        save(os.path.join(pwd, "parsed_configs.json"), parsed_configs)
         c.report()
 
     root = RootNode(parsed_configs, user_configs=merged_user_configs, arch=arch)
