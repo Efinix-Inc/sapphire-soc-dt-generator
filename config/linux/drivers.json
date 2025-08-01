@@ -2,7 +2,6 @@
     "root": {
 	"model": "efinix,sapphire",
         "includes": [
-	    "/include/ \"sapphire.dtsi\"",
 	    "#include <dt-bindings/gpio/gpio.h>"
 	]
     },
