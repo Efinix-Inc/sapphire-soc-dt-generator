@@ -88,14 +88,19 @@ class RootNode(DeviceNode):
             update_or_insert_key(self.user_configs, "interrupts_extended",
                                  "irq_extended", self.irqs_exts)
 
-    def create_memory_node(self, label="memory"):
+    def _create_memory_node(self, label, dev_type):
         """Create memory node"""
-        dev_type = "ddr"
         mem = DeviceNode(self.configs, dev_type, user_configs=self.user_configs, arch=self.arch)
         self.mem_node = mem.create_node(label=label, parent_label="/", status=1)
-        self.mem_node["device_type"] = "memory"
+        self.mem_node["device_type"] = label
 
         return self.mem_node
+
+    def create_memory_node(self):
+        return self._create_memory_node("memory", "ddr")
+
+    def create_internal_memory_node(self):
+        return self._create_memory_node("internal_memory", "ram")
 
     def create_custom_nodes(self):
         """Create custom nodes which place in the root"""
