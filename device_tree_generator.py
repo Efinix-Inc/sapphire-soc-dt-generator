@@ -80,6 +80,9 @@ def main():
 
     config_file = args.soc_configs
 
+    outfile_dtsi = args.outfile or "sapphire.dtsi"
+    outfile_dts = f"{os_name}.dts"
+
     if args.user_configs:
         all_configs = []
         # default_config should be the first item in the list so that args.user_configs could overrides it.
@@ -91,6 +94,19 @@ def main():
 
     merged_user_configs.setdefault("root", {})["os_name"] = os_name
     merged_user_configs.setdefault("root", {})["board_name"] = board_name
+
+    if "root" not in merged_user_configs:
+        merged_user_configs["root"] = {}
+
+    if "includes" not in merged_user_configs["root"]:
+        merged_user_configs["root"]["includes"] = []
+
+    if "zephyr" in args.os:
+        inc_file = f"#include <efinix/{outfile_dtsi}>"
+    else:
+        inc_file = f'/include/ "{outfile_dtsi}"'
+
+    merged_user_configs["root"]["includes"].append(inc_file)
 
     arch = args.machine
 
@@ -107,9 +123,6 @@ def main():
 
     output_dir = args.dir or os.path.join(pwd, "output", os_name, arch)
     os.makedirs(output_dir, exist_ok=True)
-
-    outfile_dtsi = args.outfile or "sapphire.dtsi"
-    outfile_dts = f"{os_name}.dts"
 
     print(f"Saving the generated '{os_name}' device tree in '{output_dir}'")
     f_dtsi = os.path.join(output_dir, outfile_dtsi)
