@@ -59,10 +59,9 @@ class BusNode(DeviceNode):
                     ctrl_node = dn.create_node(instance=num, parent_label=parent_label,
                                                addr_cells=1, size_cells=0, status=1)
 
-                    if addr_offset:
-                        header, reg = self._use_addr_offset(ctrl_node, bus_instance)
-                        properties = {"header": header, "reg": reg}
-                        dn.update_node(**properties)
+                    header, reg = self._use_addr_offset(ctrl_node, bus_instance, use=addr_offset)
+                    properties = {"header": header, "reg": reg}
+                    dn.update_node(**properties)
 
                     # find phandle of interrupt-controller and clock
                     phandle_irq = self.get_interrupt_controller_phandle()
@@ -102,15 +101,18 @@ class BusNode(DeviceNode):
 
         return int(ctrl_addr, 16) - int(bus_addr, 16)
 
-    def _use_addr_offset(self, dev_node, bus_instance=0):
+    def _use_addr_offset(self, dev_node, bus_instance=0, use=True):
         """Generate a node header and reg based on address offset"""
         label = dev_node.get("label", "")
         dev_type = dev_node.get("interface", "")
         size = dev_node.get("size", 0)
+        addr = dev_node.get("addr", 0)
 
-        offset_addr = self.get_dev_instance_addr_offset(dev_node, bus_instance)
-        header = self.generate_node_header(offset_addr, label, dev_type)
-        reg = self.set_node_reg(offset_addr, size)
+        if use:
+            addr = self.get_dev_instance_addr_offset(dev_node, bus_instance)
+
+        header = self.generate_node_header(addr, label, dev_type)
+        reg = self.set_node_reg(addr, size)
 
         return header, reg
 
