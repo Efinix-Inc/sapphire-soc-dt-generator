@@ -18,7 +18,12 @@
 		device_type = "{{ mem.device_type }}";
 		reg = <{{ mem.reg }}>;
 	};
-
+	{% if root.ram %}
+	{{ root.ram.header }} {
+		device_type = "{{ root.ram.device_type }}";
+		reg = <{{ root.ram.reg }}>;
+	};
+	{%- endif %}
 	{%- if root.child %}
 	{%- for ck, cv in root.child.items() %}
 	{{ macros.render_device(cv, node=root) | indent(8, False) }}
