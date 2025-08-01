@@ -102,6 +102,8 @@ def main():
         merged_user_configs["root"]["includes"] = []
 
     if "zephyr" in args.os:
+        outfile_dtsi = f"{args.socname}.dtsi"
+        outfile_dts = f"{args.zephyrboard}.dts"
         inc_file = f"#include <efinix/{outfile_dtsi}>"
     else:
         inc_file = f'/include/ "{outfile_dtsi}"'
