@@ -100,7 +100,7 @@ class RootNode(DeviceNode):
         return self._create_memory_node("memory", "ddr")
 
     def create_internal_memory_node(self):
-        return self._create_memory_node("internal_memory", "ram")
+        return self._create_memory_node("memory", "ram")
 
     def create_custom_nodes(self):
         """Create custom nodes which place in the root"""
