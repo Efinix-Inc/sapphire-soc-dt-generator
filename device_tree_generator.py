@@ -94,7 +94,7 @@ def main():
 
     arch = args.machine
 
-    dt = create_device_tree(config_file, merged_user_configs, bus_types, list_ctrl, arch, args.debug, pwd)
+    dt = create_device_tree(config_file, merged_user_configs, bus_types, list_ctrl, arch, args, pwd)
 
     if args.debug:
         save(os.path.join(pwd, "merged_user_configs.json"), merged_user_configs)
@@ -119,7 +119,7 @@ def main():
     print(f"dtsi: {f_dtsi}")
     print(f"dts: {f_dts}")
 
-def create_device_tree(config_file, merged_user_configs, bus_types, list_ctrl, arch, debug=False, pwd=""):
+def create_device_tree(config_file, merged_user_configs, bus_types, list_ctrl, arch, args, pwd=""):
     dt = {}
     bus_nodes = {}
     cpu_nodes = {}
@@ -130,7 +130,7 @@ def create_device_tree(config_file, merged_user_configs, bus_types, list_ctrl, a
     parsed_configs = c.parse()
     soc = SocConfigs(parsed_configs)
 
-    if debug:
+    if args.debug:
         save(os.path.join(pwd, "parsed_configs.json"), parsed_configs)
         c.report()
 
@@ -150,6 +150,14 @@ def create_device_tree(config_file, merged_user_configs, bus_types, list_ctrl, a
     root_node["cpus"] = cpu_nodes
     root_node["memory"] = root.create_memory_node()
 
+    addr_offset = True
+    if "zephyr" in args.os:
+        # Zephyr does not use address offset in the reg property. Thus, disable it.
+        addr_offset = not ("zephyr" in args.os)
+
+        if args.extmemory == True:
+            root_node["memory"] = root.create_internal_memory_node()
+
     custom_nodes = root.create_custom_nodes()
 
     for bus in bus_types:
@@ -159,7 +167,7 @@ def create_device_tree(config_file, merged_user_configs, bus_types, list_ctrl, a
 
         for bus_instance in bus_instances:
             bn.create_bus_node(bus_instance=num, header=bus_instance)
-            bus_node = bn.populate_controller_instances_nodes(bus_instance=num)
+            bus_node = bn.populate_controller_instances_nodes(bus_instance=num, addr_offset=addr_offset)
             bus_nodes[bus_instance] = bus_node
             num = num + 1
 
