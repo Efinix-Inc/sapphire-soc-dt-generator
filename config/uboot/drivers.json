@@ -2,8 +2,7 @@
     "root": {
         "model": "efinix,sapphire",
         "includes": [
-            "#include <config.h>",
-            "/include/ \"sapphire.dtsi\""
+            "#include <config.h>"
         ]
     },
     "drivers": {
