@@ -8,7 +8,7 @@
 	    "reg": 0,
 	    "private_data": [
             	"interrupts = <16>;",
-		"interrupt-parent = <&plic>"
+		"interrupt-parent = <&plic>;"
 	    ],
             "status": "okay"
         }
