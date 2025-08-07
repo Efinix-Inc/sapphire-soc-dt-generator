@@ -6,6 +6,7 @@
 		"i2c",
 		"gpio",
 		"apb_slave",
-		"axi_slave"
+		"axi_slave",
+		"watchdog"
 	]
 }
