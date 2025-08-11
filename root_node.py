@@ -9,7 +9,6 @@ class RootNode(DeviceNode):
         self.parser = ConfigParser(configs)
         self.dev_type = "soc"
         self.soc = SocConfigs(configs, self.dev_type, arch)
-        self.irqs_exts = ""
 
     def create_root_node(self, **metadata):
         """Create root node metadata"""
@@ -80,13 +79,10 @@ class RootNode(DeviceNode):
 
     def _update_interrupt_extended(self, irq_label):
         """update interrupt-extended properties"""
-        irq_exts = find_key_value(self.user_configs, "interrupts_extended")
-        if irq_exts:
-            for irq in irq_exts:
-                self.irqs_exts += f"&{irq_label} {irq} "
 
-            update_or_insert_key(self.user_configs, "interrupts_extended",
-                                 "irq_extended", self.irqs_exts)
+        prefix = f"&{irq_label} "
+        insert_custom_target_string(self.user_configs, target_key="interrupts_extended",
+                                         inserted_key="irq_extended", prefix="", index=prefix)
 
     def _create_memory_node(self, label, dev_type):
         """Create memory node"""

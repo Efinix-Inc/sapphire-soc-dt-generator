@@ -137,3 +137,24 @@ def convert_to_hex(s):
         value = s # assume it's already an int
 
     return hex(value)
+
+def insert_custom_target_string(d, target_key="target", inserted_key="inserted_target", prefix="target_", index="i0"):
+    """Insert or append to 'inserted_target' with values like 'i0 target_3' based on the target key."""
+    if isinstance(d, dict):
+        if target_key in d:
+            target_val = d[target_key]
+            if isinstance(target_val, list):
+                new_str = " ".join(f"{index} {prefix}{x}" for x in target_val)
+            else:
+                new_str = f"{index} {prefix}{target_val}"
+            if inserted_key in d:
+                d[inserted_key] += " " + new_str
+            else:
+                d[inserted_key] = new_str
+        for v in d.values():
+            if isinstance(v, dict):
+                insert_custom_target_string(v, target_key=target_key, inserted_key=inserted_key, prefix=prefix, index=index)
+            elif isinstance(v, list):
+                for item in v:
+                    if isinstance(item, dict):
+                        insert_custom_target_string(item, target_key=target_key, inserted_key=inserted_key, prefix=prefix, index=index)
