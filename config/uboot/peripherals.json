@@ -4,6 +4,8 @@
 		"spi",
 		"apb_slave",
 		"axi_slave",
-		"plic"
+		"plic",
+		"clint",
+		"watchdog"
 	]
 }
