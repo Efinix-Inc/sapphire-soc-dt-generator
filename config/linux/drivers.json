@@ -111,7 +111,8 @@
 	    "compatible": "fixed-clock",
 	    "private_data": [
 	        "#clock-cells = <0>;"
-	    ]
+	    ],
+	    "dtsi": true
 	}
     }
 }
