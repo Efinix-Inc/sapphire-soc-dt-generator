@@ -1,0 +1,14 @@
+{
+    "custom": {
+        "wdt_reboot": {
+	    "device_instance": "custom0",
+	    "reg": null,
+	    "header": "wdt-reboot",
+	    "compatible": "wdt-reboot",
+	    "private_data": [
+	        "wdt = <&watchdog0>;"
+	    ],
+	    "dts": true
+	}
+    }
+}
