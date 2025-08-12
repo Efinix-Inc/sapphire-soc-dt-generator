@@ -1,4 +1,5 @@
 {%- import 'node.jinja2' as macros -%}
+{%- import 'custom_node.jinja2' as custom_macros -%}
 {{ root.version }};
 {%- if root.includes %}
 {%- for inc in root.includes %}
@@ -29,6 +30,12 @@
 	{{ macros.render_device(cv, node=root) | indent(8, False) }}
 	{%- endfor %}
 	{% endif %}
+
+	{%- for ck, cv in custom.items() %}
+	{%- if cv.dts == true %}
+	{{ custom_macros.custom_node(custom) | indent(8, False) }}
+	{%- endif %}
+	{%- endfor %}
 };
 
 {%- for bus_type, bus_val in buses.items() %}

@@ -1,3 +1,4 @@
+{%- import 'custom_node.jinja2' as custom_macros %}
 {{ root.version }};
 
 {{ root.header }} {
@@ -55,32 +56,11 @@
 		{% endfor %}
 	};
 
-	{% for custom_key, custom_val in custom.items() %}
-	{{ custom_val.header }} {
-		{%- if custom_val.child %}
-		#address-cells = <{{ custom_val.address_cells }}>;
-		#size-cells = <{{ custom_val.size_cells }}>;
-		{%- endif %}
-		{%- if custom_val.reg or custom_val.reg == 0 %}
-		reg = <{{ custom_val.reg }}>;
-		{%- endif %}
-		{%- if custom_val.compatible_str %}
-		compatible = {{ custom_val.compatible_str }};
-		{%- endif %}
-		{%- if custom_val.device_type %}
-		device_type = "{{ custom_val.device_type }}";
-		{%- endif %}
-		clock-frequency = <{{ custom_val.clock_frequency }}>;
-		{%- if custom_val.status %}
-		{%- if custom_val.private_data %}
-		{%- for priv_data in custom_val.private_data %}
-		{{ priv_data }}
-		{%- endfor %}
-		{%- endif %}
-		status = "{{ custom_val.status }}";
-		{%- endif %}
-	};
-	{% endfor %}
+	{%- for ck, cv in custom.items() %}
+	{%- if cv.dtsi == true %}
+	{{ custom_macros.custom_node(custom) | indent(8, False) }}
+	{%- endif %}
+	{%- endfor %}
 
 	{% for bus_type, bus_val in buses.items() %}
 	{%- if bus_val.peripherals %}

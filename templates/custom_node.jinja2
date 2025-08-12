@@ -1,0 +1,28 @@
+{% macro custom_node(node) %}
+{% for k, v in node.items() %}
+{{ v.header }} {
+	{%- if v.child %}
+	#address-cells = <{{ v.address_cells }}>;
+	#size-cells = <{{ v.size_cells }}>;
+	{%- endif %}
+	{%- if v.reg or v.reg == 0 %}
+ 	reg = <{{ v.reg }}>;
+	{%- endif %}
+ 	{%- if v.compatible_str %}
+	compatible = {{ v.compatible_str }};
+ 	{%- endif %}
+ 	{%- if v.device_type %}
+ 	device_type = "{{ v.device_type }}";
+	{%- endif %}
+	clock-frequency = <{{ v.clock_frequency }}>;
+	{%- if v.status %}
+	{%- if v.private_data %}
+	{%- for priv_data in v.private_data %}
+	{{ priv_data }}
+	{%- endfor %}
+	{%- endif %}
+	status = "{{ v.status }}";
+	{%- endif %}
+};
+{% endfor %}
+{% endmacro %}
