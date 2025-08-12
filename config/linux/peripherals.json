@@ -7,6 +7,7 @@
 		"gpio",
 		"apb_slave",
 		"axi_slave",
-		"watchdog"
+		"watchdog",
+		"clint"
 	]
 }

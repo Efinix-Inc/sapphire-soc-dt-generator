@@ -65,6 +65,11 @@
 	},
 	"watchdog": {
 	    "compatible": ["efx,efx-wdt"]
+	},
+	"clint": {
+	    "compatible": ["riscv,clint0"],
+	    "interrupts_extended": [3, 7],
+	    "status": "disabled"
 	}
     },
     "child": {
