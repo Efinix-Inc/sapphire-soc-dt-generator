@@ -45,7 +45,8 @@
 	    "compatible": ["simple-bus"]
 	},
 	"watchdog": {
-	    "compatible": ["efx,efx-wdt"]
+	    "compatible": ["efx,efx-wdt"],
+	    "status": "disabled"
 	},
 	"clint": {
 	    "compatible": ["riscv,clint0"],
