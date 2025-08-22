@@ -1,3 +1,15 @@
+v3.0,	Summary,
+	Reimplement DT codebase using python class
+	Restructure the data structure for device node
+	Enhance the device node configurations
+
+	Features,
+	Add support for 32-bit and 64-bit DT generation
+	Add clint and watchdog device node configuration for linux and u-boot
+
+	Fixed,
+	NA
+
 v2.4,	Summary,
 	Features,
 	Add USB configuration for linux DT
