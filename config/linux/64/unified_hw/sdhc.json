@@ -1,0 +1,8 @@
+{
+    "overrides": {
+        "sdhc": {
+	    "device_instance": "axi_slave1",
+	    "interrupts": ["4"]
+	}
+    }
+}
