@@ -107,12 +107,16 @@ class BusNode(DeviceNode):
         dev_type = dev_node.get("interface", "")
         size = dev_node.get("size", 0)
         addr = dev_node.get("addr", 0)
+        reg = dev_node.get("reg")
 
         if use:
             addr = self.get_dev_instance_addr_offset(dev_node, bus_instance)
 
         header = self.generate_node_header(addr, label, dev_type)
-        reg = self.set_node_reg(addr, size)
+
+        # Do not update reg property if user override it in the <user_config>.json file
+        if reg is None:
+            reg = self.set_node_reg(addr, size)
 
         return header, reg
 
