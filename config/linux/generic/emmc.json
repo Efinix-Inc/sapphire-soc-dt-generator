@@ -1,0 +1,26 @@
+{
+    "overrides": {
+        "emmc": {
+	    "interface": "emmc",
+	    "label": "emmc0",
+	    "compatible": ["efinix,emmc-host-controller"],
+            "private_data": [
+		"reg-names = \"emmc\", \"syscon\";",
+		"non-removable;",
+		"no-sd;",
+		"broken-cd;",
+                "no-sdio;",
+		"voltage-ranges = <1700 1950>, <2700 3600>;",
+		"bus-width = <8>;",
+		"clock-names = \"core\";",
+                "max-frequency = <200000000>;",
+		"max-block-size = <512>;",
+		"cap-mmc-highspeed;",
+		"cap-1-8v-ddr;",
+		"mmc-hs200-1_8v",
+		"dma-coherent;",
+		"keep-power-in-suspend;"
+            ]
+	}
+    }
+}
