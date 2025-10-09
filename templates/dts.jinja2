@@ -27,9 +27,24 @@
 	{%- endif %}
 	{%- if root.child %}
 	{%- for ck, cv in root.child.items() %}
-	{{ macros.render_device(cv, node=root) | indent(8, False) }}
+		{%- if "reserved_memory" != cv.parent_label %}
+		{{ macros.render_device(cv, node=root) | indent(8, False) }}
+		{%- endif %}
 	{%- endfor %}
 	{% endif %}
+
+	{%- if root.reserved_memory.child %}
+	reserved-memory {
+		{%- if root.reserved_memory.private_data %}
+		{%- for priv in root.reserved_memory.private_data %}
+		{{ priv }}
+		{%- endfor %}
+		{%- endif %}
+		{%- for ck, cv in root.reserved_memory.child.items() %}
+		{{ macros.render_device(cv, node=root.reserved_memory) | indent(16, False) }}
+		{%- endfor %}
+	};
+	{%- endif %}
 
 	{%- for ck, cv in custom.items() %}
 	{%- if cv.dts == true %}

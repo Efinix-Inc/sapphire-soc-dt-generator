@@ -164,6 +164,7 @@ def create_device_tree(config_file, merged_user_configs, bus_types, list_ctrl, a
 
     root_node["cpus"] = cpu_nodes
     root_node["memory"] = root.create_memory_node()
+    root_node["reserved_memory"] = root.create_reserved_memory_node()
 
     addr_offset = True
     if "zephyr" in args.os:

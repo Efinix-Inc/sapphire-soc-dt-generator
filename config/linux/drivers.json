@@ -85,25 +85,6 @@
 	    "private_data": [
 	        "serial0 = &uart0;"
 	    ]
-	},
-        "reserved_memory": {
-	    "address_cells1": 1,
-	    "size_cells1": 1,
-	    "parent_label": "root",
-	    "header": "reserved-memory",
-	    "private_data": [
-	        "ranges;"
-	    ],
-	    "reg": null,
-	    "child": {
-                "opensbi": {
-	            "header": "opensbi: sbi@1000000",
-		    "label": "opensbi",
-		    "addr": "0x1000000",
-		    "size": "0x80000",
-		    "reg1": "0x1000000 0x80000"
-		}
-	    }
 	}
     },
     "custom": {

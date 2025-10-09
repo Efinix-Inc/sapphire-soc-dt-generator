@@ -110,3 +110,14 @@ class RootNode(DeviceNode):
             num += 1
 
         return custom_nodes
+
+    def create_reserved_memory_node(self):
+        """Create reserved memory node and place in the root node"""
+        dev_type = "reserved_memory"
+        reserved_node = {}
+        child_nodes = self.user_configs.get("child", {})
+
+        node = DeviceNode(self.configs, dev_type, user_configs=self.user_configs, arch=self.arch)
+        reserved_node = node.create_node(status=1, label=dev_type)
+
+        return reserved_node
