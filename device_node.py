@@ -32,6 +32,8 @@ class DeviceNode:
         size = self.ctrl.get_controller_address_size(dev_type, self.instance)
 
         compatible = self.ctrl.get_controller_driver_name(dev_type, self.instance)
+        interrupts = self.ctrl.get_controller_interrupts_line(dev_type, self.instance)
+
         self.node = {
                 "device_instance": self.ctrl.get_instance_name(self.instance),
                 "interface": dev_type,
@@ -57,6 +59,8 @@ class DeviceNode:
 
         if self.user_configs:
             self.apply_user_configs(self.instance)
+
+        self.apply_os_overrides()
 
         return self.node
 
@@ -280,3 +284,20 @@ class DeviceNode:
                 node[k] = v
 
         return node
+
+    def apply_os_overrides(self):
+        """Apply any operating system specific configuration"""
+
+        interrupt_cells = self.node.get("interrupt_cells")
+        priority = self.node.get("irq_priority", "1")
+        interrupts = self.node.get("interrupts")
+
+        if interrupt_cells and interrupts:
+            interrupts = interrupts[:interrupt_cells]
+
+        # zephyr require additional priority number in interrupts property with default is 1
+        if "zephyr" in self.configs.get("os_name"):
+            if interrupts:
+                interrupts.append(str(priority))
+
+        self.node["interrupts"] = interrupts
