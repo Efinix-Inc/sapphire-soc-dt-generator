@@ -145,6 +145,8 @@ def create_device_tree(config_file, merged_user_configs, bus_types, list_ctrl, a
     parsed_configs = c.parse()
     soc = SocConfigs(parsed_configs)
 
+    parsed_configs['os_name'] = args.os
+
     if args.debug:
         save(os.path.join(pwd, "parsed_configs.json"), parsed_configs)
         c.report()
