@@ -230,9 +230,14 @@ class DeviceNode:
         label = nlabel if nlabel else self.node.get("label", None)
         addr = naddr if naddr else self.node.get("addr", None)
 
+        if nreg:
+            # Set '_override_reg' to indicate that <user_config>.json override the reg value
+            new_values["_override_reg"] = True
+
         if naddr:
             new_values.setdefault("header", self.generate_node_header(addr, label, dev_type))
-            new_values.setdefault("reg", self.set_node_reg(addr, size))
+            if not "_override_reg" in new_values:
+                new_values.setdefault("reg", self.set_node_reg(addr, size))
 
         if nlabel:
             new_values.setdefault("header", self.generate_node_header(addr, label, dev_type))

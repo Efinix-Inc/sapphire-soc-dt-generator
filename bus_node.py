@@ -114,8 +114,9 @@ class BusNode(DeviceNode):
 
         header = self.generate_node_header(addr, label, dev_type)
 
-        # Do not update reg property if user override it in the <user_config>.json file
-        if reg is None:
+        # The '_override_reg' become true if user override it in <user_config>.json file.
+        # DeviceNode.apply_user_configs() method would check <user_config>.json and set this flag.
+        if not '_override_reg' in dev_node:
             reg = self.set_node_reg(addr, size)
 
         return header, reg
