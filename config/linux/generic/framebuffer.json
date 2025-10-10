@@ -10,6 +10,19 @@
 	        "#dma-cells = <1>;",
 		"dma-channels = <2>;"
 	    ]
+	},
+	"framebuffer0": {
+	    "interface": "apb_slave",
+	    "label": "framebuffer0",
+	    "compatible": ["efx,efx-fb"],
+	    "private_data": [
+	        "dmas = <&dma1 1>;",
+		"dma-names = \"display\";",
+		"width = <1920>;",
+		"height = <1080>;",
+		"stride = <7680>;",
+		"format = \"a8b8g8r8\";"
+	    ]
 	}
     },
     "child": {
@@ -18,21 +31,15 @@
 	    "stdout_path_append": ",framebuffer"
 	},
 	"framebuffer": {
-	    "parent_label": "root",
-	    "header": "framebuffer",
-	    "addr": 8000000,
-	    "size": 800000,
-	    "reg": "0x8000000 0x800000",
-	    "compatible": "efx,efx-fb",
+	    "parent_label": "reserved_memory0",
+	    "header": "framebuffer: framebuffer@8000000",
+	    "label": "framebuffer",
+	    "addr": "0x8000000",
+	    "size": "0x800000",
+	    "compatible": "shared-dma-pool",
 	    "private_data": [
-	        "dmas = <&dma1 1>;",
-		"dma-names = \"display\";",
-		"width = <1920>;",
-		"height = <1080>;",
-		"stride = <7680>;",
-		"format = \"a8b8g8r8\";"
-	    ],
-	    "status": "okay"
+		    "no-map;"
+	    ]
 	},
         "dma1_channel0": {
 	    "interface": "dma-channel",

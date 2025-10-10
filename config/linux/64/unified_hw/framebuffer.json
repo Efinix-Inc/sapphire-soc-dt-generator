@@ -3,6 +3,9 @@
         "dma1": {
 	    "device_instance": "apb_slave0",
 	    "interrupts": ["0", "1"]
+	},
+	"framebuffer0": {
+	    "device_instance": "apb_slave1"
 	}
     },
     "child": {
