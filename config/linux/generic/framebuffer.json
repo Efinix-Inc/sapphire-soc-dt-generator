@@ -21,7 +21,8 @@
 		"width = <1920>;",
 		"height = <1080>;",
 		"stride = <7680>;",
-		"format = \"a8b8g8r8\";"
+		"format = \"a8b8g8r8\";",
+		"memory-region = <&framebuffer>;"
 	    ]
 	}
     },
