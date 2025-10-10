@@ -200,7 +200,7 @@ class DeviceNode:
             parent_label = v.get("parent_label")
             device_instance = self.ctrl.get_instance_name(instance)
 
-            if parent_label == device_instance or "reserved_memory" in parent_label:
+            if parent_label == device_instance:
                 child_node = self._create_child_node(v)
                 node["child"][k] = child_node
 

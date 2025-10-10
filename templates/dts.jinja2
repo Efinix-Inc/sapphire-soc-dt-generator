@@ -33,17 +33,20 @@
 	{%- endfor %}
 	{% endif %}
 
-	{%- if root.reserved_memory.child %}
-	reserved-memory {
-		{%- if root.reserved_memory.private_data %}
-		{%- for priv in root.reserved_memory.private_data %}
+	{%- set rmem = root.reserved_memory %}
+	{%- if rmem %}
+	{%- if rmem.child %}
+	{{ rmem.label }} {
+		{%- if rmem.private_data %}
+		{%- for priv in rmem.private_data %}
 		{{ priv }}
 		{%- endfor %}
 		{%- endif %}
-		{%- for ck, cv in root.reserved_memory.child.items() %}
-		{{ macros.render_device(cv, node=root.reserved_memory) | indent(16, False) }}
+		{%- for ck, cv in rmem.child.items() %}
+		{{ macros.render_device(cv, node=rmem) | indent(16, False) }}
 		{%- endfor %}
 	};
+	{%- endif %}
 	{%- endif %}
 
 	{%- for ck, cv in custom.items() %}
