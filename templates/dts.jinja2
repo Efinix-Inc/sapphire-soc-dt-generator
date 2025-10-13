@@ -37,6 +37,8 @@
 	{%- if rmem %}
 	{%- if rmem.child %}
 	{{ rmem.label }} {
+		#address-cells = <{{ rmem.address_cells }}>;
+		#size-cells = <{{ rmem.size_cells }}>;
 		{%- if rmem.private_data %}
 		{%- for priv in rmem.private_data %}
 		{{ priv }}

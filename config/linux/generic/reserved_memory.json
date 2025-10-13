@@ -3,6 +3,7 @@
 		"resesrved_memory": {
 			"device_instance": "reserved_memory0",
 			"device_type": "reserved_memory",
+			"label": "reserved-memory",
 			"private_data": [
 				"ranges;"
 			]
