@@ -1,0 +1,75 @@
+{
+    "root": {
+        "model": "efinix,sapphire",
+	"includes": [
+	    "#include <mem.h>",
+	    "#include <zephyr/dt-bindings/gpio/gpio.h>"
+	]
+    },
+    "drivers": {
+	"cpu": {
+	    "compatible": "riscv",
+	    "child": {
+	        "device_type": "interrupt_controller",
+		"interrupt_controller": true,
+		"interrupt_cells": 1,
+		"compatible": "riscv,cpu-intc",
+		"private_data": [
+		    "#interrupt-cells = <1>;"
+		]
+	    }
+	},
+        "bus": {
+	    "compatible": ["efinix,sapphire"]
+	},
+	"plic": {
+	    "compatible": ["sivife,plic-1.0.0"],
+	    "interrupt_controller": true,
+	    "label": "plic",
+	    "_device_type_": "interrupt-controller",
+	    "interrupt_cells": 1,
+	    "interrupts_extended": [11],
+	    "reg": "0xf8c00000 0x00001000 0xf8c02000 0x00002000 0xf8e00000 0x00010000",
+	    "private_data": [
+	        "reg-names = \"prio\", \"irq_en\", \"reg\";",
+		"interrupt-controller;",
+		"riscv,max-priority = <3>;",
+		"riscv,ndev = <32>;"
+	    ]
+	},
+	"clint": {
+	    "compatible": ["sifive,clint0"],
+	    "interrupts_extended": [3, 7]
+	},
+	"uart": {
+	    "compatible": ["efinix,sapphire-uart0"],
+	    "private_data": [
+                "reg-names = \"base\";",
+	        "current-speed = <115200>;"
+	    ]
+	},
+	"gpio": {
+	    "compatible": ["efinix,sapphire-gpio"],
+	    "interrupt_cells": 1,
+	    "private_data": [
+                "ngpios = <4>;",
+                "gpio-controller;",
+                "#gpio-cells = <1>;"
+	    ]
+	}
+    },
+    "child": {
+        "chosen": {
+	    "parent_label": "root",
+	    "header": "chosen",
+	    "private_data": [
+	        "zephyr,console = &uart0;",
+		"zephyr,shell-uart = &uart0;"
+	    ]
+	},
+	"aliases": {
+	    "parent_label": "root",
+	    "header": "aliases"
+	}
+    }
+}
