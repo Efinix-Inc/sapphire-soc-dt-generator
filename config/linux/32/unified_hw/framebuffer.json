@@ -3,7 +3,10 @@
         "dma1": {
 	    "device_instance": "apb_slave0",
 	    "interrupts": ["0", "16"]
-	}
+	},
+	"framebuffer0": {
+            "device_instance": "apb_slave1"
+        }
     },
     "child": {
         "dma1_channel0": {
