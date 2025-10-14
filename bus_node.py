@@ -28,6 +28,8 @@ class BusNode(DeviceNode):
 
     def create_bus_node(self, bus_instance=0, header=None, label=None):
         """Create a bus node"""
+        self.node = self.create_node(instance=bus_instance, label=label)
+
         properties = {
             "ranges": self.get_bus_ranges(bus_instance=bus_instance),
             "peripherals": {}
@@ -35,7 +37,6 @@ class BusNode(DeviceNode):
         if header:
             properties["header"] = f"{header}"
 
-        self.node = self.create_node(instance=bus_instance, label=label)
         self.update_node(**properties)
 
         return self.node
@@ -83,8 +84,8 @@ class BusNode(DeviceNode):
 
         bus_type = bus_type or self.dev_type
 
-        addr = self.ctrl.get_controller_address(bus_type, bus_instance)
-        size = self.ctrl.get_controller_address_size(bus_type, bus_instance)
+        addr = self.node.get("addr")
+        size = self.node.get("size")
 
         reg = self.set_node_reg(addr, size, addr_cells=self.addr_cells)
         if self.arch == 64:
