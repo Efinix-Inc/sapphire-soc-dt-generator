@@ -17,7 +17,7 @@
 		"max-block-size = <512>;",
 		"cap-mmc-highspeed;",
 		"cap-1-8v-ddr;",
-		"mmc-hs200-1_8v",
+		"mmc-hs200-1_8v;",
 		"dma-coherent;",
 		"keep-power-in-suspend;"
             ]
