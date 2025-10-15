@@ -72,4 +72,4 @@ class Controller:
             return None
 
     def get_instance_number(self, dev_type, dev_name):
-        return ''.join([char for char in dev_name if char not in dev_type])
+        return dev_name.replace(dev_type, '')
