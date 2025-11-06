@@ -41,7 +41,9 @@ class ConfigParser:
             if not macro.startswith("SYSTEM_PLIC_SYSTEM"):
                 continue
 
-            macro = macro.removeprefix("SYSTEM_PLIC_")
+            prefix = "SYSTEM_PLIC_"
+            if macro.startswith(prefix):
+                macro = macro[len(prefix):]
 
             value = self._resolved_value(target)
             dev_type, dev_num = self._get_dev_type_and_num(macro)
