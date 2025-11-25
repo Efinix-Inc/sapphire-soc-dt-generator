@@ -1,0 +1,13 @@
+{
+    "overrides": {
+        "emmc": {
+	    "device_instance": "axi_slave3",
+	    "interrupts": ["6"],
+	    "reg": "0x0 0x0 0x0 0x10000>, <0x0 0x100000 0x0 0x10000"
+	},
+	"axi3": {
+	    "device_instance": "axi3",
+	    "size": "0x110000"
+	}
+    }
+}
