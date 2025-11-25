@@ -18,6 +18,8 @@
 		"cap-mmc-highspeed;",
 		"cap-1-8v-ddr;",
 		"mmc-hs200-1_8v;",
+		"mmc-hs400-1_8v;",
+		"hs400-default-timing = <0 6>;",
 		"dma-coherent;",
 		"keep-power-in-suspend;"
             ]
