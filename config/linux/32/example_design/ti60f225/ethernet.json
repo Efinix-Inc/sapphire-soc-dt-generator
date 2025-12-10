@@ -1,22 +1,22 @@
 {
     "overrides": {
         "ethernet": {
-	    "device_instance": "apb_slave1"
+	    "device_instance": "apb_slave0"
 	},
 	"dma": {
-	    "device_instance": "apb_slave0",
+	    "device_instance": "apb_slave1",
 	    "interrupts": ["16", "17"]
 	}
     },
     "child": {
         "ethernet": {
-	    "parent_label": "apb_slave1"
+	    "parent_label": "apb_slave0"
 	},
 	"dma_channel0": {
-	    "parent_label": "apb_slave0"
+	    "parent_label": "apb_slave1"
 	},
 	"dma_channel1": {
-	    "parent_label": "apb_slave0"
+	    "parent_label": "apb_slave1"
 	}
     }
 }
