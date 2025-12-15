@@ -1,3 +1,19 @@
+v3.1,	Summary,
+	Add device tree configuration for newer devices such as EMMC, watchdog and framebuffer
+	Allow user to override reg property of device tree node in json file
+	Fixed various bugs
+
+	Features,
+	Add EMMC device tree configuration for linux and u-boot
+	Add watchdog device tree configuration for u-boot
+	Add framebuffer node for Unified Hardware configuration
+	Add support for zephyr device tree
+
+	Fixed,
+	Fixed Ti60F225 ethernet example design memory mapped for DMA and ethernet
+	Implement helper function equivalent to removeprefix()
+	Fixed appending child of reserved memory node
+
 v3.0,	Summary,
 	Reimplement DT codebase using python class
 	Restructure the data structure for device node
