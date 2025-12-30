@@ -2,7 +2,8 @@
     "root": {
 	"model": "efinix,sapphire",
         "includes": [
-	    "#include <dt-bindings/gpio/gpio.h>"
+	    "#include <dt-bindings/gpio/gpio.h>",
+	    "#include <dt-bindings/interrupt-controller/irq.h>"
 	]
     },
     "drivers": {

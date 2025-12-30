@@ -1,0 +1,17 @@
+{
+    "child": {
+        "gpio_leds": {
+	    "address_cells": 1,
+	    "size_cells": 0,
+	    "parent_label": "root",
+            "header": "gpio-irq-example",
+            "compatible": "efinix,gpio-irq",
+            "reg1": 0,
+            "status": "okay",
+	    "private_data": [
+	    	"interrupt-parent = <&gpio0>;",
+		"interrupts = <0 IRQ_TYPE_EDGE_RISING>;"
+	    ]
+        }
+    }
+}
