@@ -13,8 +13,8 @@
 		"opensbi": {
 			"parent_label": "reserved_memory0",
 			"label": "opensbi",
-			"header": "opensbi: opensbi@1000000",
-			"addr": "0x1000000",
+			"header": "opensbi: opensbi@2000000",
+			"addr": "0x2000000",
 			"size": "0x80000"
 		}
 	}
