@@ -3,7 +3,23 @@
         "emmc": {
 	    "device_instance": "axi_slave3",
 	    "interrupts": ["6"],
-	    "reg": "0x0 0x0 0x0 0x10000>, <0x0 0x10000 0x0 0x10000"
+	    "reg": "0x0 0x0 0x0 0x10000>, <0x0 0x10000 0x0 0x10000",
+	    "private_data": [
+                "reg-names = \"emmc\", \"syscon\";",
+                "non-removable;",
+                "no-sd;",
+                "broken-cd;",
+                "no-sdio;",
+                "voltage-ranges = <1700 1950>, <2700 3600>;",
+                "bus-width = <8>;",
+                "clock-names = \"core\";",
+                "max-frequency = <50000000>;",
+                "max-block-size = <512>;",
+                "cap-mmc-highspeed;",
+                "cap-1-8v-ddr;",
+                "dma-coherent;",
+                "keep-power-in-suspend;"
+	    ]
 	},
 	"axi3": {
 	    "device_instance": "axi3",
