@@ -1,0 +1,18 @@
+{
+    "overrides": {
+	"sdio": {
+	    "device_instance": "axi_slave6",
+	    "interrupts": ["22"],
+	    "reg": "0x00000000 0x10000>, <0x00100000 0x10000"
+	},
+	"axi6": {
+	    "device_instance": "axi6",
+	    "size": "0x110000"
+	}
+    },
+    "child": {
+	"sdio": {
+	    "parent_label": "axi_slave6"
+	}
+    }
+}

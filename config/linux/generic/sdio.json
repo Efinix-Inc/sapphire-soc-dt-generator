@@ -1,0 +1,27 @@
+{
+    "overrides": {
+	"sdio": {
+	    "interface": "sdio",
+	    "label": "sdio0",
+	    "compatible": ["efinix,sdio-host-controller"],
+	     "private_data": [
+		"reg-names = \"sdio\", \"syscon\";",
+		"no-sd;",
+		"no-mmc;",
+		"sd-uhs-sdr25;",
+		"sd-uhs-ddr50;",
+		"sd-uhs-sdr104;",
+		"clock-names = \"core\";",
+		"max-frequency = <200000000>;"
+		]
+	}
+    },
+    "child": {
+	"sdio": {
+	    "header": "brcmf: wifi@1",
+	    "label": "brcmf",
+	    "reg": "1",
+	    "compatible": "brcm,bcm4329-fmac"
+	}
+    }
+}
