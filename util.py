@@ -120,11 +120,16 @@ def merge_dicts(d1, d2):
     return result
 
 def convert_to_int(s):
-    """Convert string to integer"""
-    if isinstance(s, str) and s.startswith("0x"):
-        return int(s, 16)
-    else:
+    """Convert string to integer (supports hex with optional U/L suffix)."""
+    if isinstance(s, str):
+        s = s.strip()
+        if s.lower().startswith("0x"):
+            # strip trailing u/l characters
+            while s and s[-1] in "uUlL":
+                s = s[:-1]
+            return int(s, 16)
         return int(s)
+    return int(s)
 
 def convert_to_hex(s):
     """Convert string to hex"""
