@@ -19,7 +19,9 @@ class BusNode(DeviceNode):
             print(f"Error: address or size of the bus '{self.dev_type}' was not found")
             return dev
 
-        end_addr = int(addr, 16) + int(size, 16)
+        addr = convert_to_int(addr)
+        size = convert_to_int(size)
+        end_addr = convert_to_hex(addr + size)
         for ctrl in self.list_ctrl:
             instances = self.ctrl.filter_instances_by_address_range(addr, end_addr, ctrl)
             if instances:

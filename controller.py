@@ -1,3 +1,5 @@
+from util import convert_to_int
+
 class Controller:
     def __init__(self, configs, dev_type=None):
         self.configs = configs
@@ -55,7 +57,7 @@ class Controller:
         for dtype in dev_types:
             for name, data in self.ctrl_configs.get(dtype, {}).items():
                 addr = data.get("addr")
-                if addr is not None and int(start, 16) <= int(addr, 16) < int(end):
+                if addr is not None and convert_to_int(start) <= convert_to_int(addr) < convert_to_int(end):
                     filtered.append(name)
         return filtered
 
