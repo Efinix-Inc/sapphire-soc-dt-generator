@@ -1,11 +1,11 @@
 {
     "cpu_name": {
         "32": {
-	    "soft": "Efinix Sapphire RISC-V SoC",
-	    "hard": "Efinix Sapphire High Performance RISC-V SoC"
+	    "soft": "Efinix Sapphire SoC RV32",
+	    "hard": "Efinix Sapphire High Performance SoC"
 	},
 	"64": {
-	    "soft": "",
+	    "soft": "Efinix Sapphire SoC RV64",
 	    "hard": ""
 	}
     },
