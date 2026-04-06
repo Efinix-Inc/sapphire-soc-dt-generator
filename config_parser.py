@@ -190,8 +190,14 @@ class ConfigParser:
 
     def _parse_cpu_type(self):
         """Parse cpu type like softcore or hardcore. Return 1 for hardcore, 0 for softcore"""
-        pattern = re.compile(r"SYSTEM_HARD_RISCV_QC32")
+        return self.search_macro_pattern("SYSTEM_HARD_RISCV_QC32")
 
-        for key, value in self.macros.items():
-            for key in pattern.findall(key):
-                return value
+    def search_macro_pattern(self, pattern):
+        """Parse macro pattern and return the value if found, else return 0"""
+        search = re.compile(rf"{pattern}")
+
+        for k, v in self.macros.items():
+            for k in search.findall(k):
+                return v
+
+        return 0
