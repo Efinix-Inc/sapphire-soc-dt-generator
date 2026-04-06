@@ -21,8 +21,8 @@ class ConfigParser:
     def _parse_address_size_macros(self):
         """Handles address/size macros (e.g., *_INPUT, *_CTRL, *_IO_CTRL, *_SIZE)"""
         suffix_map = {
-            "addr": ("IO_CTRL", "CTRL", "INPUT", "BMB"),
-            "size": ("CTRL_SIZE", "INPUT_SIZE", "BMB_SIZE")
+            "addr": ("IO_CTRL", "CTRL", "INPUT", "BMB", "BASE"),
+            "size": ("CTRL_SIZE", "INPUT_SIZE", "BMB_SIZE", "BASE_SIZE")
         }
 
         for macro, raw_value in self.macros.items():

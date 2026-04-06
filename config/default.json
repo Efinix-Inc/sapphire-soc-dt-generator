@@ -27,7 +27,9 @@
     ],
     "bus_types": [
         "bmb",
-	"axi"
+	"axi",
+	"peripheral",
+	"platform"
     ],
     "peripherals": [
         "uart",
