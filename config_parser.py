@@ -95,6 +95,8 @@ class ConfigParser:
         """Convert hex/int literals or resolve nested macro references"""
         trail = trail or []
 
+        if val.endswith("U"):
+            val = val.replace("U", "")
         if val.startswith("0x") or val.isdigit():
             return val
         elif val in self.macros:
