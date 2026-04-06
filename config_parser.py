@@ -149,27 +149,56 @@ class ConfigParser:
         return len(cpus.keys()) if cpus else 0
 
     def _get_cpu_isa(self):
-        """Get cpu instruction set"""
-        pattern = re.compile(r"ISA_\w+")
-        isa = {}
-        exts = ""
+        """Get cpu instruction set strings"""
+        # Canonical ordering
+        single_letter_order = ["m", "a", "c", "f", "d"]
+        z_ext_order = [
+            "zicsr",
+            "zifence",
+            "zifencei",
+            "zba",
+            "zbb",
+            "zbs",
+            "zicbom",
+        ]
 
+        # Detect base ISAs
+        has_rv32 = self.search_macro_pattern("SYSTEM_RISCV_ISA_RV32I")
+        has_rv64 = self.search_macro_pattern("SYSTEM_RISCV_ISA_RV64I")
+
+        # Collect enabled extensions
+        enabled = set()
         for macro, value in self.macros.items():
-            for macro in pattern.findall(macro):
-                isa[macro] = value
+            if value != "1":
+                continue
 
-        for k, v in isa.items():
-            parts = k.split('_')
-            ext = parts[-1].lower()
-            if int(v) == 1:
-                if 'zicsr' in ext:
-                    exts += f"_{ext}"
-                elif 'zifence' in ext:
-                    exts += f"_{ext}i"
+            m = re.search(r"ISA_(EXT_)?(.+)", macro)
+            if not m:
+                continue
+
+            ext = m.group(2).lower()
+            enabled.add(ext)
+
+        if has_rv32:
+            isa = "rv32i"
+
+        if has_rv64:
+            isa = "rv64i"
+
+        # Single-letter extensions
+        for ext in single_letter_order:
+            if ext in enabled:
+                isa += ext
+
+        # Z-extensions
+        for z in z_ext_order:
+            if z in enabled:
+                if "zifence" in z:
+                    isa += "_zifencei"
                 else:
-                    exts += ext[-1]
+                    isa += f"_{z}"
 
-        return exts
+        return isa
 
     def parse_frequency(self):
         """get frequency defined by clint_hz"""

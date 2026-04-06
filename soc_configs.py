@@ -25,13 +25,7 @@ class SocConfigs(Controller):
     def get_cpu_isa(self):
         """Return the cpu RISCV ISA"""
         cpu_configs = self._get_cpus_configs()
-        isa = cpu_configs.get("isa", "")
-        if self.arch == "64":
-            return f"rv64{isa}"
-        elif self.arch == "32":
-            return f"rv32{isa}"
-        else:
-            return ""
+        return cpu_configs.get("isa", "")
 
     def get_cpu_count(self):
         """Return number of cpu cores"""
