@@ -1,3 +1,4 @@
+import sys
 import re
 import json
 from collections import defaultdict
@@ -125,8 +126,13 @@ class ConfigParser:
 
     def parse_cpu_macros(self):
         """Parse cpu number, ISA, and other metadata"""
+        cpu_count = self.get_cpu_count()
+        if cpu_count < 1:
+            print("Error: CPU information not found!")
+            sys.exit(1)
+
         cpu = {
-            "cores": self.get_cpu_count(),
+            "cores": cpu_count,
             "isa": self._get_cpu_isa(),
             "caches": self._parse_cpu_caches(),
             "cpu_type": self._parse_cpu_type()
@@ -135,6 +141,10 @@ class ConfigParser:
         self.parsed_configs["cpus"] = cpu
 
     def get_cpu_count(self):
+        cpus = self.search_macro_pattern('SYSTEM_NUMBER_OF_HARTS')
+        if int(cpus) > 0:
+            return int(cpus)
+
         cpus = self.peripherals.get("cores", {})
         return len(cpus.keys()) if cpus else 0
 
