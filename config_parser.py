@@ -39,19 +39,17 @@ class ConfigParser:
     def _parse_interrupt_macros(self):
         """Handle nested interrupt macro (e.g., SYSTEM_PLIC_SYSTEM_UART_0_IO_INTERRUPT_X)"""
         for macro, target in self.macros.items():
-            if not macro.startswith("SYSTEM_PLIC_SYSTEM"):
-                continue
+            if "INTERRUPT" in macro:
+                prefix = "SYSTEM_PLIC_"
+                if macro.startswith(prefix):
+                    macro = macro[len(prefix):]
 
-            prefix = "SYSTEM_PLIC_"
-            if macro.startswith(prefix):
-                macro = macro[len(prefix):]
+                value = self._resolved_value(target)
+                dev_type, dev_num = self._get_dev_type_and_num(macro)
+                dev_key = f"{dev_type}{dev_num}"
 
-            value = self._resolved_value(target)
-            dev_type, dev_num = self._get_dev_type_and_num(macro)
-            dev_key = f"{dev_type}{dev_num}"
-
-            self.peripherals[dev_type][dev_key]["interrupts"].append(value)
-            self.trace[f"{dev_type}.{dev_key}"].append((macro, "interrupts"))
+                self.peripherals[dev_type][dev_key]["interrupts"].append(value)
+                self.trace[f"{dev_type}.{dev_key}"].append((macro, "interrupts"))
 
     def _get_dev_type_and_num(self, macro):
         """Get the dev type (e.g., spi, uart, i2c) and the instance number (e.g., 0, 1)"""
