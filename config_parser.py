@@ -186,15 +186,27 @@ class ConfigParser:
             return 0
 
     def _parse_cpu_caches(self):
-        """Parse all cpu caches"""
-        pattern = re.compile(r"SYSTEM_CORES_(\d+)_(ICACHE_WAYS|ICACHE_SIZE|DCACHE_WAYS|DCACHE_SIZE|BYTES_PER_LINE|L2_CACHE_WAYS|L2_CACHE_SIZE)")
+        """Parse all cpu caches information"""
+        patterns = (
+            "ICACHE_WAYS",
+            "ICACHE_SIZE",
+            "DCACHE_WAYS",
+            "DCACHE_SIZE",
+            "BYTES_PER_LINE",
+            "L2_CACHE_SIZE",
+            "L2_CACHE_WAYS",
+        )
 
         cores = {}
+        # Initialize caches to 0
+        for pattern in patterns:
+            cores[pattern.lower()] = 0
+
+        # Populate the caches
         for key, value in self.macros.items():
-            match = pattern.match(key)
-            if match:
-                _, field = match.groups()
-                cores[field.lower()] = value
+            for field in patterns:
+                if key.endswith(field):
+                    cores[field.lower()] = value
 
         return cores
 
