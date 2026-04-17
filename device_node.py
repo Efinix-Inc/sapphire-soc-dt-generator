@@ -95,8 +95,14 @@ class DeviceNode:
     def set_node_reg(self, address, size, addr_cells=-1, size_cells=-1):
         def format_cells(value, cells):
             value = convert_to_hex(abs(convert_to_int(value)))
+            val_int = convert_to_int(value)
             if cells == 2:
-                return f"0x0 {value}"
+                if val_int > 0xffffffff:
+                    addr_hi = convert_to_hex(val_int >> 32)
+                    addr_lo = convert_to_hex(val_int & 0xffffffff)
+                    return f"{addr_hi} {addr_lo}"
+                else:
+                    return f"0x0 {value}"
             elif cells == 1:
                 return f"{value}"
             else:
