@@ -44,6 +44,12 @@
 	"bmb": {
 	    "compatible": ["simple-bus"]
 	},
+	"peripheral": {
+	    "compatible": ["simple-bus"]
+	},
+	"platform": {
+	    "compatible": ["simple-bus"]
+	},
 	"watchdog": {
 	    "compatible": ["efx,efx-wdt"]
 	},
