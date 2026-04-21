@@ -1,0 +1,67 @@
+{
+    "overrides": {
+        "ethernet": {
+	    "interface": "axi_slave",
+	    "label": "tsemac0",
+	    "compatible": ["efinix,tsemac-0.01.a"],
+	    "device_type": "network",
+	    "private_data": [
+	        "axistream-connected = <&dma0>;",
+		"axistream-control-connected = <&dma0>;",
+		"local-mac-address = [ 00 11 22 33 44 55 ];",
+		"efx,rxcsum = <0x0>;",
+		"efx,rxmem = <0x1000>;",
+		"efx,stats = <0x0>;",
+		"efx,txcsum = <0x0>;",
+		"efx,txmem = <0x1000>;",
+		"phy-handle = <&phy0>;",
+		"phy-mode = \"rgmii\";"
+	    ]
+	},
+	"dma": {
+	    "address_cells": 1,
+	    "size_cells": 0,
+	    "interface": "apb_slave",
+	    "label": "dma0",
+	    "compatible": ["spinal,lib-dmasg"],
+	    "private_data": [
+	        "#dma-cells = <1>;",
+		"axistream-connected = <&tsemac0>;",
+		"axistream-control-connected = <&tsemac0>;"
+	    ]
+	}
+    },
+    "child": {
+        "ethernet": {
+	    "address_cells": 1,
+	    "size_cells": 0,
+	    "header": "mdio",
+	    "reg": 0,
+	    "child": {
+	        "phy": {
+		    "header": "phy0: ethernet-phy@0",
+		    "label": "phy0",
+		    "interface": "ethernet-phy",
+		    "reg": 0,
+		    "compatible": "ethernet-phy-id001c.c916",
+		    "device_type": "ethernet-phy",
+		    "private_data": [
+			"reset-assert-us = <500000>;",
+			"reset-deassert-us = <500000>;"
+		    ]
+		}
+	    }
+	},
+	"dma_channel0": {
+	    "interface": "dma-channel",
+	    "reg": 0,
+	    "addr": 0
+	},
+	"dma_channel1": {
+	    "interface": "dma-channel",
+	    "reg": 1,
+	    "addr": 1
+	}
+    }
+}
+
