@@ -61,7 +61,12 @@
 	    "interface": "dma-channel",
 	    "reg": 1,
 	    "addr": 1
-	}
+	},
+	"aliases": {
+            "private_data_append": [
+                "ethernet0 = &tsemac0;"
+            ]
+        }
     }
 }
 

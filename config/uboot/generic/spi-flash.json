@@ -8,6 +8,11 @@
 			"private_data": [
 				"spi-max-frequency = <6000000>;"
 			]
+		},
+		"aliases": {
+			"private_data_append": [
+				"spi0 = &spi0;"
+			]
 		}
 	}
 }
