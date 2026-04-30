@@ -1,0 +1,11 @@
+{
+    "overrides": {
+        "memory": {
+	    "parent_label": "root",
+	    "device_instance": "ddr0",
+	    "header": "memory",
+	    "addr": "0x800000000",
+	    "size": "0x2000000"
+	}
+    }
+}
