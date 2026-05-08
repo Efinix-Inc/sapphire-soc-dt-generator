@@ -1,3 +1,22 @@
+v3.2,	Summary,
+	Change reserved memory address for opensbi
+	Refactor parsing RISC-V ISA, cache information and get cpu count
+	Add search_macro_pattern() helper function
+	Move reserved_memory.json to its corresponding architecture
+	Create separate memory.json for rv32 and rv64
+
+	Features,
+	Add ethernet and spi flash to aliases node
+	Add ethernet DT configuration for u-boot
+	Add SDIO DT configuration
+	Add peripheral and platform bus for RV64
+	Add reserved memory node DT configuration for 6.6 kernel
+	Add gpio_irq DT configuration
+
+	Fixed,
+	Fix emmc address mapping for rv64 unified hw design
+	Handle address size more than 32 bits
+
 v3.1,	Summary,
 	Add device tree configuration for newer devices such as EMMC, watchdog and framebuffer
 	Allow user to override reg property of device tree node in json file
