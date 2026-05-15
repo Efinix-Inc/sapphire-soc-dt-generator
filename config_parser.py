@@ -224,6 +224,7 @@ class ConfigParser:
             "BYTES_PER_LINE",
             "L2_CACHE_SIZE",
             "L2_CACHE_WAYS",
+            "ZICBOM_CACHE",
         )
 
         cores = {}
@@ -236,6 +237,10 @@ class ConfigParser:
             for field in patterns:
                 if key.endswith(field):
                     cores[field.lower()] = value
+
+        # If zicbom found in return of self._get_cpu_isa(), set zicbom_cache = 1
+        if "zicbom" in self._get_cpu_isa():
+            cores["zicbom_cache"] = 1
 
         return cores
 

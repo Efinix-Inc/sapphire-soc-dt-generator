@@ -36,6 +36,9 @@
 			{%- if v.l2_cache_size %}
 			l2-cache-size = <{{ v.l2_cache_size }}>;
 			{%- endif %}
+			{%- if v.zicbom_cache %}
+			riscv,cbom-block-size = <{{ v.bytes_per_line }}>;
+			{%- endif %}
 			{%- if v.private_data %}
 			{%- for priv_data in v.private_data %}
 			{{ priv_data }}
