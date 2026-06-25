@@ -5,7 +5,7 @@
 	    "device_instance": "ddr0",
 	    "header": "memory",
 	    "addr": "0x400000",
-	    "size": "0x7c00000"
+	    "size": "0xfc00000"
 	}
     }
 }
