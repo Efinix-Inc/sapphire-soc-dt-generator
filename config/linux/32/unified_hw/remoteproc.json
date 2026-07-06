@@ -1,0 +1,51 @@
+{
+            "child": {
+                "efinix_remoteproc": {
+                    "parent_label": "root",
+                    "label": "efinix_remoteproc",
+                    "compatible": "efinix,ti375_rproc",
+                    "addr":"0x4000000",
+                    "size": "0x200000",
+                    "private_data": [
+                        "remote-hartid = <0x03>;",
+                        "fw-memory-region = <&rproc_fw>;",
+                        "shm-memory-region = <&rproc_shm>;",
+                        "memory-region = <&vdev0buffer>;"
+                    ],
+                    "status": "okay"
+                },
+                "rproc_fw": {
+                    "parent_label": "reserved_memory0",
+                    "label": "rproc_fw",
+                    "header": "rproc_fw: rproc-fw@4000000",
+                    "addr": "0x4000000",
+                    "size": "0x100000",
+                    "private_data": [ "no-map;" ]
+                },
+                "rproc_shm": {
+                    "parent_label": "reserved_memory0",
+                    "label": "rproc_shm",
+                    "header": "rproc_shm: rproc-shm@4100000",
+                    "addr": "0x4100000",
+                    "size": "0x100000",
+                    "compatible": "shared-dma-pool",
+                    "private_data": [ "no-map;" ]
+                },
+                "vdev0buffer": {
+                    "parent_label": "reserved_memory0",
+                    "label": "vdev0buffer",
+                    "header": "vdev0buffer: vdev0buffer@4210000",
+                    "compatible": "shared-dma-pool",
+                    "addr": "0x4210000",
+                    "size": "0x3C00000",
+                    "private_data": [ "no-map;" ]
+                }
+            },
+
+            "overrides": {
+                "cpu3": {
+		    "device_instance": "cpu3",
+	            "status": "disabled"
+		}
+            }
+}
