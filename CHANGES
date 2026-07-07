@@ -1,3 +1,14 @@
+v3.3,	Summary,
+	Add Zicbom DT property
+
+	Features,
+	Specify DTS cbom-block-size property if Zicbom is present for RV64
+	change phy-mode DT property for unified hw design and example design
+
+	Fixed,
+	Uboot: spi-flash: disable auto 4-byte addressing
+	Set memory size to 256MB on T120F324 devkit
+
 v3.2,	Summary,
 	Change reserved memory address for opensbi
 	Refactor parsing RISC-V ISA, cache information and get cpu count
