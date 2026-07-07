@@ -14,8 +14,7 @@
 		"efx,stats = <0x0>;",
 		"efx,txcsum = <0x0>;",
 		"efx,txmem = <0x1000>;",
-		"phy-handle = <&phy0>;",
-		"phy-mode = \"rgmii\";"
+		"phy-handle = <&phy0>;"
 	    ]
 	},
 	"dma": {
