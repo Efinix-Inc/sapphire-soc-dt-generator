@@ -1,7 +1,10 @@
 {
     "overrides": {
         "ethernet": {
-	    "device_instance": "axi_slave2"
+	    "device_instance": "axi_slave2",
+	    "private_data_append": [
+		"phy-mode = \"rgmii\";"
+	    ]
 	},
 	"dma": {
 	    "device_instance": "apb_slave0",
