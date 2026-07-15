@@ -19,15 +19,15 @@
                     "label": "rproc_fw",
                     "header": "rproc_fw: rproc-fw@4000000",
                     "addr": "0x4000000",
-                    "size": "0x100000",
+                    "size": "0x200000",
                     "private_data": [ "no-map;" ]
                 },
                 "rproc_shm": {
                     "parent_label": "reserved_memory0",
                     "label": "rproc_shm",
-                    "header": "rproc_shm: rproc-shm@4100000",
-                    "addr": "0x4100000",
-                    "size": "0x100000",
+                    "header": "rproc_shm: rproc-shm@4200000",
+                    "addr": "0x4200000",
+                    "size": "0x10000",
                     "compatible": "shared-dma-pool",
                     "private_data": [ "no-map;" ]
                 },
