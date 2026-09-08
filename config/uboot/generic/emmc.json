@@ -1,19 +1,19 @@
 {
     "overrides": {
         "emmc": {
-	    "interface": "emmc",
-	    "label": "emmc0",
-	    "compatible": ["efinix,emmc-host-controller"],
+            "interface": "emmc",
+            "label": "emmc0",
+            "compatible": ["efinix,emmc-host-controller"],
             "private_data": [
-	            "bus-width = <8>;",
-	            "max-frequency = <200000000>;",
-	            "cap-mmc-highspeed;",
+                "bus-width = <8>;",
+                "max-frequency = <200000000>;",
+                "cap-mmc-highspeed;",
                 "mmc-ddr-1_8v;",
-	            "mmc-hs200-1_8v;",
-	            "mmc-hs400-1_8v;",
+                "mmc-hs200-1_8v;",
+                "mmc-hs400-1_8v;",
                 "efinix,tuning-algo = \"center\";",
                 "efinix,sampling-window = \"right_half\";"
             ]
-	}
+        }
     }
 }
