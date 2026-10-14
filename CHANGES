@@ -1,3 +1,13 @@
+v3.4,	Summary,
+	Update eMMC v1.3 U-Boot DT configuration
+	Add OpenAMP remoteproc DT configuration
+
+	Features,
+	NA
+
+	Fixed,
+	NA
+
 v3.3,	Summary,
 	Add Zicbom DT property
 
